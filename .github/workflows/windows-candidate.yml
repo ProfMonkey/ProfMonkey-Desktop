@@ -1,0 +1,51 @@
+name: Build Windows candidate (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  candidate:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Reassemble the verified v0.9 source archive
+        shell: pwsh
+        run: |
+          python releases/v0.9/restore.py
+          Expand-Archive -Path ProfMonkeyDesktop-v0.9-full.zip -DestinationPath source
+
+      - name: Install project dependencies
+        working-directory: source/profmonkey-desktop
+        shell: pwsh
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Run automated checks (NOT real desktop acceptance)
+        working-directory: source/profmonkey-desktop
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: python -m pytest -q
+
+      - name: Package Windows candidate
+        working-directory: source/profmonkey-desktop
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name ProfMonkeyDesktop --icon "assets/icons/profmonkey.ico" --add-data "assets;assets" --add-data "site;site" --add-data "README.md;." app.py
+
+      - name: Upload candidate app for manual verification
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfMonkeyDesktop-v0.9-Windows-CANDIDATE
+          path: source/profmonkey-desktop/dist/ProfMonkeyDesktop/
+          retention-days: 7
+          if-no-files-found: error
