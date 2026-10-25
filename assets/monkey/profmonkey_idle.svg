@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>ProfMonkey - original prototype character, P01</title>
+  <g stroke="#3a211c" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
+    <!-- a little curved tail -->
+    <path d="M183 200 C221 211 238 174 224 158 C207 139 189 157 201 172 C208 179 219 175 219 167" fill="none" stroke="#704329" stroke-width="13"/>
+    <path d="M183 200 C221 211 238 174 224 158 C207 139 189 157 201 172" fill="none" stroke="#b47943" stroke-width="8"/>
+    <!-- feet and body -->
+    <ellipse cx="96" cy="236" rx="24" ry="12" fill="#744626"/>
+    <ellipse cx="158" cy="236" rx="24" ry="12" fill="#744626"/>
+    <path d="M75 210 C72 175 87 163 127 161 C165 160 181 180 179 211 L167 236 Q127 244 87 236 Z" fill="#9b653b"/>
+    <path d="M103 176 Q127 169 152 177 L157 230 Q127 237 99 230 Z" fill="#fff1d5" stroke-width="3.8"/>
+    <path d="M127 179 L118 194 L127 199 L136 194 Z" fill="#ce333b" stroke-width="3"/>
+    <path d="M127 198 L116 223 L128 234 L140 222 Z" fill="#f04a4f" stroke-width="3"/>
+    <path d="M121 221 L128 229 L135 221" stroke="#b41d31" stroke-width="2" fill="none"/>
+    <ellipse cx="74" cy="203" rx="14" ry="19" transform="rotate(18 74 203)" fill="#ac7344"/>
+    <ellipse cx="181" cy="203" rx="14" ry="19" transform="rotate(-18 181 203)" fill="#ac7344"/>
+    <!-- ears -->
+    <circle cx="54" cy="106" r="26" fill="#9b653b"/>
+    <circle cx="200" cy="106" r="26" fill="#9b653b"/>
+    <ellipse cx="54" cy="106" rx="12" ry="15" fill="#e8b58a" stroke-width="3"/>
+    <ellipse cx="200" cy="106" rx="12" ry="15" fill="#e8b58a" stroke-width="3"/>
+    <!-- head and fringe -->
+    <path d="M62 109 C59 61 87 35 125 34 C166 32 195 65 194 109 C197 150 165 179 127 180 C84 181 57 147 62 109 Z" fill="#976039"/>
+    <path d="M106 39 Q113 13 128 34 Q137 14 148 41" fill="#704329"/>
+    <path d="M74 77 Q89 53 107 54 Q125 61 138 54 Q157 48 180 76" fill="none" stroke="#ab7549" stroke-width="8"/>
+    <!-- warm face -->
+    <path d="M78 108 C80 85 95 75 108 82 Q127 92 145 82 C162 75 176 90 177 110 L175 139 Q162 165 126 166 Q89 165 78 139 Z" fill="#f4c996" stroke-width="3.4"/>
+    <ellipse cx="126" cy="133" rx="43" ry="27" fill="#f9d8ac" stroke="none"/>
+    <!-- glasses --><g fill="none" stroke="#322927" stroke-width="5.8">
+       <circle cx="104" cy="106" r="23"/><circle cx="151" cy="106" r="23"/>
+       <path d="M127 102 Q128 98 130 102 M82 100 L70 95 M174 100 L187 95"/>
+    </g>
+    <!-- eyes: slight raised expression -->
+    <ellipse cx="110" cy="110" rx="5.7" ry="8.7" fill="#2e2624" stroke="none"/>
+    <ellipse cx="145" cy="110" rx="5.7" ry="8.7" fill="#2e2624" stroke="none"/>
+    <circle cx="112" cy="107" r="2" fill="#fffdf1" stroke="none"/>
+    <circle cx="147" cy="107" r="2" fill="#fffdf1" stroke="none"/>
+    <ellipse cx="127" cy="132" rx="8" ry="5.5" fill="#6b4030" stroke="none"/>
+    <path d="M108 145 Q128 160 148 143" fill="none" stroke="#673b33" stroke-width="4"/>
+    <circle cx="98" cy="138" r="5" fill="#e6a18c" stroke="none"/>
+    <circle cx="157" cy="138" r="5" fill="#e6a18c" stroke="none"/>
+    <!-- tiny professor eyebrow -->
+    <path d="M90 82 Q102 75 114 81 M140 81 Q152 76 162 83" stroke="#603923" stroke-width="4" fill="none"/>
+  </g>
+</svg>

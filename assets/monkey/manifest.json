@@ -1,0 +1,289 @@
+{
+  "schema_version": 2,
+  "project": "ProfMonkey Desktop",
+  "character": "professor_monkey",
+  "art_status": "original_generated_p02_placeholder_frames",
+  "canvas_px": [
+    256,
+    256
+  ],
+  "display_logical_px": [
+    160,
+    160
+  ],
+  "anchor_normalized": [
+    0.5,
+    0.96
+  ],
+  "hit_alpha_threshold": 24,
+  "coordinate_system": "Qt device-independent logical pixels; screen work area origin",
+  "states": {
+    "idle": {
+      "implemented": true,
+      "frames": [
+        "animations/idle/00.png",
+        "animations/idle/01.png",
+        "animations/idle/02.png",
+        "animations/idle/03.png"
+      ],
+      "fps": 4.0,
+      "loop": true,
+      "priority": 0,
+      "interruptible": true,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "blink": {
+      "implemented": true,
+      "frames": [
+        "animations/blink/00.png",
+        "animations/blink/01.png",
+        "animations/blink/02.png",
+        "animations/blink/03.png"
+      ],
+      "fps": 12.0,
+      "loop": false,
+      "priority": 3,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "walk": {
+      "implemented": true,
+      "frames": [
+        "animations/walk/00.png",
+        "animations/walk/01.png",
+        "animations/walk/02.png",
+        "animations/walk/03.png",
+        "animations/walk/04.png",
+        "animations/walk/05.png",
+        "animations/walk/06.png",
+        "animations/walk/07.png"
+      ],
+      "fps": 9.0,
+      "loop": true,
+      "priority": 1,
+      "interruptible": true,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "turn": {
+      "implemented": true,
+      "frames": [
+        "animations/turn/00.png",
+        "animations/turn/01.png",
+        "animations/turn/02.png",
+        "animations/turn/03.png",
+        "animations/turn/04.png",
+        "animations/turn/05.png",
+        "animations/turn/06.png"
+      ],
+      "fps": 10.0,
+      "loop": false,
+      "priority": 2,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "sleep": {
+      "implemented": true,
+      "frames": [
+        "animations/sleep/00.png",
+        "animations/sleep/01.png",
+        "animations/sleep/02.png",
+        "animations/sleep/03.png"
+      ],
+      "fps": 2.0,
+      "loop": true,
+      "priority": 2,
+      "interruptible": true,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "wake": {
+      "implemented": true,
+      "frames": [
+        "animations/wake/00.png",
+        "animations/wake/01.png",
+        "animations/wake/02.png",
+        "animations/wake/03.png",
+        "animations/wake/04.png"
+      ],
+      "fps": 9.0,
+      "loop": false,
+      "priority": 4,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "fall": {
+      "implemented": true,
+      "frames": [
+        "animations/fall/00.png",
+        "animations/fall/01.png",
+        "animations/fall/02.png",
+        "animations/fall/03.png",
+        "animations/fall/04.png",
+        "animations/fall/05.png"
+      ],
+      "fps": 10.0,
+      "loop": false,
+      "priority": 8,
+      "interruptible": false,
+      "next_action": "get_up",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "get_up": {
+      "implemented": true,
+      "frames": [
+        "animations/get_up/00.png",
+        "animations/get_up/01.png",
+        "animations/get_up/02.png",
+        "animations/get_up/03.png",
+        "animations/get_up/04.png",
+        "animations/get_up/05.png"
+      ],
+      "fps": 9.0,
+      "loop": false,
+      "priority": 8,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "eat_banana": {
+      "implemented": true,
+      "frames": [
+        "animations/eat_banana/00.png",
+        "animations/eat_banana/01.png",
+        "animations/eat_banana/02.png",
+        "animations/eat_banana/03.png",
+        "animations/eat_banana/04.png",
+        "animations/eat_banana/05.png"
+      ],
+      "fps": 7.0,
+      "loop": false,
+      "priority": 5,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "slip": {
+      "implemented": true,
+      "frames": [
+        "animations/slip/00.png",
+        "animations/slip/01.png",
+        "animations/slip/02.png",
+        "animations/slip/03.png"
+      ],
+      "fps": 9.0,
+      "loop": false,
+      "priority": 8,
+      "interruptible": false,
+      "next_action": "fall",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "angry": {
+      "implemented": true,
+      "frames": [
+        "animations/angry/00.png",
+        "animations/angry/01.png",
+        "animations/angry/02.png",
+        "animations/angry/03.png"
+      ],
+      "fps": 5.0,
+      "loop": false,
+      "priority": 5,
+      "interruptible": false,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "dragged": {
+      "implemented": true,
+      "frames": [
+        "animations/dragged/00.png",
+        "animations/dragged/01.png"
+      ],
+      "fps": 5.0,
+      "loop": true,
+      "priority": 9,
+      "interruptible": true,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    },
+    "run": {
+      "implemented": true,
+      "frames": [
+        "animations/run/00.png",
+        "animations/run/01.png",
+        "animations/run/02.png",
+        "animations/run/03.png",
+        "animations/run/04.png",
+        "animations/run/05.png"
+      ],
+      "fps": 12.0,
+      "loop": true,
+      "priority": 1,
+      "interruptible": true,
+      "next_action": "idle",
+      "hitbox": "per-frame alpha",
+      "anchor_normalized": [
+        0.5,
+        0.96
+      ]
+    }
+  },
+  "props_planned": [
+    "banana",
+    "banana_peel",
+    "sign"
+  ],
+  "animation_phase": "P03-P12 candidate actions; Windows acceptance pending"
+}

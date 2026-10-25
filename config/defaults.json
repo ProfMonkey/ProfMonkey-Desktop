@@ -1,0 +1,17 @@
+{
+  "version": "0.7.0-physics-candidate",
+  "mode": "QUIET",
+  "sprite_logical_px": 160,
+  "always_on_top": true,
+  "sound_enabled": false,
+  "start_with_windows": false,
+  "global_input_tracking": false,
+  "background_network_access": false,
+  "animation_demo_enabled": false,
+  "animation_fps_limit": 30,
+  "user_event_history_enabled": false,
+  "local_badge_progress_enabled": false,
+  "monkey_count": 1,
+  "colony_behavior": "free",
+  "collisions_enabled": true
+}
