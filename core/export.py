@@ -2,16 +2,18 @@
 from pathlib import Path
 from PIL import Image
 from core.animation import load_manifest
+from core.character_raster import raster_mascot
 
 
-def export_action_gif(manifest: Path, action: str, destination: Path, size: int = 160) -> int:
+def export_action_gif(manifest: Path, action: str, destination: Path, size: int = 160, *, personality: str = 'scholar') -> int:
     specs = load_manifest(manifest)
     if action not in specs:
         raise ValueError('unknown animation')
     spec = specs[action]
     frames = []
-    for rel in spec.frames:
-        frame = Image.open(manifest.parent / rel).convert('RGBA')
+    for idx, _rel in enumerate(spec.frames):
+        frame = raster_mascot(manifest.parent, personality, action,
+                              idx, len(spec.frames))
         frame.thumbnail((size, size), Image.Resampling.LANCZOS)
         canvas = Image.new('RGBA', (size, size), (0, 0, 0, 0))
         canvas.alpha_composite(frame, ((size - frame.width) // 2, size - frame.height))
@@ -29,7 +31,8 @@ def export_action_gif(manifest: Path, action: str, destination: Path, size: int 
     return len(frames)
 
 
-def export_story_gif(manifest: Path, script_name: str, destination: Path, *, fps: int = 8) -> int:
+def export_story_gif(manifest: Path, script_name: str, destination: Path, *, fps: int = 8,
+                     personality: str = 'scholar') -> int:
     """Render story cards using only bundled sprites + in-app props.
 
     Privacy guarantee by construction: accepts a manifest and script key, never
@@ -63,7 +66,8 @@ def export_story_gif(manifest: Path, script_name: str, destination: Path, *, fps
             d=ImageDraw.Draw(bg)
             d.rounded_rectangle((12,10,408,63),radius=13,fill='#FFF2CD',outline='#684A39',width=2)
             d.text((24,22),beat.line,fill='#53382A',font=chinese)
-            sprite=Image.open(manifest.parent/spec.frames[k%len(spec.frames)]).convert('RGBA')
+            sprite=raster_mascot(manifest.parent, personality, spec.name,
+                                  k % len(spec.frames), len(spec.frames))
             sprite.thumbnail((190,190),Image.Resampling.LANCZOS)
             bg.paste(sprite,(87,73),sprite)
             if beat.prop in ('banana','peel'):
