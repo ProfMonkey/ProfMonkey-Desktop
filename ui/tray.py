@@ -17,6 +17,8 @@ from core.quests import QuestBoard
 from core.chronicle import ChronicleStore
 from ui.chronicle_dialog import ChronicleDialog
 from ui.council_dialog import CouncilDialog
+from core.governance import MonkeyLaws
+from ui.law_dialog import MonkeyLawDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -35,9 +37,11 @@ class MonkeyTray:
         self.quests = QuestBoard(self.config.folder / 'daily_quests.json')
         self.chronicle = ChronicleStore(self.config.folder / 'chronicle.json',
                                         enabled=overlay.settings.chronicle_enabled)
+        self.laws = MonkeyLaws(self.config.folder / 'monkey_laws.json')
         self.colony.relationships = self.relationships
         self.colony.quests = self.quests
         self.colony.chronicle = self.chronicle
+        self.colony.laws = self.laws
         self.manifest = manifest
         self.site_path = site_path
         self.menu = QMenu(overlay)
@@ -51,6 +55,7 @@ class MonkeyTray:
         self.menu.addAction('📜 今日猴山任务 · 猴学积分', self.show_quests)
         self.menu.addAction('📖 猴山纪事 · 连续剧情/成长', self.show_chronicle)
         self.menu.addAction('🗳 猴山议会 · 三猴投票与合作网络', self.open_council)
+        self.menu.addAction('📜 猴山自治 · 法令与火箭试飞', self.show_laws)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
         self.chronicle_action.setCheckable(True)
         self.chronicle_action.setChecked(overlay.settings.chronicle_enabled)
@@ -151,7 +156,7 @@ class MonkeyTray:
         self.menu.addAction('❌ 退出 ProfMonkey',self.quit)
         self.colony.bind_menu(self.menu, self.select_target)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.9 candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.14 developer candidate')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -391,6 +396,9 @@ class MonkeyTray:
                 '至少需要三只猴子。请先在「猴子数量」或「猴山管理局」里增加成员。')
             return
         CouncilDialog(self.colony).exec()
+
+    def show_laws(self) -> None:
+        MonkeyLawDialog(self.colony, self.laws).exec()
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,

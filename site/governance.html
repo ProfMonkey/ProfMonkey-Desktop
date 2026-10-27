@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#141b2d"><meta name="description" content="ProfMonkey Desktop 猴山自治：投票改变虚构猴山生活的交互式离线演示。">
+<title>猴山自治 · ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#12182a;--ink:#fef0d6;--panel:#263248;--gold:#f7cf8b;--muted:#b9c5d8}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#37496b,transparent 46%),var(--bg);color:var(--ink);font:15px/1.7 system-ui,'Microsoft Yahei',sans-serif}
+button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}a{color:var(--gold)}
+.wrap{width:min(1060px,calc(100% - 30px));margin:auto}
+nav{display:flex;justify-content:space-between;gap:14px;align-items:center;border-bottom:1px solid #495670;padding:19px 0}
+header{padding:54px 0 22px}h1{font-size:clamp(38px,7vw,69px);line-height:1.1;margin:10px 0 20px;letter-spacing:-.05em}
+.kicker{font-weight:850;color:var(--gold);font-size:11px;letter-spacing:.2em}p{color:var(--muted)}h2{font-size:21px;margin:0 0 17px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding-bottom:50px}
+.panel{background:linear-gradient(155deg,#25334a,#1c2638);padding:26px;border:1px solid #4b5a74;border-radius:22px}
+.full{grid-column:1/-1}.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.rule{border:1px solid #52617d;border-radius:16px;background:#172237;padding:20px}
+.rule b{display:block;margin-bottom:10px;font-size:17px}.rule span{color:var(--gold);font-size:13px;font-weight:850}
+.rule p{font-size:13px;line-height:1.6;margin-bottom:0}
+select{width:100%;background:#131d2e;border:1px solid #6e7792;color:var(--ink);border-radius:11px;padding:12px;margin:6px 0 18px}
+button{padding:12px 17px;border:0;border-radius:12px;background:var(--gold);color:#29231d;font-weight:850}
+button.alt{background:#465572;color:#fff0d8}button:disabled{opacity:.5;cursor:not-allowed}
+.buttons{display:flex;gap:10px;flex-wrap:wrap}
+.result{padding:18px 20px;min-height:108px;border-radius:14px;background:#101a2c;color:#fff2d9;white-space:pre-wrap}
+.note{font-size:12px;color:#b7c0d3;margin-top:18px}
+footer{border-top:1px solid #4a5870;padding:25px 0 45px;color:var(--muted);font-size:12px}
+@media(max-width:780px){.layout{grid-template-columns:1fr}.full{grid-column:auto}.rules{grid-template-columns:1fr}.panel{padding:19px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="wrap">
+<nav><strong>🐒 ProfMonkey Desktop · 猴山自治</strong><div><a href="./society.html">🗳 猴山议会</a> · <a href="./index.html">首页</a></div></nav>
+<header><div class="kicker">PIXEL COLONY GOVERNANCE · OFFLINE PLAYGROUND</div>
+<h1>一场投票，<br><span style="color:var(--gold)">改变猴山的明天。</span></h1>
+<p>从现在起，猴山议会不只是嘴上投票。通过香蕉共享条例，抢香蕉也会分享；通过安静公约，自动短剧会暂时消失；批准火箭试飞，发明猴就可以开始虚构实验。</p></header>
+<div class="layout">
+<section class="panel full"><h2>📜 猴山法令牌</h2><div class="rules" id="ruleCards"></div>
+<p class="note">这里是独立浏览器演示，初始全部未生效。你可以手动模拟投票结果，不会修改真实桌宠的存档，更不会控制电脑操作。</p></section>
+<section class="panel"><h2>🗳 模拟议会表决</h2>
+<label for="issue">选择一个虚构议案</label><select id="issue">
+<option value="banana_rules">🍌 香蕉共享条例</option>
+<option value="quiet_hours">🌙 猴山安静公约</option>
+<option value="rocket_license">🚀 火箭试飞许可</option></select>
+<div class="buttons"><button id="yes" type="button">✅ 过半通过</button>
+<button id="no" type="button" class="alt">❌ 过半否决</button>
+<button id="tie" type="button" class="alt">⚖️ 僵持</button></div>
+<p id="voteResult" class="note" aria-live="polite">只有完整结束的议会才会更新桌宠里的法令。网页按钮仅模拟已结束的投票。</p>
+</section>
+<section class="panel"><h2>🎮 测试法令真实影响</h2><div class="buttons">
+<button id="banana" type="button">🍌 让猴子抢香蕉</button>
+<button id="auto" type="button" class="alt">💬 请求一次自动偶遇</button>
+<button id="rocket" type="button" class="alt">🚀 开始猴山试飞</button>
+</div><div class="result" id="scene" role="status" aria-live="polite" style="margin-top:20px">选择上面的模拟按钮，看看不同法令会怎样影响猴山。</div>
+</section>
+<section class="panel full"><h2>📚 最近投票记录</h2><div class="result" id="history" aria-live="polite">暂无记录。</div>
+<div class="buttons" style="margin-top:15px"><button class="alt" id="clear" type="button">↺ 清空全部网页法令</button></div>
+<p class="note">网页不联网、不读取桌面、不记录任何用户输入历史。刷新页面后，演示状态将自动清零。</p></section>
+</div>
+<footer>🐒 规则只属于猴子的虚构生活。Windows 正式透明穿透和缺失的 v0.10 全套像素动画仍需单独验收和合并。</footer>
+</div>
+<script>
+"use strict";
+const rules={
+ banana_rules:["🍌 香蕉共享条例","公共香蕉仍然抢，但赢家会主动分享；竞争转为友好互动。"],
+ quiet_hours:["🌙 猴山安静公约","关闭猴子自行开始的群演与随机碰面；手动互动仍可启动。"],
+ rocket_license:["🚀 火箭试飞许可","解锁发明猴参加的虚构三幕试飞；不会运行真实系统程序。"]
+};
+const states={banana_rules:false,quiet_hours:false,rocket_license:false};
+const actions=[];const $=id=>document.getElementById(id);
+function render(){
+ $("ruleCards").replaceChildren();
+ for(const [key,[name,desc]] of Object.entries(rules)){
+  const card=document.createElement("article");card.className="rule";
+  const b=document.createElement("b");b.textContent=name;
+  const active=document.createElement("span");active.textContent=states[key]?"✅ 正在生效":"⚪ 尚未生效";
+  const p=document.createElement("p");p.textContent=desc;
+  card.append(b,active,p);$("ruleCards").append(card);
+ }
+ $("history").textContent=actions.length?actions.slice(-12).reverse().join("\n"):"暂无记录。";
+}
+function vote(result){
+ const issue=$("issue").value;const label=rules[issue][0];
+ if(result==="adopted")states[issue]=true;
+ else if(result==="rejected")states[issue]=false;
+ const msg=result==="adopted"?"议案通过，条例生效。":result==="rejected"?"议案否决，现有条例废止。":"票数僵持，条例保持原状。";
+ actions.push(label+" · "+msg);
+ if(actions.length>24)actions.shift();
+ $("voteResult").textContent=msg;render();
+}
+$("yes").addEventListener("click",()=>vote("adopted"));
+$("no").addEventListener("click",()=>vote("rejected"));
+$("tie").addEventListener("click",()=>vote("stalemate"));
+$("banana").addEventListener("click",()=>{
+ $("scene").textContent=states.banana_rules?
+ "🍌 皮猴抢到香蕉后分给其他猴子一小块。\n🎓 学究猴：这才叫共同富裕，猴山好感+！":
+ "🍌 皮猴抢到最后一根香蕉，自己吃掉。\n⭐ 队长猴：我宣布，下次必须遵守规则！";
+});
+$("auto").addEventListener("click",()=>{
+ $("scene").textContent=states.quiet_hours?
+ "🌙 安静公约生效。猴子不会自行开演，手动剧情仍可以继续。":
+ "💬 自动相遇允许进行（在真实桌宠还需开启自动碰面开关）。";
+});
+$("rocket").addEventListener("click",()=>{
+ $("scene").textContent=states.rocket_license?
+ "🚀 发明猴：许可证拿到啦！\n⭐ 队长猴：带好安全帽。\n🐒 全员：三、二、一，起飞……然后原地躺平！":
+ "🔒 试飞尚未获批。需要议会通过火箭许可证，而且真实桌宠还需要三只在场且有发明猴。";
+});
+$("clear").addEventListener("click",()=>{
+ for(const k of Object.keys(states))states[k]=false;
+ actions.length=0;$("scene").textContent="法令已经清空。";
+ $("voteResult").textContent="模拟议会重置成功。";render();
+});
+render();
+</script></body></html>

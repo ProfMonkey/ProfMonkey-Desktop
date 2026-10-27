@@ -20,6 +20,7 @@ from core.quests import QuestBoard
 from core.encounters import EncounterDirector, Participant, Encounter
 from core.duo_story import DuoStory
 from core.council import CouncilStory, Seat, prepare_council
+from core.governance import MonkeyLaws
 from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
@@ -49,6 +50,7 @@ class MonkeyColony:
         self.relationships: RelationshipStore | None = None
         self.quests: QuestBoard | None = None
         self.chronicle: ChronicleStore | None = None
+        self.laws: MonkeyLaws | None = None
         self._active_chapter: Chapter | None = None
         self.encounters = EncounterDirector()
         self.duo = DuoStory()
@@ -132,6 +134,7 @@ class MonkeyColony:
         if mode != 'MONKEY':
             self.cancel_duo()
             self.cancel_council()
+            self.cancel_social()
         for monkey in self.monkeys:
             monkey.set_mode(mode)
 
@@ -198,13 +201,22 @@ class MonkeyColony:
         if self.quests is not None:
             self.quests.record('race')
             self.quests.record('feed')
-        winner._say(f"{winner_name} 抢到了公共香蕉！🍌", 2.8)
+        sharing = self.laws is not None and self.laws.active('banana_rules')
+        winner._say((f"{winner_name} 抢到了香蕉，按条例分享！🍌"
+                     if sharing else f"{winner_name} 抢到了公共香蕉！🍌"), 2.8)
         for pet in self.monkeys:
             if pet is not winner:
-                pet.stats.mood = max(-100.0, pet.stats.mood - 1.0)
-                pet._say(f"被{winner_name}抢先了！", 2.0)
-                if self.relationships is not None:
-                    self.relationships.record_race(winner.monkey_index, pet.monkey_index)
+                if sharing:
+                    pet.stats.mood = min(100.0, pet.stats.mood + 2.0)
+                    pet._say(f"谢谢{winner_name}分享香蕉片！", 2.0)
+                    if self.relationships is not None:
+                        self.relationships.record_shared_activity(
+                            winner.monkey_index, pet.monkey_index)
+                else:
+                    pet.stats.mood = max(-100.0, pet.stats.mood - 1.0)
+                    pet._say(f"被{winner_name}抢先了！", 2.0)
+                    if self.relationships is not None:
+                        self.relationships.record_race(winner.monkey_index, pet.monkey_index)
 
     def _physics_tick(self, now: float) -> None:
         """Coordinate follower targets, a shared banana race, and soft contact."""
@@ -299,7 +311,7 @@ class MonkeyColony:
         self._last_social_tick = now
         if (not self.primary.isVisible() or any(p.paused for p in self.monkeys)
                 or self.primary.focus.active):
-            if self.primary.focus.active and self.social.active:
+            if self.social.active:
                 self.cancel_social()
             if self.duo.active:
                 self.cancel_duo()
@@ -337,6 +349,7 @@ class MonkeyColony:
                 else:
                     self._apply_duo_beat()
         if (not self.social.active and not self.duo.active and not self._race_active and self.count >= 2
+                and not (self.laws is not None and self.laws.active('quiet_hours'))
                 and self.primary.settings.ambient_encounters
                 and self.primary.settings.mode == "MONKEY"):
             self._maybe_encounter(now)
@@ -354,6 +367,7 @@ class MonkeyColony:
             return
         if (self.count >= 2 and self.primary.settings.social_enabled
                 and not self.duo.active and self.primary.settings.mode == 'MONKEY'
+                and not (self.laws is not None and self.laws.active('quiet_hours'))
                 and now >= self._next_social_at):
             self.start_social(self._rng.choice(('meeting', 'banana_duel')))
         if now >= self._next_social_at:
@@ -415,6 +429,8 @@ class MonkeyColony:
             return
         if self.relationships is not None:
             self.relationships.record_council(plan.votes)
+        if self.laws is not None:
+            self.laws.enact(plan.issue, plan.result)
         # Only an explicitly enabled fictional chronicle can create a case.
         if self.chronicle is not None and self.chronicle.enabled:
             self.chronicle.observe('meeting', plan.seats[0].index,
@@ -577,8 +593,19 @@ class MonkeyColony:
         beat = self.social.beat
         if beat is None:
             return
+        if self.social.name == 'rocket_trial':
+            # Give lead engineer dialogue to the actual inventor, regardless
+            # of which monkey index that character occupies.
+            lead = next((i for i, pet in enumerate(self.monkeys)
+                         if pet.personality == 'inventor'), 0)
+            assistant = next((i for i, pet in enumerate(self.monkeys)
+                              if i != lead and pet.personality == 'captain'),
+                             next(i for i in range(self.count) if i != lead))
+        else:
+            lead, assistant = 0, 1
         for index, pet in enumerate(self.monkeys):
-            action, phrase = beat.first if index == 0 else beat.second if index == 1 else beat.others
+            action, phrase = (beat.first if index == lead else
+                              beat.second if index == assistant else beat.others)
             pet.social_pose(action, phrase)
 
     def _release_group_poses(self) -> None:
@@ -590,7 +617,26 @@ class MonkeyColony:
         self.social.cancel()
         self._release_group_poses()
 
+    def start_rocket_trial(self) -> bool:
+        """Manual fictional rocket trial, unlocked only by a completed vote."""
+        if (self.laws is None or not self.laws.active('rocket_license')
+                or self.count < 3 or self.council.active or self.duo.active
+                or self.social.active or self._race_active
+                or not any(p.personality == 'inventor' for p in self.monkeys)):
+            return False
+        return self.start_social('rocket_trial')
+
+    def clear_monkey_laws(self) -> None:
+        """Reset fictional policies without touching relationships or chronicle."""
+        if self.social.name == 'rocket_trial':
+            self.cancel_social()
+        if self.laws is not None:
+            self.laws.clear()
+
     def start_social(self, name: str) -> bool:
+        # No direct-call bypass of an unapproved in-universe trial.
+        if name == 'rocket_trial' and (self.laws is None or not self.laws.active('rocket_license')):
+            return False
         if (self.council.active or self.count < 2 or not self.visible() or self.primary.focus.active
                 or any(p.paused or p.story.active or p._drag_active for p in self.monkeys)):
             return False
@@ -607,14 +653,24 @@ class MonkeyColony:
     def _complete_social(self, name: str) -> None:
         """Commit social effects only after a group story reaches its ending."""
         indices = [pet.monkey_index for pet in self.monkeys]
+        inventor = next((p.monkey_index for p in self.monkeys
+                         if p.personality == 'inventor'), indices[0])
+        partner = next((p.monkey_index for p in self.monkeys
+                        if p.monkey_index != inventor and p.personality == 'captain'),
+                       next((i for i in indices if i != inventor), indices[0]))
         if self.chronicle is not None and len(indices) >= 2:
-            self.chronicle.observe(name, indices[0], indices[1])
+            if name == 'rocket_trial':
+                self.chronicle.observe(name, inventor, partner)
+            else:
+                self.chronicle.observe(name, indices[0], indices[1])
         if self.relationships is not None:
             if name == 'meeting':
                 self.relationships.record_meeting(indices)
             elif name == 'banana_duel' and len(indices) >= 2:
                 self.relationships.record_race(indices[0], indices[1])
-        if self.quests is not None and name == 'meeting':
+            elif name == 'rocket_trial':
+                self.relationships.record_shared_activity(inventor, partner)
+        if self.quests is not None and name in ('meeting', 'rocket_trial'):
             self.quests.record('group')
         if self.primary.history is not None:
             self.primary.history.add(name)
@@ -686,6 +742,7 @@ class MonkeyColony:
         if enabled:
             self.cancel_duo()
             self.cancel_council()
+            self.cancel_social()
         for monkey in self.monkeys:
             monkey.toggle_pause(enabled)
 
@@ -714,6 +771,7 @@ class MonkeyColony:
     def hide_all(self) -> None:
         self.cancel_council()
         self.cancel_duo()
+        self.cancel_social()
         self.cancel_shared_banana()
         for monkey in self.monkeys:
             monkey.hide()

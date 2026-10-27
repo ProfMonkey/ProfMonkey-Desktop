@@ -1,4 +1,4 @@
-name: v0.13 Windows integrated candidate (code + archived artwork)
+name: v0.14 Windows integrated candidate (code + archived artwork)
 
 on:
   pull_request:
@@ -39,13 +39,19 @@ jobs:
         shell: pwsh
         env:
           PYTHONFAULTHANDLER: "1"
-        run: python -m pytest -q --ignore=tests/test_qt_v013_council.py
+        run: python -m pytest -q --ignore=tests/test_qt_v013_council.py --ignore=tests/test_qt_v014_governance.py
 
       - name: Test new three-monkey Qt scenes independently (offscreen only)
         shell: pwsh
         env:
           PYTHONFAULTHANDLER: "1"
         run: python -m pytest -q tests/test_qt_v013_council.py
+
+      - name: Test fictional-law Qt integration independently (offscreen only)
+        shell: pwsh
+        env:
+          PYTHONFAULTHANDLER: "1"
+        run: python -m pytest -q tests/test_qt_v014_governance.py
 
       - name: Compile current PR into a Windows EXE candidate
         shell: pwsh
@@ -55,7 +61,7 @@ jobs:
       - name: Publish only as unverified candidate
         uses: actions/upload-artifact@v4
         with:
-          name: ProfMonkeyDesktop-v0.13-Windows-UNVERIFIED
+          name: ProfMonkeyDesktop-v0.14-Windows-UNVERIFIED
           path: dist/ProfMonkeyDesktop/
           retention-days: 7
           if-no-files-found: error

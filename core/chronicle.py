@@ -20,6 +20,7 @@ TRIGGERS = {
     'meeting': 'exam',
     'invention': 'rocket',
     'launch': 'rocket',
+    'rocket_trial': 'rocket',
     'roll_call': 'sleep',
     'sleep_machine': 'sleep',
 }
