@@ -19,6 +19,8 @@ from ui.chronicle_dialog import ChronicleDialog
 from ui.council_dialog import CouncilDialog
 from core.governance import MonkeyLaws
 from ui.law_dialog import MonkeyLawDialog
+from core.expeditions import ExpeditionJournal
+from ui.expedition_dialog import ExpeditionDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -38,10 +40,12 @@ class MonkeyTray:
         self.chronicle = ChronicleStore(self.config.folder / 'chronicle.json',
                                         enabled=overlay.settings.chronicle_enabled)
         self.laws = MonkeyLaws(self.config.folder / 'monkey_laws.json')
+        self.expeditions = ExpeditionJournal(self.config.folder / 'expeditions.json')
         self.colony.relationships = self.relationships
         self.colony.quests = self.quests
         self.colony.chronicle = self.chronicle
         self.colony.laws = self.laws
+        self.colony.expeditions = self.expeditions
         self.manifest = manifest
         self.site_path = site_path
         self.menu = QMenu(overlay)
@@ -56,6 +60,8 @@ class MonkeyTray:
         self.menu.addAction('📖 猴山纪事 · 连续剧情/成长', self.show_chronicle)
         self.menu.addAction('🗳 猴山议会 · 三猴投票与合作网络', self.open_council)
         self.menu.addAction('📜 猴山自治 · 法令与火箭试飞', self.show_laws)
+        self.menu.addAction('🧭 猴山探险局 · 小队与日报', self.show_expeditions)
+        self.menu.addAction('⛔ 停止猴山探险', self.colony.cancel_expedition)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
         self.chronicle_action.setCheckable(True)
         self.chronicle_action.setChecked(overlay.settings.chronicle_enabled)
@@ -156,7 +162,7 @@ class MonkeyTray:
         self.menu.addAction('❌ 退出 ProfMonkey',self.quit)
         self.colony.bind_menu(self.menu, self.select_target)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.14 developer candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.15 developer candidate')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -399,6 +405,9 @@ class MonkeyTray:
 
     def show_laws(self) -> None:
         MonkeyLawDialog(self.colony, self.laws).exec()
+
+    def show_expeditions(self) -> None:
+        ExpeditionDialog(self.colony).exec()
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
