@@ -105,7 +105,8 @@ class ExpeditionDialog(QDialog):
                           if self.colony.laws is not None and self.colony.laws.active(key))
         try:
             plan = plan_expedition(self.mission.currentData(),
-                                   crew, self.colony.relationships, laws)
+                                   crew, self.colony.relationships, laws,
+                                   journal.buildings)
         except ValueError:
             self.preview.setText('队员或路线无效。')
             self.launch.setEnabled(False)
@@ -113,7 +114,9 @@ class ExpeditionDialog(QDialog):
         self.preview.setText(
             f'预估结果：{RESULTS[plan.outcome]}（协作分 {plan.score}）\n'
             f'预计获得：🍌{plan.rewards[0]} | 🔬{plan.rewards[1]} | ⭐{plan.rewards[2]}'
-            + (' · 猴山法令加成已生效' if plan.law_boost else ''))
+            + (' · 猴山法令加成已生效' if plan.law_boost else '')
+            + (f' · 城市建筑加成×{len(plan.city_buildings)}'
+               if plan.city_buildings else ''))
         self.launch.setEnabled(True)
 
     def _launch(self) -> None:
@@ -146,7 +149,7 @@ class ExpeditionDialog(QDialog):
     def _clear(self) -> None:
         if QMessageBox.question(
             self, '清空猴山探险档案',
-            '是否永久删除本机全部探险资源、出勤记录及日报历史？'
+            '是否永久删除本机全部探险资源、已建城市建筑、出勤记录及日报历史？'
             '\n猴际关系、猴山法令和连续剧情不会被删除。'
         ) != QMessageBox.StandardButton.Yes:
             return
