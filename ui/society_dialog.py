@@ -117,8 +117,14 @@ class SocietyDialog(QDialog):
                                 self.first.currentData() != self.second.currentData())
 
     def _observe(self):
-        if not self.colony.demo_pair(self.first.currentData(),
-                                     self.second.currentData()):
+        # Reject direct calls too; a disabled visual button alone is not a
+        # sufficient consent gate for explicitly opted-in background features.
+        a, b = self.first.currentData(), self.second.currentData()
+        if (not self.colony.primary.settings.civic_autonomy or
+                self.colony.primary.settings.mode != 'MONKEY' or
+                type(a) is not int or type(b) is not int or a == b):
+            return
+        if not self.colony.demo_pair(a, b):
             QMessageBox.information(
                 self, '🐒 猴山社会 · 暂时无法互动',
                 '需要开启自治行为和猴山模式，以及两只不同、可见、空闲的猴子。'
