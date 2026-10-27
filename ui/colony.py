@@ -118,6 +118,8 @@ class MonkeyColony:
         self.apply_profiles()
 
     def apply_profiles(self) -> None:
+        if self.expedition.active:
+            self.cancel_expedition()
         profiles = clean_profiles(self.primary.settings.monkey_profiles)
         for idx, pet in enumerate(self.monkeys):
             pet.configure_profile(profiles[idx])
@@ -394,6 +396,85 @@ class MonkeyColony:
             self.start_social(self._rng.choice(('meeting', 'banana_duel')))
         if now >= self._next_social_at:
             self._next_social_at = now + 300
+
+    def start_expedition(self, mission: str, indices: tuple[int, ...]) -> bool:
+        """Manually stage a 2-6 member fictional exploration, never in background."""
+        if (self.expeditions is None or self.count < 2 or self.social.active
+                or self.duo.active or self.council.active or self.expedition.active
+                or self._race_active or self.primary.focus.active
+                or not self.primary.isVisible() or any(p.paused for p in self.monkeys)):
+            return False
+        if (type(indices) is not tuple or not 2 <= len(indices) <= self.count
+                or any(type(i) is not int or not 0 <= i < self.count for i in indices)
+                or len(set(indices)) != len(indices)):
+            return False
+        team = [self.monkeys[i] for i in indices]
+        if any(not pet.isVisible() or pet._drag_active or pet.story.active
+               or pet._social_active or pet.body.airborne or pet._demo_enabled for pet in team):
+            return False
+        policies = frozenset(key for key in ('banana_rules', 'rocket_license', 'quiet_hours')
+                             if self.laws is not None and self.laws.active(key))
+        roster = tuple(Explorer(p.monkey_index, p.personality) for p in team)
+        try:
+            plan = plan_expedition(mission, roster, self.relationships, policies)
+        except ValueError:
+            return False
+        if not self.expedition.start(plan):
+            return False
+        left, top, right, bottom = self.primary._work_area()
+        width = max(p.width() for p in team)
+        for n, pet in enumerate(team):
+            new_x = left + max(0, right-left-width)*n/max(1, len(team)-1)
+            pet.set_colony_target(None)
+            pet.body.x = max(left, min(right-pet.width(), new_x))
+            pet.body.y = max(top, bottom-pet.height())
+            pet.body.vx = pet.body.vy = 0.
+            pet.body.airborne = False
+            pet.move(round(pet.body.x), round(pet.body.y))
+            pet._last_move = (round(pet.body.x), round(pet.body.y))
+        self._last_social_tick = time.monotonic()
+        self._apply_expedition_beat()
+        return True
+
+    def _apply_expedition_beat(self) -> None:
+        beat = self.expedition.beat
+        if beat is None:
+            return
+        for index, action, speech in beat.poses:
+            if 0 <= index < self.count:
+                self.monkeys[index].social_pose(action, speech)
+
+    def _complete_expedition(self) -> None:
+        if not self.expedition.consume_completion():
+            return
+        plan = self.expedition.plan
+        if plan is None or self.expeditions is None or not self.expeditions.record(plan):
+            return
+        if self.relationships is not None:
+            indices = [person.index for person in plan.crew]
+            if plan.outcome == 'success':
+                self.relationships.record_meeting(indices)
+            elif plan.outcome == 'mixed':
+                self.relationships.record_shared_activity(indices[0], indices[1])
+            else:
+                self.relationships.record_collision(indices[0], indices[1])
+        if self.quests is not None:
+            self.quests.record('group')
+
+    def cancel_expedition(self) -> None:
+        if not self.expedition.active:
+            return
+        crew = [p.index for p in self.expedition.plan.crew]
+        self.expedition.cancel()
+        for idx in crew:
+            if idx < self.count:
+                self.monkeys[idx].exit_social()
+        self._next_social_at = time.monotonic() + self._rng.uniform(240, 420)
+
+    def clear_expeditions(self) -> None:
+        self.cancel_expedition()
+        if self.expeditions is not None:
+            self.expeditions.clear()
 
     def start_council(self, issue: str, indices: tuple[int, ...]) -> bool:
         """Stage a user-requested 3-6 monkey vote; no auto polling or user profiling."""
