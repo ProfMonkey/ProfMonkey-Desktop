@@ -185,6 +185,7 @@ class CouncilStory:
         self.plan: CouncilPlan | None = None
         self.index = 0
         self.elapsed = 0.0
+        self.committed = False
 
     @property
     def active(self) -> bool:
@@ -206,6 +207,7 @@ class CouncilStory:
         self.plan = plan
         self.index = 0
         self.elapsed = 0.0
+        self.committed = False
         return True
 
     def advance(self, dt: float) -> bool:
@@ -220,7 +222,15 @@ class CouncilStory:
         self.index += 1
         return True
 
+    def consume_completion(self) -> bool:
+        """Exactly one caller may apply the effects of a finished vote."""
+        if not self.finished or self.committed:
+            return False
+        self.committed = True
+        return True
+
     def cancel(self) -> None:
         self.plan = None
         self.index = 0
         self.elapsed = 0.0
+        self.committed = False
