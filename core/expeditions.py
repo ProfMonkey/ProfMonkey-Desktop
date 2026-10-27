@@ -162,7 +162,7 @@ class ExpeditionStory:
             _validate_crew(plan.crew)
         except ValueError:
             return False
-        if plan.mission not in MISSIONS or len(plan.beats) != 3:
+        if type(plan.mission) is not str or plan.mission not in MISSIONS or len(plan.beats) != 3:
             return False
         self.plan, self.index, self.elapsed, self._committed = plan, 0, 0., False
         return True
@@ -249,14 +249,18 @@ class ExpeditionJournal:
             skill = tuple(MISSIONS).index(plan.mission)
         except (ValueError, TypeError):
             return False
-        if (plan.outcome not in RESULTS or type(plan.score) is not int
-                or type(plan.law_boost) is not bool):
+        if (type(plan.outcome) is not str or plan.outcome not in RESULTS
+                or type(plan.score) is not int or type(plan.law_boost) is not bool):
             return False
         base = REWARDS[plan.mission][plan.outcome]
         expected = tuple(n + (1 if plan.law_boost and i == skill and
                               plan.outcome != 'mishap' else 0)
                          for i, n in enumerate(base))
         if plan.rewards != expected or len(plan.beats) != 3:
+            return False
+        expected_result = ('success' if plan.score >= 6 else
+                           'mixed' if plan.score >= 3 else 'mishap')
+        if plan.outcome != expected_result:
             return False
         for i, key in enumerate(RESOURCE_KEYS):
             self.resources[key] = min(MAX_VALUE, self.resources[key] + plan.rewards[i])
@@ -301,6 +305,12 @@ def newspaper(journal: ExpeditionJournal, laws=None, names: tuple[str, ...] = ()
                     f' · {RESULTS[item["outcome"]]}（{people}）')
     if not journal.log:
         rows.append('今天还没有出任务。选择两只猴子试试！')
+    leaders = sorted(((idx, count) for idx, count in journal.missions.items()
+                      if count > 0), key=lambda row: (-row[1], row[0]))
+    if leaders:
+        rows.append('🏅 出勤榜：' + ' / '.join(
+            f'{names[i] if i < len(names) else f"#{i+1}"} {count}次'
+            for i, count in leaders[:3]))
     rewards = journal.unlocked()
     rows.append('🏆 成果：' +
                 ('、'.join(title for _key, title in rewards)
