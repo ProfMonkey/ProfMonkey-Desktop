@@ -226,3 +226,30 @@ def test_clear_city_removes_cases_but_preserves_other_records(tmp_path):
     assert journal.city_cases['banana_vault']==empty_case()
     assert not journal.path.exists()
     assert other.read_text(encoding='utf-8')=='keep this'
+
+
+def test_selected_monkey_personalities_have_distinct_dialogue():
+    professor = prepare_city_case(
+        'banana_vault', empty_case(), 0, 1, 'careful',
+        first_personality='scholar', second_personality='trickster')
+    inventor = prepare_city_case(
+        'banana_vault', empty_case(), 0, 1, 'careful',
+        first_personality='inventor', second_personality='captain')
+    assert professor.beats[1].poses[0][2] != inventor.beats[1].poses[0][2]
+    assert professor.beats[1].poses[1][2] != inventor.beats[1].poses[1][2]
+    assert professor.resource_delta == inventor.resource_delta
+
+
+def test_city_map_reports_pending_chapter_and_completed_case(tmp_path):
+    from core.civilization import city_report
+    journal = setup_buildings(tmp_path)
+    summary = city_report(journal.buildings, journal.resources,
+                          journal.city_cases)
+    assert '第1章待演出' in summary
+    for _ in range(3):
+        p = prepare_city_case('banana_vault',
+                              journal.city_cases['banana_vault'], 0, 1, 'careful')
+        assert journal.record_city_chapter(p)
+    finished = city_report(journal.buildings, journal.resources,
+                           journal.city_cases)
+    assert '✅ 结案' in finished
