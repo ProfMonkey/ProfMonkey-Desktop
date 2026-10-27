@@ -130,9 +130,9 @@ def prepare_council(issue: str, seats: tuple[Seat, ...],
                 score += sign
             elif rival:
                 score -= sign
-        if score > 1:
+        if score > 0:
             vote = 'yes'
-        elif score < -1:
+        elif score < 0:
             vote = 'no'
         else:
             vote = 'abstain'
