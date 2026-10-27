@@ -478,6 +478,11 @@ class MonkeyColony:
     def clear_expeditions(self) -> None:
         self.cancel_expedition()
         if self.expeditions is not None:
+            # Clearing the save invalidates construction ownership: remove
+            # previously displayed building props but preserve free furniture.
+            for prop in list(self.furniture):
+                if prop.kind in BUILDINGS:
+                    self.remove_furniture(prop)
             self.expeditions.clear()
 
     def start_council(self, issue: str, indices: tuple[int, ...]) -> bool:
@@ -853,6 +858,21 @@ class MonkeyColony:
                      (pet.body.y+pet._sy+pet._size/2-center_y)**2)
         if target.story.active or target._social_active or target._drag_active:
             target._say('现在没空，等这场事故结束。')
+            return
+        if widget.kind in BUILDINGS:
+            if (self.expeditions is None or
+                    widget.kind not in self.expeditions.buildings):
+                self.remove_furniture(widget)
+                return
+            stories = {
+                'banana_vault': ('eat_banana', '香蕉仓库盘点完成，全部属于猴山！🍌'),
+                'galaxy_scope': ('blink', '银河望远镜发现了新星！下一次科研出发！🔭'),
+                'public_square': ('wake', '猴山广场竣工，居民们欢迎你！🏛️'),
+                'monkey_academy': ('wake', '联合实验室开课！猴山文明万岁！🌌'),
+            }
+            action, phrase = stories[widget.kind]
+            target.play_action(action)
+            target._say(phrase, 2.7)
             return
         if widget.kind == 'trampoline':
             target.play_action('fall')
