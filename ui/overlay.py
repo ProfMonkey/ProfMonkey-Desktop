@@ -77,7 +77,7 @@ class MonkeyOverlay(QWidget):
         self.configure_profile(clean_profiles(self.settings.monkey_profiles)[monkey_index])
         self.story = StoryDirector(on_finish=self._story_finished)
         self.audio = SoundBank(self._art_root.parent/"audio", self)
-        self.audio.enabled = self.settings.sound
+        self.audio.set_enabled(self.settings.sound)
         self._rng = random.Random(seed)
         self.body = Body()
         self._on_ground = True
@@ -146,7 +146,7 @@ class MonkeyOverlay(QWidget):
         self.settings = updated.validated()
         self.stats.mode = self.settings.mode
         self.configure_profile(self.settings.monkey_profiles[self.monkey_index])
-        self.audio.enabled = self.settings.sound
+        self.audio.set_enabled(self.settings.sound)
         if oldsize != self.settings.size:
             self._resize_canvas(self.settings.size)
             self._set_current_sprite(force=True)
