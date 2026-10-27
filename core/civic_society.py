@@ -223,31 +223,41 @@ def civic_encounter(a: object, b: object, relations: dict,
                          'angry', 'angry',
                          f'我们{FACTIONS[left.faction]}主张先谈妥分工！',
                          f'可是{FACTIONS[right.faction]}想现在就做实验！',
-                         a.personality, b.personality)
+                         a.personality, b.personality,
+                         outcome_first=('blink', '先把这次分歧记录在议会档案里。'),
+                         outcome_second=('idle', '下次见面再谈，也许会找到共识。'))
     if (left.building == 'monkey_academy' or
             right.building == 'monkey_academy') and snapshot.innovation >= 30:
         return Encounter(a.index, b.index, 'civic_research',
                          'blink', 'wake',
                          f'{left.role}：先检查一下历史研究记录。',
                          f'{right.role}：这次我们把结果写进公开档案。',
-                         a.personality, b.personality)
+                         a.personality, b.personality,
+                         outcome_first=('blink', '旧实验事故提醒我们要先验证。'),
+                         outcome_second=('wake', '这份数据将成为下一次研究的线索！'))
     if left.building == 'public_square' or right.building == 'public_square':
         return Encounter(a.index, b.index, 'civic_festival',
                          'walk', 'wake',
                          f'{left.role}：今天的广场需要大家帮忙。',
                          f'{right.role}：我会按新传统参加！',
-                         a.personality, b.personality)
+                         a.personality, b.personality,
+                         outcome_first=('walk', '把旧庆典留下的舞台收拾好！'),
+                         outcome_second=('blink', '明年我们还能继续在这里演出。'))
     if trust >= 15 or snapshot.cooperation >= 35:
         return Encounter(a.index, b.index, 'civic_cooperate',
                          'wake', 'blink',
                          f'{left.role}申请协助你的工作。',
                          f'{right.role}已收到，我们轮流值班！',
-                         a.personality, b.personality)
+                         a.personality, b.personality,
+                         outcome_first=('wake', '合作完成，今天的值班记录写好了。'),
+                         outcome_second=('blink', '下回我们还可以换个岗位试试。'))
     return Encounter(a.index, b.index, 'civic_patrol',
                      'walk', 'blink',
                      f'{left.role}正在查看最近的猴山日报。',
                      f'{right.role}：还得看看旧案件怎么处理的。',
-                     a.personality, b.personality)
+                     a.personality, b.personality,
+                     outcome_first=('blink', '旧档案都核对完了。'),
+                     outcome_second=('idle', '继续巡查，保持猴山整洁！'))
 
 
 def society_report(snapshot: CivicSnapshot) -> str:
