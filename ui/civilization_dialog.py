@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
                                QMessageBox, QPushButton, QVBoxLayout, QWidget)
 from core.civilization import (BUILDINGS, RESOURCE_LABELS, city_report,
                                city_tier, construction_status)
+from ui.city_life_dialog import CityLifeDialog
 
 
 class CityMapWidget(QWidget):
@@ -113,17 +114,21 @@ class CivilizationDialog(QDialog):
         self.build_button.clicked.connect(self.build)
         self.show_button = QPushButton('🖥 放到桌面')
         self.show_button.clicked.connect(self.display)
+        self.story_button = QPushButton('🗞️ 查看本建筑连续事件')
+        self.story_button.clicked.connect(self.open_story)
         close = QPushButton('关闭')
         close.clicked.connect(self.accept)
         actions.addWidget(self.build_button)
         actions.addWidget(self.show_button)
+        actions.addWidget(self.story_button)
         actions.addWidget(close)
         layout.addLayout(actions)
         self.refresh()
 
     def refresh(self, *_args):
         journal = self.colony.expeditions
-        self.summary.setText(city_report(journal.buildings, journal.resources))
+        self.summary.setText(city_report(journal.buildings,
+                                         journal.resources, journal.city_cases))
         key = self.selection.currentData()
         spec = BUILDINGS[key]
         eligible, reason = construction_status(key, journal.resources,
@@ -133,6 +138,7 @@ class CivilizationDialog(QDialog):
         self.details.setText(f'{spec.description}\n费用：{cost}\n{reason}')
         self.build_button.setEnabled(eligible)
         self.show_button.setEnabled(key in journal.buildings)
+        self.story_button.setEnabled(key in journal.buildings)
         self.map.update()
 
     def build(self):
@@ -155,3 +161,11 @@ class CivilizationDialog(QDialog):
         if not self.colony.display_city_building(self.selection.currentData()):
             QMessageBox.information(self, '无法展示',
                 '请先建造建筑；桌面最多同时展示8件道具。')
+
+    def open_story(self):
+        """Use the same verified building ownership as the casebook."""
+        key = self.selection.currentData()
+        if key not in self.colony.expeditions.buildings:
+            return
+        CityLifeDialog(self.colony, key, self).exec()
+        self.refresh()
