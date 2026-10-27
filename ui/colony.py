@@ -358,6 +358,80 @@ class MonkeyColony:
         if now >= self._next_social_at:
             self._next_social_at = now + 300
 
+    def start_council(self, issue: str, indices: tuple[int, ...]) -> bool:
+        """Stage a user-requested 3-6 monkey vote; no auto polling or user profiling."""
+        if (self.count < 3 or self.social.active or self.duo.active
+                or self.council.active or self._race_active
+                or self.primary.focus.active or not self.primary.isVisible()
+                or any(p.paused for p in self.monkeys)):
+            return False
+        if (not isinstance(indices, tuple) or not 3 <= len(indices) <= self.count
+                or len(set(indices)) != len(indices)
+                or any(type(i) is not int or not 0 <= i < self.count
+                       for i in indices)):
+            return False
+        people = [self.monkeys[i] for i in indices]
+        if any(not p.isVisible() or p._drag_active or p.story.active or
+               p._social_active or p.body.airborne or p._demo_enabled
+               for p in people):
+            return False
+        seats = tuple(Seat(i, self.monkeys[i].personality) for i in indices)
+        try:
+            plan = prepare_council(issue, seats, self.relationships)
+        except ValueError:
+            return False
+        if not self.council.start(plan):
+            return False
+        # Gather only attendees; all other monkeys retain their own positions.
+        left, top, right, bottom = self.primary._work_area()
+        widest = max(p.width() for p in people)
+        available = max(0., right-left-widest)
+        for n, pet in enumerate(people):
+            pos_x = left + available*n/max(1, len(people)-1)
+            pet.set_colony_target(None)
+            pet.body.x = max(left, min(right-pet.width(), pos_x))
+            pet.body.y = max(top, bottom-pet.height())
+            pet.body.vx = pet.body.vy = 0.
+            pet.body.airborne = False
+            pet.move(round(pet.body.x), round(pet.body.y))
+            pet._last_move = (round(pet.body.x), round(pet.body.y))
+        self._last_social_tick = time.monotonic()
+        self._apply_council_beat()
+        return True
+
+    def _apply_council_beat(self) -> None:
+        beat = self.council.beat
+        if beat is None:
+            return
+        for index, action, phrase in beat.poses:
+            if index < self.count:
+                self.monkeys[index].social_pose(action, phrase)
+
+    def _complete_council(self) -> None:
+        if not self.council.finished:
+            return
+        plan = self.council.plan
+        if plan is None:
+            return
+        if self.relationships is not None:
+            self.relationships.record_council(plan.votes)
+        # Only an explicitly enabled fictional chronicle can create a case.
+        if self.chronicle is not None and self.chronicle.enabled:
+            self.chronicle.observe('meeting', plan.seats[0].index,
+                                   plan.seats[1].index)
+        if self.quests is not None:
+            self.quests.record('group')
+
+    def cancel_council(self) -> None:
+        if not self.council.active:
+            return
+        indices = [s.index for s in self.council.plan.seats]
+        self.council.cancel()
+        for index in indices:
+            if index < self.count:
+                self.monkeys[index].exit_social()
+        self._next_social_at = time.monotonic() + self._rng.uniform(240, 420)
+
     def _participants(self) -> list[Participant]:
         """Only inspect our own character coordinates and busy flags."""
         return [Participant(
