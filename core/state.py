@@ -33,6 +33,18 @@ class Brain:
         self.personality = personality
         self.rng = random.Random(seed)
         self.remaining = 0.0
+        # Civic simulation is a voluntary, in-app preference from v0.19.
+        # No changes to the default, historically seeded brain.
+        self.civic_bias = (0, 0, 0, 0, 0, 0)
+
+    def set_civic_bias(self, bias: tuple[int, ...] | None) -> None:
+        if bias is None:
+            self.civic_bias = (0, 0, 0, 0, 0, 0)
+        elif (type(bias) is tuple and len(bias) == 6 and
+              all(type(v) is int and 0 <= v <= 30 for v in bias)):
+            self.civic_bias = bias
+        else:
+            raise ValueError('invalid local civic animation weights')
 
     def next(self, state: PetState, dt: float) -> str | None:
         """Return an action change or None; action duration is simulated seconds."""
@@ -63,6 +75,9 @@ class Brain:
                 run_bias = {'trickster': 35, 'sleepy': 8, 'inventor': 16,
                             'captain': 25, 'shy': 5, 'scholar': 18}
                 weights.append(run_bias.get(self.personality, 18) + state.mischief / 5)
+            # Existing order: idle,walk,blink,sleep,turn,run. The sixth
+            # weight only applies in MONKEY mode; QUIET never gains running.
+            weights = [w + self.civic_bias[i] for i, w in enumerate(weights)]
             pick = self.rng.choices(actions, weights=weights, k=1)[0]
         state.action = pick
         self.remaining = self.rng.uniform(2.0, 5.0) if pick in ('walk', 'run', 'idle') else self.rng.uniform(0.8, 2.0)
