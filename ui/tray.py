@@ -242,7 +242,8 @@ class MonkeyTray:
         if self.colony.count < 2:
             QMessageBox.information(None, '🐒 猴山化学反应', '请先在猴山管理局增加至至少两只猴子。')
             return
-        labels = [f'#{i+1}  {pet.display_name} · {pet.personality}'
+        from core.profiles import PERSONALITIES
+        labels = [f'#{i+1}  {pet.display_name} · {PERSONALITIES.get(pet.personality, "学究猴")}'
                   for i, pet in enumerate(self.colony.monkeys)]
         first, ok = QInputDialog.getItem(
             None, '🧪 猴山化学反应', '选择第一只猴子', labels, 0, False)
