@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111729"><meta name="description" content="ProfMonkey Desktop 猴山议会与六猴动态合作网络，免费离线网页演示。">
+<title>猴山议会 · 六猴社会实验 | ProfMonkey</title>
+<style>
+:root{color-scheme:dark;--bg:#111729;--panel:#202c42;--muted:#acb9d0;--gold:#fcd08b;--line:#45536f}
+*{box-sizing:border-box}body{margin:0;color:#fef2dd;background:radial-gradient(circle at 72% -10%,#3f456b 0,transparent 40%),var(--bg);font:15px/1.65 system-ui,"Microsoft Yahei",sans-serif}
+button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+a{color:var(--gold)}.wrap{width:min(1200px,calc(100% - 32px));margin:auto}
+nav{padding:21px 0;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-size:17px;font-weight:900}.badge{font-size:11px;color:#24232a;background:var(--gold);padding:4px 8px;border-radius:99px}
+header{padding:53px 0 24px}h1{font-size:clamp(42px,6vw,70px);letter-spacing:-.05em;line-height:1.12;margin:10px 0 20px}
+.kicker{font-size:11px;letter-spacing:.2em;color:var(--gold);font-weight:900}
+.lead{max-width:780px;color:var(--muted);font-size:15px}h2{font-size:23px;margin:0 0 17px}
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;padding:13px 0 55px}
+.panel{background:linear-gradient(160deg,#253048,#192335);border:1px solid var(--line);border-radius:22px;padding:25px}
+.full{grid-column:1/-1}.cast{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.pet{border:2px solid #45536f;background:#1b2438;color:#f7ead5;border-radius:14px;padding:10px 5px;min-height:166px;text-align:center;transition:transform .15s}
+.pet[aria-pressed=true]{border-color:var(--gold);background:#39364b}
+.pet:hover{transform:translateY(-3px)}.pet svg{display:block;margin:0 auto 5px;width:76px;max-width:100%;image-rendering:pixelated}
+.pet b,.pet small{display:block}.pet b{font-size:13px}.pet small{font-size:11px;color:var(--muted)}
+label{display:block;color:var(--muted);font-size:12px;margin-bottom:8px}
+select{display:block;width:100%;background:#111b2d;color:#fff1d9;padding:12px;border-radius:11px;border:1px solid #5e6a81;font:inherit}
+.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.btn{border:0;border-radius:12px;padding:12px 16px;background:var(--gold);color:#242128;font-weight:850}
+.btn.alt{background:#3c4b65;color:#f7e9cc}.btn:disabled{opacity:.43;cursor:not-allowed}
+.board{background:#121b2d;padding:20px;border-radius:17px;min-height:200px;white-space:pre-wrap;color:#f2e3c7}
+.vote{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-top:13px}
+.vote div{border:1px solid #52607c;background:#28354d;border-radius:11px;text-align:center;padding:11px;font-weight:800}
+.vote strong{font-size:20px;display:block;color:var(--gold)}
+.socialmap{background:#0e1727;border:1px solid #404f68;border-radius:17px;min-height:280px;padding:14px}
+svg.graph{width:100%;height:auto;max-height:300px}.graph line{stroke:#6ed3ba;stroke-width:4}.graph line.enemy{stroke:#ec8283;stroke-dasharray:7 6}
+.graph circle{fill:#364962;stroke:#ffce7c;stroke-width:2}
+.graph text{font:800 14px system-ui,sans-serif;fill:#fff4dc}
+.note{font-size:12px;color:#b8c3d8;margin-top:16px}
+footer{border-top:1px solid var(--line);padding:28px 0 42px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.full{grid-column:auto}.cast{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:430px){.panel{padding:16px}.cast{grid-template-columns:repeat(2,1fr)}.vote{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.pet{transition:none}.pet:hover{transform:none}}
+</style></head><body><div class="wrap">
+<nav><span class="brand">🐒 ProfMonkey <span class="badge">SOCIETY 0.13</span></span><div><a href="./chronicle.html">猴山纪事</a> · <a href="./index.html">首页</a></div></nav>
+<header><span class="kicker">PIXEL MONKEYS / 3–6 SEATS / FICTIONAL VOTING</span>
+<h1>六只猴子，<br><span style="color:#fcd08b">谁说了算？</span></h1>
+<p class="lead">选出参会成员，召开一场三幕猴山议会。每只猴子的性格决定初始立场，猴际友谊可能影响摇摆票，投票又会改变下一次的合作关系。</p></header>
+<div class="layout">
+<section class="panel full"><h2>🐒 选出 3～6 位议员</h2><div class="cast" id="cast" aria-label="点击选择参与的猴子"></div>
+<p class="note">角色头像是原创网页像素示意，尚不等于独立 v0.10 全部动画素材已恢复。这里不连接 Windows 桌宠。</p></section>
+<section class="panel"><h2>🗳 议案与表决</h2>
+<label for="issue">本次议题</label><select id="issue">
+<option value="banana_rules">🍌 香蕉配给条例</option>
+<option value="quiet_hours">🌙 猴山静音公约</option>
+<option value="rocket_license">🚀 火箭试飞许可</option>
+</select>
+<div class="actions"><button class="btn" type="button" id="start">🎭 召开三幕议会</button>
+<button class="btn alt" type="button" id="next">下一幕 →</button></div>
+<div class="vote" aria-live="polite">
+<div>支持<strong id="yes">0</strong></div><div>反对<strong id="no">0</strong></div><div>弃权<strong id="abstain">0</strong></div></div>
+<p class="note" id="outcome">多数派才有最终结果。演出未结束不会改变任何关系。</p></section>
+<section class="panel"><h2>🎬 三幕猴山剧场</h2>
+<div class="board" id="scene" role="status" aria-live="polite">选好三只以上的猴子，点击「召开三幕议会」。</div><p class="note" id="stage">第 0/3 幕 · 尚未开会</p>
+</section>
+<section class="panel full"><h2>🤝 动态猴际网络</h2>
+<div class="socialmap"><svg class="graph" id="network" viewBox="0 0 840 295" role="img" aria-label="六只猴子的虚构友谊网络"></svg></div>
+<div class="actions"><button type="button" class="btn alt" id="addFriend">🤝 让前两只参会猴子结盟</button>
+<button type="button" class="btn alt" id="addRival">⚡ 让前两只参会猴子变成对手</button>
+<button type="button" class="btn alt" id="reset">↺ 重置网络</button></div>
+<p class="note" id="groups">绿色实线表示达到合作阈值的关系，红色虚线表示明显竞争。表决会逐步改变关系；网页示例只存于当前页面内存，刷新即清零。</p></section>
+</div>
+<footer>🔒 本页面完全离线、不截图、不监听真实系统操作，也不会改动猴山程序里的关系存档。真实桌宠的「猴山议会」由用户右键手动开启。<br>ProfMonkey Desktop · 开源源码候选版，Windows 真机验收仍需进行。</footer></div>
+<script>
+"use strict";
+const people=[
+["scholar","🎓 学究猴","#e9ce87","审稿员"],["trickster","🧢 皮猴","#f6a474","整活专家"],
+["sleepy","💤 困猴","#bd95ef","打盹专家"],["inventor","🔧 发明猴","#60babc","技术鬼才"],
+["captain","⭐ 队长猴","#89a9f6","纪律委员"],["shy","🌿 社恐猴","#9acb95","低调观察"]];
+const views={
+scholar:[1,3,-1],trickster:[-3,-3,2],sleepy:[0,3,-2],
+inventor:[-1,-1,3],captain:[3,1,-2],shy:[1,3,-1]};
+const issueKeys=["banana_rules","quiet_hours","rocket_license"];
+const questions=["要不要统一分配香蕉？","晚上能否大声敲实验设备？","允许发明猴试飞火箭吗？"];
+const $=id=>document.getElementById(id);
+let chosen=new Set([0,1,2]),edges=new Map(),meeting=null,phase=0;
+const pair=(a,b)=>[a,b].sort((x,y)=>x-y).join(":");
+function px(x,y,w,h,color){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+color+'"/>'}
+function drawMonkey(p){
+const id=p[0],color=p[2];
+let s=px(4,6,16,13,"#94613d")+px(2,9,4,5,"#94613d")+px(18,9,4,5,"#94613d");
+s+=px(6,8,12,9,"#cfa373")+px(9,10,2,2,"#282136")+px(14,10,2,2,"#282136");
+s+=px(6,18,12,5,color)+px(10,15,4,2,"#805139");
+if(id==="scholar"){s+='<rect x="7" y="9" width="5" height="5" stroke="#293545" fill="none"/><rect x="13" y="9" width="5" height="5" stroke="#293545" fill="none"/>'+px(11,11,3,1,"#293545")+px(12,18,2,4,"#de5e65")}
+if(id==="trickster")s+=px(4,4,16,3,color)+px(2,7,19,2,color);
+if(id==="sleepy")s+=px(8,2,11,3,color)+px(12,1,8,2,color);
+if(id==="inventor")s+=px(5,8,7,4,"#30d0d1")+px(13,8,7,4,"#30d0d1")+px(5,5,15,2,"#407779");
+if(id==="captain")s+=px(4,3,16,5,color)+px(11,3,3,3,"#f6d074");
+if(id==="shy")s+=px(4,4,4,15,color)+px(18,4,4,15,color)+px(7,3,11,3,color);
+return '<svg viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true">'+s+'</svg>';
+}
+function roster(){
+$("cast").replaceChildren();
+people.forEach((p,i)=>{
+const btn=document.createElement("button");btn.type="button";btn.className="pet";btn.setAttribute("aria-pressed",String(chosen.has(i)));
+btn.innerHTML=drawMonkey(p)+"<b></b><small></small>";btn.querySelector("b").textContent=p[1];btn.querySelector("small").textContent=p[3];
+btn.addEventListener("click",()=>{if(meeting){message("议会已经开始，结束或重置后才能改变人员。");return}
+if(chosen.has(i)){chosen.delete(i)}else chosen.add(i);roster();drawNetwork()});
+$("cast").append(btn);
+});
+}
+function votes(){
+const ids=[...chosen].sort((a,b)=>a-b),topic=issueKeys.indexOf($("issue").value);
+return ids.map(i=>{
+let score=3*views[people[i][0]][topic];
+ids.filter(j=>i!==j).forEach(j=>{
+const relation=edges.get(pair(i,j));
+const preference=views[people[j][0]][topic];const sign=Math.sign(preference);
+if(relation&&relation.bond>=35&&relation.trust>=30&&relation.rivalry<55)score+=sign;
+else if(relation&&(relation.rivalry>=55||relation.bond<=-35))score-=sign;
+});
+return [i,score>0?"yes":score<0?"no":"abstain"];
+});
+}
+function countRows(rows){return Object.fromEntries(["yes","no","abstain"].map(v=>[v,rows.filter(x=>x[1]===v).length]))}
+function stageText(){
+if(!meeting)return "";
+const n=countRows(meeting.ballot),names={"yes":"支持","no":"反对","abstain":"弃权"};
+if(phase===0)return "🎓 议长：" + questions[issueKeys.indexOf(meeting.issue)]+"\n\n"+meeting.ballot.map(([i])=>people[i][1]+"：先听听其他猴怎么想。").join("\n");
+if(phase===1)return "📮 正式投票开始！\n\n"+meeting.ballot.map(([i,v])=>people[i][1]+"：" + names[v] +"！").join("\n");
+const decision=n.yes>meeting.ballot.length/2?"✅ 议案通过":n.no>meeting.ballot.length/2?"❌ 议案否决":"⚖️ 僵持，暂不作决定";
+return decision+"\n\n支持 "+n.yes+" · 反对 "+n.no+" · 弃权 "+n.abstain+"\n\n结果只改变猴子之间的虚构关系。";
+}
+function message(s){$("outcome").textContent=s}
+function frame(){
+if(!meeting)return;
+$("scene").textContent=stageText();$("stage").textContent="第 "+(phase+1)+"/3 幕 · "+["提出议题","全部投票","公布结果"][phase];
+const n=countRows(meeting.ballot);Object.entries(n).forEach(([k,v])=>$(k).textContent=v);
+$("next").disabled=phase===2;
+}
+function start(){
+if(chosen.size<3){message("至少选出三只猴子才能开会。");return}
+if(meeting){message("已有一场议会，请先重置。");return}
+meeting={issue:$("issue").value,ballot:votes()};phase=0;frame();
+}
+function advance(){
+if(!meeting){message("请先召开议会。");return}
+if(phase<2){phase++;frame();if(phase===2){commit();}}
+}
+function commit(){
+const rows=meeting.ballot;
+rows.forEach(([i,vi],pos)=>rows.slice(pos+1).forEach(([j,vj])=>{
+if(vi==="abstain"||vj==="abstain")return;
+const k=pair(i,j),old=edges.get(k)||{bond:0,trust:0,rivalry:0};
+if(vi===vj){
+edges.set(k,{bond:Math.min(100,old.bond+2),trust:Math.min(100,old.trust+2),rivalry:Math.max(0,old.rivalry-1)});
+}else{
+edges.set(k,{bond:Math.max(-100,old.bond-1),trust:old.trust,rivalry:Math.min(100,old.rivalry+2)});
+}
+}));
+drawNetwork();
+message("本次三幕议会结束。每对猴子的好感、信任或竞争已小幅变化；关系达到阈值才会形成合作小组。");
+}
+function alliances(){
+const parent=people.map((_,i)=>i);
+function find(i){while(parent[i]!==i)i=parent[i];return i}
+for(const [key,value] of edges){
+if(!(value.bond>=35&&value.trust>=30&&value.rivalry<55))continue;
+const [a,b]=key.split(":").map(Number);parent[find(b)]=find(a)}
+const components=new Map();people.forEach((_,i)=>{const k=find(i);const group=components.get(k)||[];group.push(i);components.set(k,group)});
+return [...components.values()].filter(g=>g.length>1);
+}
+function drawNetwork(){
+const ns="http://www.w3.org/2000/svg";const root=$("network");root.replaceChildren();
+const points=people.map((p,i)=>{const rad=(i*60-90)*Math.PI/180;return [420+290*Math.cos(rad),145+100*Math.sin(rad)]});
+for(const [pairKey,value]of edges){
+const friend=value.bond>=35&&value.trust>=30&&value.rivalry<55;
+const rival=value.rivalry>=55||value.bond<=-35;
+if(!friend&&!rival)continue;
+const [a,b]=pairKey.split(":").map(Number);
+const line=document.createElementNS(ns,"line");line.setAttribute("x1",points[a][0]);line.setAttribute("y1",points[a][1]);line.setAttribute("x2",points[b][0]);line.setAttribute("y2",points[b][1]);if(rival)line.setAttribute("class","enemy");root.append(line);
+}
+points.forEach(([x,y],i)=>{
+const circle=document.createElementNS(ns,"circle");circle.setAttribute("cx",x);circle.setAttribute("cy",y);circle.setAttribute("r","27");circle.setAttribute("fill",people[i][2]);root.append(circle);
+const t=document.createElementNS(ns,"text");t.setAttribute("x",x);t.setAttribute("y",y+5);t.setAttribute("text-anchor","middle");t.textContent=people[i][0].slice(0,3).toUpperCase();root.append(t);
+});
+const groups=alliances().map(g=>g.map(i=>people[i][1].slice(2)).join("、"));
+$("groups").textContent=groups.length?"合作小组："+groups.join("；")+"。绿色为合作，红色为竞争。":"目前还没有合作小组。可以点击结盟或完成三幕投票形成联盟。";
+}
+function changeEdge(mode){
+if(meeting){message("议会演出中不能改变关系，请重置后再试。");return}
+const ids=[...chosen].sort((a,b)=>a-b);
+if(ids.length<2){message("请至少选择两只猴子。");return}
+edges.set(pair(ids[0],ids[1]),mode==="friend"?
+{bond:40,trust:35,rivalry:0}:{bond:-20,trust:0,rivalry:60});drawNetwork();
+}
+$("start").addEventListener("click",start);$("next").addEventListener("click",advance);
+$("addFriend").addEventListener("click",()=>changeEdge("friend"));
+$("addRival").addEventListener("click",()=>changeEdge("rival"));
+$("reset").addEventListener("click",()=>{meeting=null;phase=0;edges.clear();chosen=new Set([0,1,2]);roster();drawNetwork();$("scene").textContent="选好成员，点击召开三幕议会。";$("stage").textContent="第 0/3 幕 · 尚未开会";$("next").disabled=true;["yes","no","abstain"].forEach(k=>$(k).textContent="0");message("关系和议会已重置。")});
+$("issue").addEventListener("change",()=>{if(meeting){message("议会进行中不能更改议题，重置后再试。");$("issue").value=meeting.issue}});
+$("next").disabled=true;roster();drawNetwork();
+</script></body></html>
