@@ -616,6 +616,22 @@ class MonkeyColony:
         self.social.cancel()
         self._release_group_poses()
 
+    def start_rocket_trial(self) -> bool:
+        """Manual fictional rocket trial, unlocked only by a completed vote."""
+        if (self.laws is None or not self.laws.active('rocket_license')
+                or self.count < 3 or self.council.active or self.duo.active
+                or self.social.active or self._race_active
+                or not any(p.personality == 'inventor' for p in self.monkeys)):
+            return False
+        return self.start_social('rocket_trial')
+
+    def clear_monkey_laws(self) -> None:
+        """Reset fictional policies without touching relationships or chronicle."""
+        if self.social.name == 'rocket_trial':
+            self.cancel_social()
+        if self.laws is not None:
+            self.laws.clear()
+
     def start_social(self, name: str) -> bool:
         if (self.council.active or self.count < 2 or not self.visible() or self.primary.focus.active
                 or any(p.paused or p.story.active or p._drag_active for p in self.monkeys)):
