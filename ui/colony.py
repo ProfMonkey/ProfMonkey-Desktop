@@ -451,13 +451,8 @@ class MonkeyColony:
         if plan is None or self.expeditions is None or not self.expeditions.record(plan):
             return
         if self.relationships is not None:
-            indices = [person.index for person in plan.crew]
-            if plan.outcome == 'success':
-                self.relationships.record_meeting(indices)
-            elif plan.outcome == 'mixed':
-                self.relationships.record_shared_activity(indices[0], indices[1])
-            else:
-                self.relationships.record_collision(indices[0], indices[1])
+            self.relationships.record_expedition(
+                tuple(person.index for person in plan.crew), plan.outcome)
         if (self.chronicle is not None and plan.outcome == 'success'
                 and len(plan.crew) >= 2):
             trigger = {'banana_scout': 'banana_duel', 'meteor_lab': 'launch',
