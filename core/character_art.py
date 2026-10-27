@@ -44,7 +44,12 @@ def _source(file: str) -> str:
     ):
         if marker not in data:
             raise ValueError(f'invalid bundled monkey artwork: missing {marker}')
-    if '<script' in data.lower() or 'http:' in data.lower() or 'https:' in data.lower():
+    # The required SVG namespace uses http://www.w3.org/2000/svg. Do not
+    # block it; block only executable payloads and URL-linked image/font data.
+    unsafe = ('<script', '<foreignobject', 'onload=', 'onerror=',
+              'href="http:', 'href="https:', "href='http:",
+              "href='https:", 'xlink:href=', 'url(http:', 'url(https:')
+    if any(token in data.lower() for token in unsafe):
         raise ValueError('external SVG resources or scripts are not permitted')
     return data
 
