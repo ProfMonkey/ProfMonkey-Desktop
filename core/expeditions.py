@@ -10,6 +10,9 @@ import json
 import os
 import tempfile
 
+from core.civilization import (BUILDINGS, construction_status, city_tier,
+                               mission_city_bonus, sanitize_city)
+
 MISSIONS = {
     'banana_scout': ('🍌 香蕉侦察队', '在猴山寻找传说中的香蕉树'),
     'meteor_lab': ('🔭 陨石研究所', '研究来自银河猴山的奇怪矿石'),
@@ -63,6 +66,7 @@ class ExpeditionPlan:
     score: int
     beats: tuple[ExpeditionBeat, ...]
     law_boost: bool = False
+    city_buildings: frozenset[str] = frozenset()
 
 
 def _bounded(value: object) -> int:
@@ -96,24 +100,29 @@ def _synergy(relations, left: int, right: int) -> int:
 
 
 def plan_expedition(mission: str, crew: tuple[Explorer, ...],
-                    relationships=None, active_laws: frozenset[str] = frozenset()) -> ExpeditionPlan:
+                    relationships=None, active_laws: frozenset[str] = frozenset(),
+                    built: frozenset[str] = frozenset()) -> ExpeditionPlan:
     if type(mission) is not str or mission not in MISSIONS:
         raise ValueError('unknown mission')
     _validate_crew(crew)
     if not isinstance(active_laws, frozenset):
         raise ValueError('laws must be snapshotted')
+    if not isinstance(built, frozenset) or sanitize_city(list(built)) != built:
+        raise ValueError('invalid city buildings snapshot')
     skill = tuple(MISSIONS).index(mission)
     score = sum(SKILLS[member.personality][skill] for member in crew)
     for i, person in enumerate(crew):
         for partner in crew[i+1:]:
             score += _synergy(relationships, person.index, partner.index)
     boosted = LAW_BONUS[mission] in active_laws
-    if boosted:
-        score += 2
+    city_score, _ = mission_city_bonus(mission, built)
+    score += city_score + (2 if boosted else 0)
     outcome = 'success' if score >= 6 else 'mixed' if score >= 3 else 'mishap'
     rewards = list(REWARDS[mission][outcome])
     if boosted and outcome != 'mishap':
         rewards[skill] += 1
+    _, city_rewards = mission_city_bonus(mission, built, outcome)
+    rewards = [value + city_rewards[i] for i, value in enumerate(rewards)]
     first = tuple((p.index, 'wake' if n == 0 else 'blink',
                    f'{MISSIONS[mission][0]}集合！' if n == 0 else '装备清点完成！')
                   for n, p in enumerate(crew))
@@ -133,7 +142,7 @@ def plan_expedition(mission: str, crew: tuple[Explorer, ...],
                    for n, p in enumerate(crew))
     return ExpeditionPlan(mission, crew, outcome, tuple(rewards), score,
                           (ExpeditionBeat(1.7, first), ExpeditionBeat(2.1, middle),
-                           ExpeditionBeat(1.9, ending)), boosted)
+                           ExpeditionBeat(1.9, ending)), boosted, built)
 
 
 class ExpeditionStory:
@@ -196,6 +205,7 @@ class ExpeditionJournal:
         self.path = Path(path)
         self.resources = {key: 0 for key in RESOURCE_KEYS}
         self.missions = {i: 0 for i in range(6)}
+        self.buildings: frozenset[str] = frozenset()
         self.log: list[dict] = []
         self._load()
 
@@ -206,6 +216,9 @@ class ExpeditionJournal:
             return
         if not isinstance(raw, dict) or raw.get('version') != 1:
             return
+        # Legacy v0.15 journals contain no building data; keep full backward
+        # compatibility while accepting only four known completed structures.
+        self.buildings = sanitize_city(raw.get('buildings'))
         resources = raw.get('resources')
         if isinstance(resources, dict):
             for k in RESOURCE_KEYS:
@@ -234,6 +247,7 @@ class ExpeditionJournal:
             with os.fdopen(fd, 'w', encoding='utf-8') as stream:
                 json.dump({'version': 1, 'resources': self.resources,
                            'missions': {str(i): self.missions[i] for i in range(6)},
+                           'buildings': sorted(self.buildings),
                            'log': self.log}, stream, ensure_ascii=False, indent=2)
             os.replace(path, self.path)
         finally:
@@ -250,12 +264,17 @@ class ExpeditionJournal:
         except (ValueError, TypeError):
             return False
         if (type(plan.outcome) is not str or plan.outcome not in RESULTS
-                or type(plan.score) is not int or type(plan.law_boost) is not bool):
+                or type(plan.score) is not int or type(plan.law_boost) is not bool
+                or not isinstance(plan.city_buildings, frozenset)
+                or sanitize_city(list(plan.city_buildings)) != plan.city_buildings):
+            return False
             return False
         base = REWARDS[plan.mission][plan.outcome]
+        _score, city_rewards = mission_city_bonus(
+            plan.mission, plan.city_buildings, plan.outcome)
         expected = tuple(n + (1 if plan.law_boost and i == skill and
                               plan.outcome != 'mishap' else 0)
-                         for i, n in enumerate(base))
+                         + city_rewards[i] for i, n in enumerate(base))
         if plan.rewards != expected or len(plan.beats) != 3:
             return False
         expected_result = ('success' if plan.score >= 6 else
@@ -273,13 +292,40 @@ class ExpeditionJournal:
         return True
 
     def unlocked(self) -> tuple[tuple[str, str], ...]:
+        """Earned v0.15 achievement remains visible after a building is paid for."""
         totals = tuple(self.resources[k] for k in RESOURCE_KEYS)
         return tuple((key, label) for key, label, required in BLUEPRINTS
-                     if all(current >= minimum for current, minimum in zip(totals, required)))
+                     if key in self.buildings or
+                     all(current >= minimum for current, minimum in zip(totals, required)))
+
+    def construct(self, building: str) -> bool:
+        """Pay and build in one atomic journal write; invalid attempts do nothing.
+
+        No waiting/auto-build: the user explicitly confirms construction in UI.
+        Roll memory back if disk save fails so no phantom building appears.
+        """
+        eligible, _reason = construction_status(
+            building, self.resources, self.buildings)
+        if not eligible:
+            return False
+        previous_balances = self.resources.copy()
+        old_city = self.buildings
+        spec = BUILDINGS[building]
+        for name, cost in zip(RESOURCE_KEYS, spec.cost):
+            self.resources[name] -= cost
+        self.buildings = frozenset(set(self.buildings) | {building})
+        try:
+            self._save()
+        except OSError:
+            self.resources = previous_balances
+            self.buildings = old_city
+            return False
+        return True
 
     def clear(self) -> None:
         self.resources = {key: 0 for key in RESOURCE_KEYS}
         self.missions = {i: 0 for i in range(6)}
+        self.buildings = frozenset()
         self.log = []
         try:
             self.path.unlink(missing_ok=True)
@@ -290,9 +336,11 @@ class ExpeditionJournal:
 def newspaper(journal: ExpeditionJournal, laws=None, names: tuple[str, ...] = ()) -> str:
     """Create a fictional bulletin solely from the game's local data."""
     v = journal.resources
+    _tier, title = city_tier(journal.buildings)
     rows = ['🗞️ 猴山日报 · 本期手工汇总',
             f'🍌 香蕉 {v["bananas"]} | 🔬 科研 {v["science"]} | ⭐ 声望 {v["reputation"]}',
-            f'📦 最近保存 {len(journal.log)} 次探险']
+            f'📦 最近保存 {len(journal.log)} 次探险',
+            f'🏗️ 文明阶段：{title} · 已建建筑 {len(journal.buildings)}/4']
     if laws is not None:
         active = [label for key, label in (
             ('banana_rules', '香蕉共享'), ('quiet_hours', '安静公约'),
