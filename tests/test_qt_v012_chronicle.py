@@ -13,9 +13,15 @@ from ui.colony import MonkeyColony
 from ui.overlay import MonkeyOverlay
 
 
-def test_chronicle_chapter_requires_full_two_beat_playback(tmp_path):
+@pytest.fixture(scope='module')
+def app():
     os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
-    app = QApplication.instance() or QApplication([])
+    instance = QApplication.instance() or QApplication([])
+    yield instance
+    instance.processEvents()
+
+
+def test_chronicle_chapter_requires_full_two_beat_playback(tmp_path, app):
     root = Path(__file__).resolve().parents[1]
     image, manifest = root / 'assets/monkey/idle.png', root / 'assets/monkey/manifest.json'
     if not image.is_file():
@@ -59,9 +65,7 @@ def test_chronicle_chapter_requires_full_two_beat_playback(tmp_path):
         colony.quit_all()
 
 
-def test_hidden_or_absent_monkey_cannot_play_pending_chapter(tmp_path):
-    os.environ.setdefault('QT_QPA_PLATFORM', 'offscreen')
-    app = QApplication.instance() or QApplication([])
+def test_hidden_or_absent_monkey_cannot_play_pending_chapter(tmp_path, app):
     root = Path(__file__).resolve().parents[1]
     image, manifest = root / 'assets/monkey/idle.png', root / 'assets/monkey/manifest.json'
     if not image.is_file():
