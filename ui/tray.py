@@ -16,6 +16,7 @@ from core.relationships import RelationshipStore
 from core.quests import QuestBoard
 from core.chronicle import ChronicleStore
 from ui.chronicle_dialog import ChronicleDialog
+from ui.council_dialog import CouncilDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -49,6 +50,7 @@ class MonkeyTray:
         self.menu.addAction('🤝 猴山关系档案 · 好友/死对头/师徒', self.open_relationships)
         self.menu.addAction('📜 今日猴山任务 · 猴学积分', self.show_quests)
         self.menu.addAction('📖 猴山纪事 · 连续剧情/成长', self.show_chronicle)
+        self.menu.addAction('🗳 猴山议会 · 三猴投票与合作网络', self.open_council)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
         self.chronicle_action.setCheckable(True)
         self.chronicle_action.setChecked(overlay.settings.chronicle_enabled)
@@ -382,6 +384,13 @@ class MonkeyTray:
 
     def show_chronicle(self) -> None:
         ChronicleDialog(self.colony, self.chronicle, self.set_chronicle_enabled).exec()
+
+    def open_council(self) -> None:
+        if self.colony.count < 3:
+            QMessageBox.information(None, '🗳 猴山议会',
+                '至少需要三只猴子。请先在「猴子数量」或「猴山管理局」里增加成员。')
+            return
+        CouncilDialog(self.colony).exec()
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
