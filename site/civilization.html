@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101a2c"><meta name="description" content="ProfMonkey Desktop 猴山文明，离线建设香蕉仓库、望远镜、广场与联合实验室。">
+<title>猴山文明 | ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1729;--panel:#1a2940;--line:#435b74;--ink:#fff0d9;--muted:#b4c6d9;--gold:#f8d28b;--leaf:#90e7be}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 72% -20%,#3c5269 0,transparent 45%),var(--bg);font:15px/1.65 system-ui,"Microsoft YaHei",sans-serif}
+button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+a{color:var(--gold)}.wrap{max-width:1150px;width:calc(100% - 30px);margin:auto}
+nav{display:flex;gap:15px;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line)}
+nav strong{font-size:17px}.badge{display:inline-block;font-size:10px;color:var(--gold);border:1px solid var(--gold);border-radius:50px;padding:3px 10px;margin-left:7px}
+.hero{padding:54px 0 28px}.eyebrow{letter-spacing:.2em;font-size:11px;color:var(--gold);font-weight:900}
+h1{font-size:clamp(39px,6vw,70px);line-height:1.12;letter-spacing:-.04em;margin:12px 0 18px}
+.lead{max-width:820px;color:var(--muted)}h2{font-size:22px;margin:0 0 15px}.small{font-size:12px;color:var(--muted)}
+.city{height:330px;border:2px solid #627994;border-radius:19px;overflow:hidden;position:relative;background:linear-gradient(#344967 0%,#647c8b 53%,#465c6d 54%,#285159 73%,#1e3e45 74%);margin-bottom:19px}
+.sun{position:absolute;right:11%;top:25px;width:67px;height:67px;border-radius:50%;background:#fbd38c;box-shadow:0 0 45px #fbd38c77}
+.star{position:absolute;width:3px;height:3px;background:#fce6b2}
+.titlebar{position:absolute;top:18px;left:20px;z-index:5;font-weight:900;border-radius:10px;padding:7px 12px;background:#122338ce}
+.hills{position:absolute;bottom:65px;width:40%;height:150px;background:#2e5c68;clip-path:polygon(0% 100%,50% 0%,100% 100%)}
+.hills.a{left:-9%}.hills.b{left:21%;height:180px}.hills.c{right:-7%;height:170px}
+.lots{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;position:absolute;left:4%;right:4%;bottom:20px;height:153px;z-index:3}
+.lot{background:#14273be5;border:2px solid #6e8799;border-bottom:8px solid #1e3f40;border-radius:9px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:9px 6px;text-align:center}
+.lot.built{border-color:#e7cf8c;background:#355462ed;box-shadow:0 0 20px #f0d79833}
+.pixel{display:block;width:70px;height:85px;max-width:95%;position:relative;margin-bottom:5px;image-rendering:pixelated}
+.pixel::before{content:"＋";display:flex;align-items:center;justify-content:center;height:100%;font-size:37px;color:#879bad}
+.built .pixel::before{content:"";position:absolute;bottom:0;left:20%;width:60%;height:60%;background:var(--tower,#bdaa79);border:5px solid #213e51;box-shadow:inset 11px 12px 0 #88a9a6,0 -18px 0 -7px #fff1bc}
+.built .pixel::after{content:"";position:absolute;bottom:16px;left:43%;width:17%;height:17%;background:#273849}
+.lot b{font-size:12px}.lot small{font-size:10px;color:#b5c7d7}
+.starscape{position:absolute;z-index:4;right:4%;bottom:5px;font-size:24px;animation:bounce 3s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}55%{transform:translateY(-8px)}}
+.panel{background:linear-gradient(140deg,#24344b,#18273c);border:1px solid #4b617d;padding:24px;border-radius:19px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.full{grid-column:1/-1}
+.wallet{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:17px}
+.money{border:1px solid #607089;border-radius:11px;background:#1b293c;padding:12px;text-align:center}
+.money strong{font-size:27px;color:var(--gold);display:block}
+.projects{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.project{padding:16px;background:#17283b;border:1px solid #566b85;border-radius:14px}
+.project.built{border-color:var(--leaf);background:#1e4643}.project h3{margin:0 0 5px;font-size:16px}
+.project p{color:#beccdb;margin:5px 0 10px;font-size:12px}
+.cost{display:block;margin-bottom:10px;color:var(--gold);font-size:12px}
+.btn{background:var(--gold);color:#291f1b;font-weight:850;border:0;border-radius:10px;padding:10px 15px}
+.btn.secondary{background:#3f5875;color:var(--ink)}
+.btn:disabled{cursor:not-allowed;opacity:.4}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.history{min-height:130px;white-space:pre-wrap;background:#0e1d2e;border-radius:10px;padding:17px;color:#f6e4c6;line-height:1.9}
+.legend{margin-top:12px;font-size:12px;color:#b4c3d7}
+footer{margin:45px 0 20px;padding:25px 0;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.projects{grid-template-columns:1fr 1fr}}
+@media(max-width:550px){.lots{gap:4px;left:2%;right:2%}.lot{padding:5px 2px}.lot b{font-size:10px}.lot small{font-size:8px}.city{height:280px}.projects{grid-template-columns:1fr}.panel{padding:15px}.pixel{height:55px}}
+@media(prefers-reduced-motion:reduce){.starscape{animation:none}}
+</style></head><body><div class="wrap">
+<nav><strong>🐒 ProfMonkey <span class="badge">CIVILIZATION v0.16</span></strong><div><a href="./expeditions.html">🧭 探险局</a> · <a href="./index.html">首页</a></div></nav>
+<header class="hero"><div class="eyebrow">MONKEY CIVILIZATION / FOUR BUILDINGS / OFFLINE PLAYGROUND</div>
+<h1>把探险带回的资源，<br><span style="color:var(--gold)">建成一座城。</span></h1>
+<p class="lead">从第一座香蕉仓库开始，让四个城区陆续点亮。建筑真正消耗猴山资源；建造完毕，又会反过来增强后来猴子的探险能力。最终成立银河猴山联合实验室。🌌</p></header>
+<div class="city" role="img" aria-label="银河猴山四个可建设的像素风城区">
+<div class="sun"></div><div class="hills a"></div><div class="hills b"></div><div class="hills c"></div>
+<div class="titlebar" id="tier">🌱 初生猴山 · 0/4</div><div class="lots" id="lots"></div><span class="starscape" aria-hidden="true">🐒</span></div>
+<div class="grid">
+<section class="panel"><h2>🏦 猴山国库</h2><div class="wallet">
+<div class="money">🍌 香蕉<strong id="bananas">0</strong></div>
+<div class="money">🔬 科研<strong id="science">0</strong></div>
+<div class="money">⭐ 声望<strong id="reputation">0</strong></div></div>
+<p class="small">网页演示与桌宠真实存档分离。点击按钮模拟一次探险结束，获得6/6/6虚构资源；真实桌宠必须完成三幕探险才能获得奖励。</p>
+<div class="actions"><button class="btn" id="expedition" type="button">🧭 模拟完成探险（+6/+6/+6）</button></div>
+<p class="legend">建造后永久拥有建筑，成本从国库一次性扣除。反复点击已建成建筑不会二次收费。</p></section>
+<section class="panel"><h2>⚙️ 城市加成</h2><p>🍌 香蕉仓库：香蕉侦察加1协作，额外带回香蕉。</p>
+<p>🔭 银河望远镜：陨石研究加1协作，额外带回科研点。</p>
+<p>🏛️ 公共广场：村庄营造加1协作，额外获得声望。</p>
+<p>🌌 联合实验室：全部队伍协作再加1，需要前三座基础建筑。</p>
+<p class="legend">真实桌宠会在小队出发时固定这些加成；中途建设不改变已经进行的探险。</p></section>
+<section class="panel full"><h2>🏗️ 猴山四大工程</h2><div class="projects" id="projects"></div></section>
+<section class="panel full"><h2>🗞️ 文明纪事</h2><div class="history" id="history" aria-live="polite">猴山尚未兴建，等待第一支探险队……</div>
+<div class="actions"><button class="btn secondary" id="reset" type="button">↺ 重置本页演示城市</button></div></section>
+</div><footer>本网页完全离线，不请求远程接口，也不写 localStorage / cookie。不读取真实电脑资源或用户隐私。桌宠源码已提供 Qt 城市地图和桌面建筑道具，但 v0.16 仍是尚未完成真机验收的开发版；不使用 GitHub Actions。</footer>
+</div>
+<script>
+"use strict";
+const defs={
+banana_vault:{title:"🍌 香蕉研究仓库",short:"香蕉仓库",cost:[12,0,0],require:[],desc:"香蕉侦察加1协作，额外获得1香蕉。"},
+galaxy_scope:{title:"🔭 银河猴山望远镜",short:"银河望远镜",cost:[0,12,0],require:[],desc:"陨石科研加1协作，额外获得1科研点。"},
+public_square:{title:"🏛️ 猴山公共广场",short:"公共广场",cost:[0,0,12],require:[],desc:"村庄建设加1协作，额外获得1声望。"},
+monkey_academy:{title:"🌌 银河猴山联合实验室",short:"联合实验室",cost:[20,20,20],require:["banana_vault","galaxy_scope","public_square"],desc:"所有任务协作加1，需先建造三座基础建筑。"}
+};
+const ids=Object.keys(defs);const keys=["bananas","science","reputation"];
+const $=id=>document.getElementById(id);
+let resources=[0,0,0],built=new Set(),events=[];
+function status(key){
+ if(built.has(key))return [false,"✅ 已完成"];
+ const spec=defs[key];const needed=spec.require.filter(k=>!built.has(k));
+ if(needed.length)return [false,"🔒 先建："+needed.map(k=>defs[k].short).join("、")];
+ if(spec.cost.some((n,i)=>resources[i]<n))return [false,"💰 资源不足"];
+ return [true,"🔨 可以建造"];
+}
+function tier(){
+ if(built.has("monkey_academy"))return "🌌 银河猴山文明";
+ return ["🌱 初生猴山","🏕️ 猴山聚落","🏘️ 猴山小镇","🏙️ 猴山城邦"][built.size];
+}
+function render(){
+ keys.forEach((key,i)=>$(key).textContent=resources[i]);
+ $("tier").textContent=tier()+" · "+built.size+"/4";
+ $("lots").replaceChildren();$("projects").replaceChildren();
+ ids.forEach((id,index)=>{
+  const cfg=defs[id],finished=built.has(id),[canBuild,why]=status(id);
+  const plot=document.createElement("div");plot.className="lot"+(finished?" built":"");
+  const tower=document.createElement("span");tower.className="pixel";
+  tower.style.setProperty("--tower",["#d8aa67","#8fc5da","#a6c8a9","#ecd08e"][index]);
+  const plotName=document.createElement("b");plotName.textContent=cfg.short;
+  const state=document.createElement("small");state.textContent=finished?"已竣工":"建设用地";
+  plot.append(tower,plotName,state);$("lots").append(plot);
+  const card=document.createElement("div");card.className="project"+(finished?" built":"");
+  const title=document.createElement("h3");title.textContent=cfg.title;
+  const desc=document.createElement("p");desc.textContent=cfg.desc;
+  const cost=document.createElement("span");cost.className="cost";
+  cost.textContent="费用 "+cfg.cost.map((n,i)=>n?["🍌","🔬","⭐"][i]+" "+n:"").filter(Boolean).join(" · ");
+  const btn=document.createElement("button");btn.className="btn";btn.type="button";
+  btn.disabled=!canBuild;btn.textContent=why;
+  btn.addEventListener("click",()=>build(id));
+  card.append(title,desc,cost,btn);$("projects").append(card);
+ });
+ $("history").textContent=events.length?events.slice(-8).reverse().join("\n"):
+ "猴山尚未兴建，等待第一支探险队……";
+}
+function build(id){
+ const [okay]=status(id);if(!okay)return;
+ const cost=defs[id].cost;
+ for(let i=0;i<3;i++)resources[i]-=cost[i];
+ built.add(id);events.push("🔨 已建造："+defs[id].title+" · 城市加成生效");
+ render();
+}
+$("expedition").addEventListener("click",()=>{
+ resources=resources.map(v=>Math.min(999,v+6));
+ events.push("🧭 演示探险带回资源 🍌6 / 🔬6 / ⭐6");render();
+});
+$("reset").addEventListener("click",()=>{
+ resources=[0,0,0];built=new Set();events=[];render();
+});
+render();
+</script></body></html>
