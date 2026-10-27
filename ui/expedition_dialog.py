@@ -1,7 +1,8 @@
 """User-driven expedition board and offline monkey newspaper."""
 from __future__ import annotations
+from pathlib import Path
 
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QHBoxLayout,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QFileDialog, QHBoxLayout,
                                QLabel, QMessageBox, QPlainTextEdit,
                                QPushButton, QVBoxLayout)
 from core.expeditions import (MISSIONS, RESULTS, Explorer, plan_expedition,
@@ -69,11 +70,14 @@ class ExpeditionDialog(QDialog):
         bottom = QHBoxLayout()
         refresh = QPushButton('🔄 刷新日报')
         refresh.clicked.connect(self.refresh)
+        export = QPushButton('💾 导出日报 TXT')
+        export.clicked.connect(self._export)
         clear = QPushButton('🗑 清空探险档案')
         clear.clicked.connect(self._clear)
         exit_button = QPushButton('关闭')
         exit_button.clicked.connect(self.accept)
         bottom.addWidget(refresh)
+        bottom.addWidget(export)
         bottom.addWidget(clear)
         bottom.addWidget(exit_button)
         layout.addLayout(bottom)
@@ -124,6 +128,20 @@ class ExpeditionDialog(QDialog):
     def _cancel(self) -> None:
         self.colony.cancel_expedition()
         self.refresh()
+
+    def _export(self) -> None:
+        # Explicit user-selected file destination; never auto-save desktop data.
+        filename, _filter = QFileDialog.getSaveFileName(
+            self, '保存猴山日报', 'ProfMonkey_猴山日报.txt', '文本文件 (*.txt)')
+        if not filename:
+            return
+        try:
+            Path(filename).write_text(self.bulletin.toPlainText(), encoding='utf-8')
+        except OSError as exc:
+            QMessageBox.warning(self, '保存失败', f'无法保存日报：{exc}')
+        else:
+            QMessageBox.information(self, '日报已保存',
+                                    '仅导出虚构猴山资源、探险记录和角色昵称。')
 
     def _clear(self) -> None:
         if QMessageBox.question(
