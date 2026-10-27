@@ -45,6 +45,7 @@ def test_council_requires_full_three_beat_completion_and_cancel(tmp_path, app):
     try:
         assert not colony.start_council('quiet_hours',(0,1))
         assert not colony.start_council('quiet_hours',(0,0,1))
+        assert all(not pet.audio.effects for pet in colony.monkeys)  # default mute is cheap
         assert colony.start_council('quiet_hours',(0,1,2))
         assert colony.council.active
         assert all(p._social_active for p in colony.monkeys)
