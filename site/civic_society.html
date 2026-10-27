@@ -1,0 +1,110 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>猴山自主社会 · ProfMonkey Desktop v0.19</title>
+<style>
+:root{color-scheme:dark;--gold:#f3d28b;--ink:#ffefd2;--muted:#b9cddb}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 70% 0%,#36536b,transparent 40%),#0c1726;color:var(--ink);font:15px/1.6 system-ui,"Microsoft Yahei",sans-serif}
+main{max-width:1100px;width:calc(100% - 30px);margin:auto}a{color:var(--gold)}nav{display:flex;justify-content:space-between;padding:20px 0;border-bottom:1px solid #657589;gap:10px}
+header{padding:43px 0}h1{font-size:clamp(40px,7vw,70px);line-height:1.1;margin:10px 0}h1 em{font-style:normal;color:var(--gold)}
+header p{max-width:680px;color:var(--muted)}.overline{color:var(--gold);letter-spacing:.2em;font-weight:900;font-size:11px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:linear-gradient(145deg,#263e52,#18293e);border:1px solid #657b8d;border-radius:18px;padding:20px;margin-bottom:16px}
+h2{margin:0 0 14px}.small{font-size:12px;color:var(--muted)}label{display:block;font-size:12px;color:var(--muted);margin:8px 0}select,input{font:inherit;background:#102136;color:var(--ink);border:1px solid #69869a;border-radius:9px;padding:9px;width:100%}
+input[type=checkbox]{width:auto;accent-color:var(--gold)}button{font:inherit;border:1px solid #7893a9;border-radius:9px;background:#36516a;color:var(--ink);padding:10px;cursor:pointer}button.primary{background:var(--gold);color:#29231d;font-weight:900}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+button:disabled{opacity:.4;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{text-align:center;border:1px solid #638399;border-radius:12px;background:#0c2233;padding:10px}.stat b{display:block;font-size:28px;color:var(--gold)}
+.cast{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.pet{border:1px solid #628196;background:#102237;padding:11px;border-radius:11px}.pet strong{display:block}.pet small{display:block;font-size:12px;color:var(--muted)}
+#news,#stage{background:#0c1c2d;border:1px solid #607c92;border-radius:12px;padding:15px;white-space:pre-wrap;min-height:110px;line-height:1.9}.actions{display:flex;gap:9px;flex-wrap:wrap;padding:11px 0}footer{border-top:1px solid #657589;padding:20px 0 50px;color:var(--muted);font-size:12px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:500px){.two,.cast{grid-template-columns:1fr}}
+</style></head><body><main>
+<nav><b>🐒 ProfMonkey · CITY SOCIETY v0.19</b><div><a href="evolution.html">📜 历史演化</a> · <a href="index.html">首页</a></div></nav>
+<header><div class="overline">THE CITY REMEMBERS. THE MONKEYS CHANGE.</div><h1>六只猴子，<br><em>不同的社会。</em></h1><p>建筑决定岗位，案件结局和法令影响文明氛围；历史选择和猴际关系还能形成共治派、开拓派与独行派。尝试改变历史，再让两只猴子真正碰面。</p></header>
+<div class="grid"><div>
+<section class="panel"><h2>🏛️ 城市气候</h2><div class="stats">
+<div class="stat">🤝 合作<b id="cooperation">20</b></div><div class="stat">🔬 创新<b id="innovation">18</b></div><div class="stat">⚡ 分歧<b id="tension">12</b></div>
+</div><p id="era" class="small"></p></section>
+<section class="panel"><h2>🏗️ 改变城市历史</h2><p class="small">此页只模拟历史快照。真实桌面端仍须建造对应建筑，并完成 v0.17–v0.18 事件才能改变社会。</p>
+<div class="two"><label><input id="banana_vault" type="checkbox" checked> 🍌 香蕉仓库</label><label><input id="galaxy_scope" type="checkbox" checked> 🔭 观测台</label><label><input id="public_square" type="checkbox" checked> 🎉 公共广场</label><label><input id="monkey_academy" type="checkbox"> 🧪 联合实验室</label></div>
+<div class="two">
+<label>🍌 仓库钥匙<select id="granary"><option value="">未定</option><option value="community" selected>合作</option><option value="elite">突破</option></select></label>
+<label>🔭 星际发现<select id="star_chart"><option value="">未定</option><option value="community">合作</option><option value="elite">突破</option></select></label>
+<label>🎉 广场传统<select id="festival_custom"><option value="">未定</option><option value="community">合作</option><option value="elite">突破</option></select></label>
+<label>🧪 实验室章程<select id="safety_code"><option value="">未定</option><option value="community">合作</option><option value="elite">突破</option></select></label>
+<label>🏛️ 共同宪章<select id="constitution"><option value="">未定</option><option value="community">合作</option><option value="elite">突破</option></select></label></div>
+<label><input id="banana_rules" type="checkbox" checked> 香蕉共享条例</label>
+<label><input id="quiet_hours" type="checkbox"> 猴山安静公约</label>
+<label><input id="rocket_license" type="checkbox"> 火箭许可</label>
+<div class="actions"><button id="reset">↻ 重置沙盒</button></div></section></div>
+<div><section class="panel"><h2>🐒 六猴岗位与阵营</h2><label>猴子数量<select id="count"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></label>
+<div class="cast" id="members"></div></section>
+<section class="panel"><h2>🎭 让猴子真正碰面</h2><p class="small">猴子按自己的岗位和社会观点交谈；完成互动后改变两猴的模拟好感、信任和竞争，不发放资源。</p>
+<div class="two"><label>猴子 A<select id="first"></select></label><label>猴子 B<select id="second"></select></label></div>
+<label>关系：信任 <span id="trust">0</span> / 竞争 <span id="rivalry">0</span> / 好感 <span id="bond">0</span></label>
+<div class="actions"><button class="primary" id="meet">🎬 演示一次社会偶遇</button><button id="routine">☀️ 观察全城一轮</button></div><div id="stage">还没有猴子碰面，先选择角色。</div>
+</section><section class="panel"><h2>🗞️ 猴山社会日报</h2><div id="news"></div></section>
+<section class="panel"><h2>🌙 用户控制</h2><p class="small">真实桌宠的「自主社会」默认关闭。开启后只在猴山模式调整原有动作概率；自动偶遇还需要另外开启原有「自动碰面」开关，并遵守安静公约、专注和暂停。本演示完全离线，刷新即清除。</p></section></div></div>
+<footer>v0.19 独立源码候选 · Windows 真机未验收；不使用 GitHub Actions、不监听桌面、不连接网络。</footer>
+</main>
+<script>
+"use strict";
+const $=id=>document.getElementById(id), buildings=['banana_vault','galaxy_scope','public_square','monkey_academy'],
+history=['granary','star_chart','festival_custom','safety_code','constitution'],
+people=[['🎓','学究猴','galaxy_scope',2],['🧢','皮猴','public_square',-2],['💤','困猴','banana_vault',0],['🔧','发明猴','monkey_academy',-2],['⭐','队长猴','banana_vault',1],['🌿','社恐猴','galaxy_scope',2]],
+jobs={banana_vault:'🍌 仓库管理员',galaxy_scope:'🔭 星际观测员',public_square:'🎉 广场策划师',monkey_academy:'🧪 联合实验员'};
+let relations={},log=[],turn=0,city=null;
+function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join(':')}
+function rel(a,b){const k=pairKey(a,b);if(!relations[k])relations[k]={trust:0,bond:0,rivalry:0};return relations[k]}
+function clamp(x){return Math.max(0,Math.min(100,x))}
+function snapshot(){
+ const owned=buildings.filter(k=>$(k).checked),decided=history.filter(k=>$(k).value),community=decided.filter(k=>$(k).value==='community').length,elite=decided.length-community,n=Number($('count').value);
+ let cooperation=20+14*community-10*elite,innovation=18+11*elite+3*community,tension=12+17*elite-10*community;
+ if($('banana_rules').checked){cooperation+=8;tension-=5}
+ if($('quiet_hours').checked)tension-=7;
+ if($('rocket_license').checked)innovation+=8;
+ let totalB=0,totalT=0,totalR=0,pairs=0;
+ for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){const r=rel(i,j);totalB+=r.bond;totalT+=r.trust;totalR+=r.rivalry;pairs++}
+ if(pairs){cooperation+=Math.floor(totalB/pairs/5)+Math.floor(totalT/pairs/5);tension+=Math.floor(totalR/pairs/4)}
+ const lean=3*(community-elite),members=[];
+ for(let i=0;i<n;i++){
+ const p=people[i],priority=i===3?['monkey_academy','galaxy_scope','banana_vault','public_square']:i===1?['public_square','banana_vault','galaxy_scope','monkey_academy']:i===4?['banana_vault','public_square','monkey_academy','galaxy_scope']:[p[2],...buildings.filter(k=>k!==p[2])],jobKey=priority.find(k=>owned.includes(k))||null;
+ const opinion=p[3]+lean,faction=opinion>=2?'🤝 共治派':opinion<=-2?'⚡ 开拓派':'🌿 独行派';
+ members.push({name:p[1],emoji:p[0],job:jobKey?jobs[jobKey]:'🌱 自由探险者',key:jobKey,faction});
+ }
+ return {members,owned,decided,cooperation:clamp(cooperation),innovation:clamp(innovation),tension:clamp(tension),era:decided.includes('constitution')?'🏛️ 共治时代':decided.length>=2?'📚 制度萌芽时代':decided.length?'🗞️ 城市记忆时代':owned.length?'🏗️ 建设时代':'🌱 萌芽时代'};
+}
+function render(){
+ city=snapshot();
+ for(const k of ['cooperation','innovation','tension'])$(k).textContent=city[k];
+ $('era').textContent=city.era+' · 建筑 '+city.owned.length+'/4 · 历史 '+city.decided.length+'/5';
+ $('members').replaceChildren();
+ for(const m of city.members){const div=document.createElement('div');div.className='pet';
+ const strong=document.createElement('strong');strong.textContent=m.emoji+' '+m.name;
+ const role=document.createElement('small');role.textContent=m.job;
+ const faction=document.createElement('small');faction.textContent=m.faction;div.append(strong,role,faction);$('members').append(div)}
+ const aa=$('first'),bb=$('second'),a=aa.value,b=bb.value;aa.replaceChildren();bb.replaceChildren();
+ for(let i=0;i<city.members.length;i++)for(const el of [aa,bb]){const o=document.createElement('option');o.value=String(i);o.textContent=city.members[i].name;el.append(o)}
+ aa.value=Number(a)<city.members.length&&a!==''?a:'0';bb.value=Number(b)<city.members.length&&b!==''?b:String(Math.min(1,city.members.length-1));
+ $('meet').disabled=city.members.length<2||aa.value===bb.value;
+ $('routine').disabled=city.members.length<2;
+ showRelation();
+ $('news').textContent=log.slice(-12).reverse().join('\n')||'猴山刚刚建成，尚无新偶遇。';
+}
+function showRelation(){const a=Number($('first').value),b=Number($('second').value),r=a===b?{bond:0,trust:0,rivalry:0}:rel(a,b);for(const k of ['bond','trust','rivalry'])$(k).textContent=r[k]}
+function meet(){
+ const a=Number($('first').value),b=Number($('second').value);if(a===b||!city||city.members.length<2)return;
+ const left=city.members[a],right=city.members[b],r=rel(a,b);
+ const quarrel=left.faction!==right.faction&&city.tension>=30&&r.rivalry>=15;
+ let title,first,second;
+ if(quarrel){title='观点冲突';first=left.name+'：我认为应该让大家一起决定。';second=right.name+'：我更想立即尝试！';r.rivalry=Math.min(90,r.rivalry+2);r.bond=Math.max(-100,r.bond-1)}
+ else if(left.key==='monkey_academy'||right.key==='monkey_academy'){title='实验室交流';first=left.name+'：来研究一下旧实验日志。';second=right.name+'：先公开原始数据再下结论！'}
+ else if(left.key==='public_square'||right.key==='public_square'){title='广场节庆';first=left.name+'：传统庆典正在准备！';second=right.name+'：这次换我们来负责。'}
+ else{title='共同值班';first=left.name+'：'+left.job+'需要帮忙。';second=right.name+'：我带着历史档案来了。'}
+ if(!quarrel){r.bond=Math.min(100,r.bond+2);r.trust=Math.min(100,r.trust+2);r.rivalry=Math.max(0,r.rivalry-1)}
+ turn++;$('stage').textContent='第 '+turn+' 次 · '+title+'\n'+first+'\n'+second+'\n本页关系已更新。';
+ log.push('🐒 '+left.name+' × '+right.name+' · '+title);render()
+}
+function routine(){const n=city.members.length;if(n<2)return;const a=turn%n;$('first').value=String(a);$('second').value=String((a+1)%n);meet()}
+for(const id of [...buildings,...history,'banana_rules','quiet_hours','rocket_license','count'])$(id).addEventListener('change',render);
+$('first').addEventListener('change',showRelation);$('second').addEventListener('change',showRelation);
+$('meet').addEventListener('click',meet);$('routine').addEventListener('click',routine);
+$('reset').addEventListener('click',()=>{relations={};log=[];turn=0;for(const id of buildings)$(id).checked=id!=='monkey_academy';for(const id of history)$(id).value=id==='granary'?'community':'';for(const id of ['banana_rules','quiet_hours','rocket_license'])$(id).checked=id==='banana_rules';$('count').value='6';$('stage').textContent='已重置：新的猴山重新开始。';render()});
+render();
+</script></body></html>
