@@ -51,7 +51,7 @@ class MonkeyLaws:
                     continue
                 key, outcome, active = (record.get('issue'), record.get('outcome'),
                                         record.get('active'))
-                if key in POLICIES and outcome in OUTCOMES and type(active) is bool:
+                if type(key) is str and key in POLICIES and type(outcome) is str and outcome in OUTCOMES and type(active) is bool:
                     self.history.append({'issue': key, 'outcome': outcome, 'active': active})
 
     def _save(self) -> None:
@@ -68,7 +68,7 @@ class MonkeyLaws:
 
     def active(self, issue: str) -> bool:
         """Unknown policies are never granted any privilege."""
-        return bool(self.states.get(issue, False)) if issue in POLICIES else False
+        return bool(self.states.get(issue, False)) if type(issue) is str and issue in POLICIES else False
 
     def enact(self, issue: str, outcome: str) -> bool:
         """Enact only a completed ballot's *validated outcome*, not a preview.
@@ -76,7 +76,7 @@ class MonkeyLaws:
         Returned True means this vote was recorded, even if tied and the state
         remains unchanged. Whoever calls this must enforce finished-once.
         """
-        if issue not in POLICIES or outcome not in OUTCOMES or type(issue) is not str or type(outcome) is not str:
+        if type(issue) is not str or type(outcome) is not str or issue not in POLICIES or outcome not in OUTCOMES:
             return False
         if outcome == 'adopted':
             self.states[issue] = True
