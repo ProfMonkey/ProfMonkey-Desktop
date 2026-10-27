@@ -138,6 +138,36 @@ class RelationshipStore:
         if changes:
             self._save()
 
+    def record_expedition(self, indices: tuple[int, ...], outcome: str) -> None:
+        """One local save for an entire completed expedition (at most 15 pairs).
+
+        Invalid lists, duplicates and fabricated result types must never
+        accidentally update the friendship graph.
+        """
+        if (type(indices) is not tuple or not 2 <= len(indices) <= MAX_MONKEYS
+                or any(type(i) is not int or not 0 <= i < MAX_MONKEYS for i in indices)
+                or len(set(indices)) != len(indices)
+                or type(outcome) is not str or
+                outcome not in ('success', 'mixed', 'mishap')):
+            raise ValueError('invalid completed expedition event')
+        if outcome == 'success':
+            pairs = [(a, b) for pos, a in enumerate(indices)
+                     for b in indices[pos + 1:]]
+            delta = (3, 2, -1)
+        else:
+            pairs = [(indices[0], indices[1])]
+            delta = (2, 1, -1) if outcome == 'mixed' else (-1, 0, 2)
+        for a, b in pairs:
+            key = _pair_key(a, b)
+            row = self.pairs.setdefault(
+                key, {'bond': 0, 'rivalry': 0, 'trust': 0, 'interactions': 0})
+            bond, trust, rivalry = delta
+            row['bond'] = max(-100, min(100, row['bond'] + bond))
+            row['trust'] = max(0, min(100, row['trust'] + trust))
+            row['rivalry'] = max(0, min(100, row['rivalry'] + rivalry))
+            row['interactions'] = min(1_000_000, row['interactions'] + 1)
+        self._save()
+
     def reconcile(self, a: int, b: int) -> None:
         self._change(a, b, bond=10, trust=8, rivalry=-8)
 
