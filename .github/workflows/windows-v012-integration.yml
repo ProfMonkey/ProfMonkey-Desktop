@@ -35,9 +35,17 @@ jobs:
         shell: pwsh
         run: python -m pip install -r requirements-dev.txt
 
-      - name: Test current PR source with recovered artwork (offscreen only)
+      - name: Test PR source and earlier Qt modules (offscreen only)
         shell: pwsh
-        run: python -m pytest -q
+        env:
+          PYTHONFAULTHANDLER: "1"
+        run: python -m pytest -q --ignore=tests/test_qt_v013_council.py
+
+      - name: Test new three-monkey Qt scenes independently (offscreen only)
+        shell: pwsh
+        env:
+          PYTHONFAULTHANDLER: "1"
+        run: python -m pytest -q tests/test_qt_v013_council.py
 
       - name: Compile current PR into a Windows EXE candidate
         shell: pwsh
