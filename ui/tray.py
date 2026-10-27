@@ -24,6 +24,7 @@ from ui.expedition_dialog import ExpeditionDialog
 from ui.civilization_dialog import CivilizationDialog
 from ui.city_life_dialog import CityLifeDialog
 from ui.evolution_dialog import EvolutionDialog
+from ui.society_dialog import SocietyDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -49,6 +50,7 @@ class MonkeyTray:
         self.colony.chronicle = self.chronicle
         self.colony.laws = self.laws
         self.colony.expeditions = self.expeditions
+        self.colony._refresh_civic(force=True)
         self.manifest = manifest
         self.site_path = site_path
         self.menu = QMenu(overlay)
@@ -67,6 +69,7 @@ class MonkeyTray:
         self.menu.addAction('🏗️ 猴山文明 · 四座建筑与城市发展', self.show_civilization)
         self.menu.addAction('🗞️ 活着的猴山 · 四大城市连续事件', lambda: self.show_city_life())
         self.menu.addAction('📜 猴山历史 · 文明演化与新事件', self.show_evolution)
+        self.menu.addAction('🏛️ 猴山自主社会 · 岗位/阵营/互动', self.show_society)
         self.menu.addAction('⛔ 停止当前城市章节', self.colony.cancel_city_life)
         self.menu.addAction('⛔ 停止猴山探险', self.colony.cancel_expedition)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
@@ -100,6 +103,10 @@ class MonkeyTray:
         self.ambient_action.setCheckable(True)
         self.ambient_action.setChecked(overlay.settings.ambient_encounters)
         self.ambient_action.toggled.connect(self.set_ambient_encounters)
+        self.civic_action = group_menu.addAction('🏛️ 自主社会 · 历史影响猴子日常')
+        self.civic_action.setCheckable(True)
+        self.civic_action.setChecked(overlay.settings.civic_autonomy)
+        self.civic_action.toggled.connect(self.set_civic_autonomy)
         group_menu.addAction('🎭 让附近两只猴子互动一次', self.demo_encounter)
         group_menu.addAction('🧪 指定两只猴子上演双幕短剧', self.choose_duo_pair)
         group_menu.addAction('🍌 放置公共香蕉 · 猴子竞速', self.drop_shared_banana)
@@ -170,7 +177,7 @@ class MonkeyTray:
         self.colony.bind_menu(self.menu, self.select_target)
         self.colony.bind_city_story(self.show_city_life)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.18 developer candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.19 developer candidate')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -262,6 +269,10 @@ class MonkeyTray:
 
     def set_ambient_encounters(self, enabled: bool) -> None:
         self.colony.set_ambient_encounters(enabled)
+        self._save()
+
+    def set_civic_autonomy(self, enabled: bool) -> None:
+        self.colony.set_civic_autonomy(enabled)
         self._save()
 
     def demo_encounter(self) -> None:
@@ -425,6 +436,18 @@ class MonkeyTray:
 
     def show_evolution(self) -> None:
         EvolutionDialog(self.colony).exec()
+
+    def show_society(self) -> None:
+        SocietyDialog(self.colony, self._save).exec()
+        # Both switches can change in the dedicated dialog. Synchronize tray
+        # without retriggering the same callbacks or extra writes.
+        for action, checked in (
+            (self.civic_action, self.overlay.settings.civic_autonomy),
+            (self.ambient_action, self.overlay.settings.ambient_encounters),
+        ):
+            action.blockSignals(True)
+            action.setChecked(checked)
+            action.blockSignals(False)
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
