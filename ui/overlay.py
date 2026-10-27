@@ -25,6 +25,7 @@ from core.history import History
 from core.physics import Body
 from core.profiles import clean_profiles
 from core.state import Brain, PetState
+from ui.character_render import render_mascot
 from ui.audio import SoundBank
 
 ALPHA_HIT_THRESHOLD = 24
@@ -62,15 +63,18 @@ class MonkeyOverlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.setWindowTitle('ProfMonkey Desktop · v0.9 candidate')
+        self.setWindowTitle('ProfMonkey Desktop · v0.20 六猴原创形象候选')
         self.setToolTip('ProfMonkey 🐒 左键轻戳或拖动；右键菜单')
         self.setMouseTracking(True)
         self._menu: QMenu | None = None
         self._before_context_menu = None
-        self._fallback = QPixmap(str(image_file))
-        if self._fallback.isNull():
-            raise FileNotFoundError(str(image_file))
         self._art_root = (manifest_file or image_file.parent/'manifest.json').parent
+        # v0.20: all 6 mascots are vector originals. Do not load obsolete,
+        # missing v0.9 idle.png or reuse one giant-headed image for everyone.
+        first_profile = clean_profiles(self.settings.monkey_profiles)[monkey_index]
+        self._fallback = render_mascot(self._art_root, first_profile['personality'])
+        if self._fallback.isNull():
+            raise ValueError('six-monkey artwork missing or invalid')
         self.player = AnimationPlayer(load_manifest(manifest_file or image_file.parent/'manifest.json'))
         self.stats = PetState(mode=self.settings.mode)
         self.brain = Brain(seed=seed)
@@ -165,9 +169,20 @@ class MonkeyOverlay(QWidget):
         from core.profiles import clean_name, PERSONALITIES
         self.display_name = clean_name(profile.get('name'), self.monkey_index)
         personality = profile.get('personality', 'scholar')
+        previous = self.personality
         self.personality = personality if personality in PERSONALITIES else 'scholar'
         self.brain.personality = self.personality
-        self.setToolTip(f'{self.display_name} · 左键轻戳或拖动；右键菜单')
+        self.setToolTip(f'{self.display_name} · {PERSONALITIES[self.personality]} · 左键拖动；右键菜单')
+        # A user changing their personality immediately changes their actual
+        # full-body sprite, hit region and all future animations. No stale
+        # professor frame remains in a companion's cache.
+        if previous != self.personality and hasattr(self, '_sprite_cache'):
+            self._fallback = render_mascot(self._art_root, self.personality)
+            self._fallback_original = self._fallback
+            self._sprite_cache.clear()
+            self._hit_cache.clear()
+            self._display_key = None
+            self._set_current_sprite(force=True)
 
     def set_colony_target(self, target_x: float | None, speed: float = 95.0) -> None:
         self._colony_target_x = None if target_x is None else float(target_x)
@@ -278,10 +293,14 @@ class MonkeyOverlay(QWidget):
         if key in self._sprite_cache:
             return self._sprite_cache[key]
         name, idx, facing, size = key
-        file = self._art_root / self.player.specs[name].frames[idx]
-        pix = QPixmap(str(file)) if file.is_file() else QPixmap()
-        if pix.isNull():
-            self._missing_frames.add(str(file))
+        # Action timings/frames remain in the v0.9 manifest, but the actual
+        # drawing is regenerated per persona. Missing old PNGs are irrelevant.
+        spec = self.player.specs[name]
+        try:
+            pix = render_mascot(self._art_root, self.personality,
+                                name, idx, len(spec.frames))
+        except (OSError, ValueError):
+            self._missing_frames.add(f'{self.personality}:{name}:{idx}')
             pix = self._fallback_original
         pix = pix.scaled(size, size, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
         if facing == -1:
