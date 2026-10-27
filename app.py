@@ -21,7 +21,10 @@ def main() -> int:
     app.setApplicationName('ProfMonkey Desktop')
     app.setOrganizationName('ProfMonkey')
     app.setQuitOnLastWindowClosed(False)
-    icon = QIcon(str(resource_path('assets/icons/profmonkey.png')))
+    # Self-contained v0.20 mascot renders without the missing legacy PNG ZIP.
+    from ui.character_render import render_mascot
+    artwork_root = resource_path('assets/monkey')
+    icon = QIcon(render_mascot(artwork_root, 'scholar'))
     app.setWindowIcon(icon)
     config = ConfigStore()
     settings = config.load()
@@ -29,13 +32,13 @@ def main() -> int:
     progress = ProgressStore(config.folder/'progress.json', settings.progress_enabled)
     manifest = resource_path('assets/monkey/manifest.json')
     try:
-        overlay = MonkeyOverlay(resource_path('assets/monkey/idle.png'),manifest,
+        overlay = MonkeyOverlay(resource_path('assets/characters_v020/scholar.svg'),manifest,
                                 settings=settings,history=history,progress=progress)
-    except (OSError,ValueError,KeyError) as exc:
+    except (OSError,ValueError,KeyError,RuntimeError) as exc:
         QMessageBox.critical(None,'ProfMonkey 启动失败',f'角色素材加载失败：\n{exc}')
         return 2
     overlay.position_bottom_right()
-    colony = MonkeyColony(overlay, resource_path('assets/monkey/idle.png'), manifest)
+    colony = MonkeyColony(overlay, resource_path('assets/characters_v020/scholar.svg'), manifest)
     tray = MonkeyTray(app, overlay, icon, config, manifest,
                      resource_path('site/index.html'), colony=colony)
     overlay.show()
