@@ -1,0 +1,308 @@
+"""Offline, user-triggered, three-act monkey missions and bounded local resources.
+
+All time is in in-game scene seconds. No OS inspection, network, GPS, real
+economy or background scheduling; only completed cartoon shows earn rewards.
+"""
+from __future__ import annotations
+from dataclasses import dataclass
+from pathlib import Path
+import json
+import os
+import tempfile
+
+MISSIONS = {
+    'banana_scout': ('🍌 香蕉侦察队', '在猴山寻找传说中的香蕉树'),
+    'meteor_lab': ('🔭 陨石研究所', '研究来自银河猴山的奇怪矿石'),
+    'village_repair': ('🏡 猴山营造队', '修建猴山公共长椅与小桥'),
+}
+SKILLS = {
+    'scholar': (1, 3, 2), 'trickster': (3, 0, 1),
+    'sleepy': (0, 0, 2), 'inventor': (2, 3, 1),
+    'captain': (1, 1, 3), 'shy': (2, 2, 3),
+}
+LAW_BONUS = {
+    'banana_scout': 'banana_rules',
+    'meteor_lab': 'rocket_license',
+    'village_repair': 'quiet_hours',
+}
+REWARDS = {
+    'banana_scout': {'success': (5, 1, 1), 'mixed': (2, 0, 1), 'mishap': (0, 0, 0)},
+    'meteor_lab': {'success': (0, 5, 2), 'mixed': (0, 2, 1), 'mishap': (0, 0, 0)},
+    'village_repair': {'success': (1, 1, 5), 'mixed': (0, 0, 2), 'mishap': (0, 0, 0)},
+}
+RESULTS = {'success': '大功告成', 'mixed': '差点成功', 'mishap': '猴山事故'}
+RESOURCE_KEYS = ('bananas', 'science', 'reputation')
+MAX_VALUE = 999
+MAX_LOG = 36
+BLUEPRINTS = (
+    ('banana_vault', '🍌 香蕉研究仓库', (12, 0, 0)),
+    ('galaxy_scope', '🔭 银河猴山望远镜', (0, 12, 0)),
+    ('public_square', '🏛️ 猴山公共广场', (0, 0, 12)),
+    ('monkey_academy', '🌌 银河猴山联合实验室', (20, 20, 20)),
+)
+
+
+@dataclass(frozen=True)
+class Explorer:
+    index: int
+    personality: str
+
+
+@dataclass(frozen=True)
+class ExpeditionBeat:
+    seconds: float
+    poses: tuple[tuple[int, str, str], ...]
+
+
+@dataclass(frozen=True)
+class ExpeditionPlan:
+    mission: str
+    crew: tuple[Explorer, ...]
+    outcome: str
+    rewards: tuple[int, int, int]
+    score: int
+    beats: tuple[ExpeditionBeat, ...]
+    law_boost: bool = False
+
+
+def _bounded(value: object) -> int:
+    return max(0, min(MAX_VALUE, value)) if type(value) is int else 0
+
+
+def _validate_crew(crew: tuple[Explorer, ...]) -> None:
+    if type(crew) is not tuple or not 2 <= len(crew) <= 6:
+        raise ValueError('2-6 explorers required')
+    seen = set()
+    for member in crew:
+        if (not isinstance(member, Explorer) or type(member.index) is not int
+                or not 0 <= member.index < 6 or member.index in seen
+                or type(member.personality) is not str or member.personality not in SKILLS):
+            raise ValueError('invalid/duplicate explorer')
+        seen.add(member.index)
+
+
+def _synergy(relations, left: int, right: int) -> int:
+    if relations is None:
+        return 0
+    pair = relations.get(left, right)
+    if not isinstance(pair, dict):
+        return 0
+    bond, trust, rivalry = pair.get('bond'), pair.get('trust'), pair.get('rivalry')
+    if any(type(v) is not int for v in (bond, trust, rivalry)):
+        return 0
+    if rivalry >= 55 or bond <= -35:
+        return -1
+    return 1 if bond >= 35 and trust >= 30 else 0
+
+
+def plan_expedition(mission: str, crew: tuple[Explorer, ...],
+                    relationships=None, active_laws: frozenset[str] = frozenset()) -> ExpeditionPlan:
+    if type(mission) is not str or mission not in MISSIONS:
+        raise ValueError('unknown mission')
+    _validate_crew(crew)
+    if not isinstance(active_laws, frozenset):
+        raise ValueError('laws must be snapshotted')
+    skill = tuple(MISSIONS).index(mission)
+    score = sum(SKILLS[member.personality][skill] for member in crew)
+    for i, person in enumerate(crew):
+        for partner in crew[i+1:]:
+            score += _synergy(relationships, person.index, partner.index)
+    boosted = LAW_BONUS[mission] in active_laws
+    if boosted:
+        score += 2
+    outcome = 'success' if score >= 6 else 'mixed' if score >= 3 else 'mishap'
+    rewards = list(REWARDS[mission][outcome])
+    if boosted and outcome != 'mishap':
+        rewards[skill] += 1
+    first = tuple((p.index, 'wake' if n == 0 else 'blink',
+                   f'{MISSIONS[mission][0]}集合！' if n == 0 else '装备清点完成！')
+                  for n, p in enumerate(crew))
+    middle = tuple((p.index, 'run' if n % 2 == 0 else 'walk',
+                    '这里有一条新线索！' if p.personality in ('scholar', 'shy') else
+                    '交给我的神奇工具！' if p.personality == 'inventor' else
+                    '我闻到了香蕉味。' if p.personality == 'trickster' else
+                    '我来负责安全。' if p.personality == 'captain' else
+                    '这个任务有午睡时间吗？')
+                   for n, p in enumerate(crew))
+    ending = tuple((p.index,
+                    'wake' if outcome == 'success' else 'blink' if outcome == 'mixed' else 'fall',
+                    ('任务成功！猴山资源增加了。' if outcome == 'success' else
+                     '出了一点差错，但还是带回了收获。' if outcome == 'mixed' else
+                     '今天没找到资源，大家平安就好。') if n == 0 else
+                    '下次继续合作！' if outcome != 'mishap' else '先收拾装备回家吧。')
+                   for n, p in enumerate(crew))
+    return ExpeditionPlan(mission, crew, outcome, tuple(rewards), score,
+                          (ExpeditionBeat(1.7, first), ExpeditionBeat(2.1, middle),
+                           ExpeditionBeat(1.9, ending)), boosted)
+
+
+class ExpeditionStory:
+    def __init__(self) -> None:
+        self.plan: ExpeditionPlan | None = None
+        self.index = 0
+        self.elapsed = 0.
+        self._committed = False
+
+    @property
+    def active(self) -> bool:
+        return self.plan is not None
+
+    @property
+    def finished(self) -> bool:
+        return self.active and self.index >= len(self.plan.beats)
+
+    @property
+    def beat(self) -> ExpeditionBeat | None:
+        return self.plan.beats[self.index] if self.active and not self.finished else None
+
+    def start(self, plan: ExpeditionPlan) -> bool:
+        if self.active or not isinstance(plan, ExpeditionPlan):
+            return False
+        try:
+            _validate_crew(plan.crew)
+        except ValueError:
+            return False
+        if plan.mission not in MISSIONS or len(plan.beats) != 3:
+            return False
+        self.plan, self.index, self.elapsed, self._committed = plan, 0, 0., False
+        return True
+
+    def advance(self, dt: float) -> bool:
+        if type(dt) not in (float, int) or not 0 <= dt <= .5:
+            raise ValueError('invalid expedition delta')
+        if not self.active or self.finished:
+            return False
+        self.elapsed += dt
+        if self.elapsed < self.beat.seconds:
+            return False
+        self.elapsed -= self.beat.seconds
+        self.index += 1
+        return True
+
+    def consume_completion(self) -> bool:
+        if not self.finished or self._committed:
+            return False
+        self._committed = True
+        return True
+
+    def cancel(self) -> None:
+        self.plan, self.index, self.elapsed, self._committed = None, 0, 0., False
+
+
+class ExpeditionJournal:
+    """Separate, atomic, bounded, explicitly erasable fictional scorebook."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = Path(path)
+        self.resources = {key: 0 for key in RESOURCE_KEYS}
+        self.missions = {i: 0 for i in range(6)}
+        self.log: list[dict] = []
+        self._load()
+
+    def _load(self) -> None:
+        try:
+            raw = json.loads(self.path.read_text(encoding='utf-8'))
+        except (OSError, TypeError, ValueError):
+            return
+        if not isinstance(raw, dict) or raw.get('version') != 1:
+            return
+        resources = raw.get('resources')
+        if isinstance(resources, dict):
+            for k in RESOURCE_KEYS:
+                self.resources[k] = _bounded(resources.get(k))
+        counts = raw.get('missions')
+        if isinstance(counts, dict):
+            for i in range(6):
+                self.missions[i] = _bounded(counts.get(str(i)))
+        log = raw.get('log')
+        if isinstance(log, list):
+            for row in log[-MAX_LOG:]:
+                if not isinstance(row, dict):
+                    continue
+                kind, outcome, team = row.get('mission'), row.get('outcome'), row.get('crew')
+                if (type(kind) is str and kind in MISSIONS and type(outcome) is str
+                        and outcome in RESULTS and isinstance(team, list)
+                        and 2 <= len(team) <= 6 and
+                        all(type(i) is int and 0 <= i < 6 for i in team)
+                        and len(set(team)) == len(team)):
+                    self.log.append({'mission': kind, 'outcome': outcome, 'crew': team})
+
+    def _save(self) -> None:
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        fd, path = tempfile.mkstemp(dir=self.path.parent, prefix='.expedition-', suffix='.json')
+        try:
+            with os.fdopen(fd, 'w', encoding='utf-8') as stream:
+                json.dump({'version': 1, 'resources': self.resources,
+                           'missions': {str(i): self.missions[i] for i in range(6)},
+                           'log': self.log}, stream, ensure_ascii=False, indent=2)
+            os.replace(path, self.path)
+        finally:
+            if os.path.exists(path):
+                os.unlink(path)
+
+    def record(self, plan: ExpeditionPlan) -> bool:
+        """Call only after ExpeditionStory.consume_completion() is True."""
+        if not isinstance(plan, ExpeditionPlan):
+            return False
+        try:
+            _validate_crew(plan.crew)
+            skill = tuple(MISSIONS).index(plan.mission)
+        except (ValueError, TypeError):
+            return False
+        if (plan.outcome not in RESULTS or type(plan.score) is not int
+                or type(plan.law_boost) is not bool):
+            return False
+        base = REWARDS[plan.mission][plan.outcome]
+        expected = tuple(n + (1 if plan.law_boost and i == skill and
+                              plan.outcome != 'mishap' else 0)
+                         for i, n in enumerate(base))
+        if plan.rewards != expected or len(plan.beats) != 3:
+            return False
+        for i, key in enumerate(RESOURCE_KEYS):
+            self.resources[key] = min(MAX_VALUE, self.resources[key] + plan.rewards[i])
+        for member in plan.crew:
+            self.missions[member.index] = min(MAX_VALUE, self.missions[member.index] + 1)
+        self.log.append({'mission': plan.mission, 'outcome': plan.outcome,
+                         'crew': [member.index for member in plan.crew]})
+        self.log = self.log[-MAX_LOG:]
+        self._save()
+        return True
+
+    def unlocked(self) -> tuple[tuple[str, str], ...]:
+        totals = tuple(self.resources[k] for k in RESOURCE_KEYS)
+        return tuple((key, label) for key, label, required in BLUEPRINTS
+                     if all(current >= minimum for current, minimum in zip(totals, required)))
+
+    def clear(self) -> None:
+        self.resources = {key: 0 for key in RESOURCE_KEYS}
+        self.missions = {i: 0 for i in range(6)}
+        self.log = []
+        try:
+            self.path.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def newspaper(journal: ExpeditionJournal, laws=None, names: tuple[str, ...] = ()) -> str:
+    """Create a fictional bulletin solely from the game's local data."""
+    v = journal.resources
+    rows = ['🗞️ 猴山日报 · 本期手工汇总',
+            f'🍌 香蕉 {v["bananas"]} | 🔬 科研 {v["science"]} | ⭐ 声望 {v["reputation"]}',
+            f'📦 最近保存 {len(journal.log)} 次探险']
+    if laws is not None:
+        active = [label for key, label in (
+            ('banana_rules', '香蕉共享'), ('quiet_hours', '安静公约'),
+            ('rocket_license', '火箭许可')) if laws.active(key)]
+        rows.append('📜 已通过：' + ('、'.join(active) if active else '暂无法令'))
+    for item in reversed(journal.log[-5:]):
+        people = '、'.join(names[i] if i < len(names) else f'#{i + 1}'
+                          for i in item['crew'])
+        rows.append(f'• {MISSIONS[item["mission"]][0]}'
+                    f' · {RESULTS[item["outcome"]]}（{people}）')
+    if not journal.log:
+        rows.append('今天还没有出任务。选择两只猴子试试！')
+    rewards = journal.unlocked()
+    rows.append('🏆 成果：' +
+                ('、'.join(title for _key, title in rewards)
+                 if rewards else '见习猴山'))
+    return '\n'.join(rows)
