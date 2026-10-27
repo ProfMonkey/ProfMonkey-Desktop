@@ -452,7 +452,9 @@ class MonkeyColony:
         try:
             plan = prepare_city_case(
                 case_id, self.expeditions.city_cases[case_id], first, second,
-                choice, bond=values.get('bond', 0), trust=values.get('trust', 0))
+                choice, bond=values.get('bond', 0), trust=values.get('trust', 0),
+                first_personality=pair[0].personality,
+                second_personality=pair[1].personality)
         except ValueError:
             return False
         if not self.city_life.start(plan):
