@@ -21,6 +21,7 @@ from core.encounters import EncounterDirector, Participant, Encounter
 from core.duo_story import DuoStory
 from core.council import CouncilStory, Seat, prepare_council
 from core.governance import MonkeyLaws
+from core.expeditions import ExpeditionStory, ExpeditionJournal, Explorer, plan_expedition, LAW_BONUS
 from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
@@ -51,10 +52,12 @@ class MonkeyColony:
         self.quests: QuestBoard | None = None
         self.chronicle: ChronicleStore | None = None
         self.laws: MonkeyLaws | None = None
+        self.expeditions: ExpeditionJournal | None = None
         self._active_chapter: Chapter | None = None
         self.encounters = EncounterDirector()
         self.duo = DuoStory()
         self.council = CouncilStory()
+        self.expedition = ExpeditionStory()
         self.furniture: list[FurnitureWidget] = []
         self._social_timer.start()
 
@@ -75,6 +78,7 @@ class MonkeyColony:
         value to Settings/ConfigStore. Closing companions stops their timers.
         """
         target = clamp_count(count)
+        self.cancel_expedition()
         self.cancel_council()
         self.cancel_duo()
         if self.social.active:
@@ -120,6 +124,7 @@ class MonkeyColony:
 
     def configure(self, settings: Settings) -> None:
         """Apply a global preference to every independent entity."""
+        self.cancel_expedition()
         self.cancel_social()
         self.cancel_duo()
         self.cancel_council()
@@ -132,6 +137,7 @@ class MonkeyColony:
 
     def set_mode(self, mode: str) -> None:
         if mode != 'MONKEY':
+            self.cancel_expedition()
             self.cancel_duo()
             self.cancel_council()
             self.cancel_social()
@@ -162,7 +168,7 @@ class MonkeyColony:
         """Spawn a visible banana token; the colony races to claim it."""
         if (self.count < 2 or self._race_active or not self.visible()
                 or self.primary.focus.active or self.social.active or self.duo.active
-                or self.council.active
+                or self.council.active or self.expedition.active
                 or any(p.paused or p.story.active or p._drag_active or p._social_active
                        for p in self.monkeys)):
             return False
@@ -220,7 +226,7 @@ class MonkeyColony:
 
     def _physics_tick(self, now: float) -> None:
         """Coordinate follower targets, a shared banana race, and soft contact."""
-        if self.social.active or self.council.active or not self.primary.isVisible():
+        if self.social.active or self.council.active or self.expedition.active or not self.primary.isVisible():
             return
         if any(p.paused for p in self.monkeys) or self.primary.focus.active:
             return
@@ -317,6 +323,22 @@ class MonkeyColony:
                 self.cancel_duo()
             if self.council.active:
                 self.cancel_council()
+            if self.expedition.active:
+                self.cancel_expedition()
+            return
+        if self.expedition.active:
+            plan = self.expedition.plan
+            attendees = [self.monkeys[m.index] for m in plan.crew if m.index < self.count]
+            if (len(attendees) != len(plan.crew) or
+                    any(p._drag_active or p.story.active or not p._social_active
+                        or not p.isVisible() for p in attendees)):
+                self.cancel_expedition()
+            elif self.expedition.advance(dt):
+                if self.expedition.finished:
+                    self._complete_expedition()
+                    self.cancel_expedition()
+                else:
+                    self._apply_expedition_beat()
             return
         if self.council.active:
             plan = self.council.plan
@@ -376,7 +398,7 @@ class MonkeyColony:
     def start_council(self, issue: str, indices: tuple[int, ...]) -> bool:
         """Stage a user-requested 3-6 monkey vote; no auto polling or user profiling."""
         if (self.count < 3 or self.social.active or self.duo.active
-                or self.council.active or self._race_active
+                or self.council.active or self.expedition.active or self._race_active
                 or self.primary.focus.active or not self.primary.isVisible()
                 or any(p.paused for p in self.monkeys)):
             return False
@@ -511,7 +533,7 @@ class MonkeyColony:
     def play_chronicle_chapter(self, case_id: int) -> bool:
         """A user action only; never automatically opens another chapter."""
         if (self.chronicle is None or not self.chronicle.enabled or self.count < 2
-                or self.duo.active or self.council.active or self.social.active or self._race_active
+                or self.duo.active or self.council.active or self.expedition.active or self.social.active or self._race_active
                 or not self.visible() or self.primary.focus.active
                 or any(p.paused for p in self.monkeys)):
             return False
@@ -551,7 +573,7 @@ class MonkeyColony:
 
     def _maybe_encounter(self, now: float, *, force: bool = False,
                          pair: tuple[int, int] | None = None) -> bool:
-        if (self.count < 2 or self.social.active or self.duo.active or self.council.active or self._race_active or
+        if (self.count < 2 or self.social.active or self.duo.active or self.council.active or self.expedition.active or self._race_active or
                 not self.visible() or self.primary.focus.active or
                 any(p.paused for p in self.monkeys)):
             return False
@@ -637,7 +659,7 @@ class MonkeyColony:
         # No direct-call bypass of an unapproved in-universe trial.
         if name == 'rocket_trial' and (self.laws is None or not self.laws.active('rocket_license')):
             return False
-        if (self.council.active or self.count < 2 or not self.visible() or self.primary.focus.active
+        if (self.council.active or self.expedition.active or self.count < 2 or not self.visible() or self.primary.focus.active
                 or any(p.paused or p.story.active or p._drag_active for p in self.monkeys)):
             return False
         if not self.social.start(name, self.count):
@@ -740,6 +762,7 @@ class MonkeyColony:
 
     def toggle_pause(self, enabled: bool) -> None:
         if enabled:
+            self.cancel_expedition()
             self.cancel_duo()
             self.cancel_council()
             self.cancel_social()
@@ -769,6 +792,7 @@ class MonkeyColony:
             prop.show()
 
     def hide_all(self) -> None:
+        self.cancel_expedition()
         self.cancel_council()
         self.cancel_duo()
         self.cancel_social()
@@ -782,6 +806,7 @@ class MonkeyColony:
         return any(monkey.isVisible() for monkey in self.monkeys)
 
     def gather(self) -> None:
+        self.cancel_expedition()
         self.cancel_council()
         self.cancel_duo()
         self.cancel_shared_banana()
@@ -816,6 +841,7 @@ class MonkeyColony:
         self.show_all()
 
     def prepare_focus(self) -> None:
+        self.cancel_expedition()
         self.cancel_council()
         self.cancel_duo()
         self.cancel_shared_banana()
@@ -831,6 +857,7 @@ class MonkeyColony:
 
     def quit_all(self) -> None:
         self._social_timer.stop()
+        self.cancel_expedition()
         self.cancel_council()
         self.cancel_duo()
         self.cancel_shared_banana()
