@@ -6,6 +6,7 @@ from __future__ import annotations
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from core.profiles import clean_profiles, PERSONALITIES
+from core.character_raster import raster_mascot
 
 
 def _font(size: int):
@@ -24,7 +25,6 @@ def render_colony_portrait(idle: Path, profiles: list[dict], count: int,
     """Generate a 1000x660 PNG, using only user-provided names and bundled image."""
     if not 1 <= count <= 6:
         raise ValueError('portrait supports 1 to 6 monkeys')
-    base = Image.open(idle).convert('RGBA')
     profiles = clean_profiles(profiles)
     W,H = 1000, 660
     image = Image.new('RGB',(W,H),'#141822')
@@ -54,8 +54,13 @@ def render_colony_portrait(idle: Path, profiles: list[dict], count: int,
         art_size = 157 if rows == 2 else 258
         variant = {'scholar':'idle','trickster':'angry','sleepy':'sleep',
                    'inventor':'blink','captain':'wake','shy':'idle'}[profiles[i]['personality']]
-        pose = idle.parent / 'animations' / variant / f'{i%4:02d}.png'
-        art=Image.open(pose).convert('RGBA') if pose.is_file() else base.copy()
+        # Every portrait now uses the actual character assigned to that slot.
+        # No duplicate professor image, missing PNG dependency or screen capture.
+        art = raster_mascot(idle.parent if idle.parent.name == 'monkey'
+                            else idle.parent.parent/'monkey',
+                            profiles[i]['personality'], variant,
+                            frame=1 if variant in ('sleep','blink') else 0,
+                            frame_count=4 if variant in ('sleep','blink') else 1)
         art.thumbnail((art_size,art_size),Image.Resampling.LANCZOS)
         image.paste(art,(x+(card_w-art.width)//2,y+4),art)
         bottom = y+card_h-76
