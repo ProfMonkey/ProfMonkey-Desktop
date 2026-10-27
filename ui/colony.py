@@ -120,6 +120,8 @@ class MonkeyColony:
         self.apply_profiles()
 
     def set_mode(self, mode: str) -> None:
+        if mode != 'MONKEY':
+            self.cancel_duo()
         for monkey in self.monkeys:
             monkey.set_mode(mode)
 
@@ -323,7 +325,8 @@ class MonkeyColony:
                         self._release_group_poses()
             return
         if (self.count >= 2 and self.primary.settings.social_enabled
-                and self.primary.settings.mode == 'MONKEY' and now >= self._next_social_at):
+                and not self.duo.active and self.primary.settings.mode == 'MONKEY'
+                and now >= self._next_social_at):
             self.start_social(self._rng.choice(('meeting', 'banana_duel')))
         if now >= self._next_social_at:
             self._next_social_at = now + 300
@@ -388,6 +391,8 @@ class MonkeyColony:
         return self._maybe_encounter(time.monotonic(), force=True)
 
     def set_ambient_encounters(self, enabled: bool) -> None:
+        if not enabled:
+            self.cancel_duo()
         self.primary.settings.ambient_encounters = bool(enabled)
         for pet in self.monkeys:
             pet.settings.ambient_encounters = bool(enabled)
