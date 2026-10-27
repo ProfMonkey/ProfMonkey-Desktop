@@ -1,0 +1,53 @@
+name: v0.12 Windows integrated candidate (code + archived artwork)
+
+on:
+  pull_request:
+    paths:
+      - "core/**"
+      - "ui/**"
+      - "tests/**"
+      - "tools/restore_assets_from_v09.py"
+      - ".github/workflows/windows-v012-integration.yml"
+      - "site/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-candidate:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Recover only original v0.9 binary assets
+        shell: pwsh
+        run: python tools/restore_assets_from_v09.py
+
+      - name: Install dependencies
+        shell: pwsh
+        run: python -m pip install -r requirements-dev.txt
+
+      - name: Test current PR source with recovered artwork (offscreen only)
+        shell: pwsh
+        run: python -m pytest -q
+
+      - name: Compile current PR into a Windows EXE candidate
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name ProfMonkeyDesktop --icon "assets/icons/profmonkey.ico" --add-data "assets;assets" --add-data "site;site" --add-data "README.md;." app.py
+
+      - name: Publish only as unverified candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfMonkeyDesktop-v0.12-Windows-UNVERIFIED
+          path: dist/ProfMonkeyDesktop/
+          retention-days: 7
+          if-no-files-found: error
