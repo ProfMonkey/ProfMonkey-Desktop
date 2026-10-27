@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111929">
+<meta name="description" content="ProfMonkey Desktop 猴山探险局：选猴组队，离线试玩三幕探险、资源科研与猴山日报。">
+<title>猴山探险局 · ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#0c1321;--panel:#1d2a40;--gold:#ffd68c;--text:#fff4de;--muted:#abbad3;--green:#91e4c1}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--text);background:radial-gradient(ellipse at 68% 3%,#364c6d 0,transparent 39%),var(--bg);font:15px/1.7 system-ui,"Microsoft YaHei",sans-serif}
+button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+a{color:var(--gold)}.wrap{width:min(1140px,calc(100% - 30px));margin:auto}
+nav{display:flex;align-items:center;justify-content:space-between;gap:15px;border-bottom:1px solid #4c5b72;padding:20px 0}
+.brand{font-size:17px;font-weight:900}.tag{display:inline-block;border:1px solid #e5c484;color:var(--gold);border-radius:99px;font-size:10px;padding:3px 8px;vertical-align:middle}
+.hero{padding:52px 0 26px}.kicker{font-size:11px;color:var(--gold);letter-spacing:.2em;font-weight:800}h1{font-size:clamp(38px,6vw,68px);line-height:1.12;letter-spacing:-.05em;margin:12px 0 22px}
+p{color:var(--muted)}.lede{max-width:700px;font-size:16px}
+.world{min-height:200px;border-radius:22px;position:relative;overflow:hidden;border:1px solid #546989;background:linear-gradient(#556a86 0%,#9cafaf 70%,#32566c 70%,#22485e 87%,#273d3f 87%);margin-bottom:22px}
+.world:before{content:"";position:absolute;left:10%;top:22px;width:77px;height:77px;border-radius:50%;background:#f9d38d;box-shadow:0 0 65px #ffdb8d88}
+.mountain{position:absolute;bottom:26px;background:#3d657a;clip-path:polygon(0% 100%,50% 2%,100% 100%);width:33%;height:110px}
+.mountain.one{left:0}.mountain.two{left:27%;height:160px;opacity:.68}.mountain.three{right:0;height:125px;opacity:.82}
+.world-text{position:absolute;z-index:1;right:20px;top:18px;background:#172941ca;color:#fff0ca;border-radius:12px;padding:8px 14px;font-size:13px}
+.world-monkeys{position:absolute;bottom:24px;left:5%;right:5%;display:flex;justify-content:space-around;align-items:flex-end;z-index:2}
+.mini{font-size:30px;filter:drop-shadow(0 5px 2px #132b2b);animation:hop 3.6s ease-in-out infinite;animation-delay:var(--delay)}
+@keyframes hop{0%,85%,100%{transform:translateY(0)}90%{transform:translateY(-8px)}}
+.board{display:grid;grid-template-columns:.88fr 1.12fr;gap:17px;margin-bottom:20px}
+.panel{padding:24px;border:1px solid #435770;background:linear-gradient(145deg,#243249,#162237);border-radius:21px}
+h2{font-size:22px;margin:0 0 14px}.sub{font-size:12px;color:var(--muted)}
+label{display:block;color:var(--muted);font-size:12px;margin:12px 0 7px}
+select{width:100%;border-radius:11px;background:#0f1d2f;color:var(--text);border:1px solid #62748c;padding:12px}
+.crew{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:17px 0}
+.pet{border:1px solid #57637c;border-radius:13px;background:#142037;color:#fff2d3;padding:12px 5px;min-height:107px;text-align:center}
+.pet[aria-pressed=true]{border-color:#f7cf8c;box-shadow:inset 0 0 0 1px #f7cf8c;background:#383548}
+.pet b{display:block;font-size:12px;margin-top:5px}.pet small{display:block;font-size:10px;color:#b9c1d0}
+.pet .face{font-size:32px;display:block;line-height:1.1;image-rendering:pixelated}
+.cta{display:flex;flex-wrap:wrap;gap:9px}.btn{border:0;background:var(--gold);padding:11px 16px;border-radius:11px;color:#2b241e;font-weight:850}
+.btn.alt{background:#394c65;color:#fff0d0}.btn:disabled{opacity:.43;cursor:not-allowed}
+.preview{margin:17px 0;padding:14px;border-radius:11px;color:#ecf4dd;border:1px solid #647e8c;background:#1b3040;min-height:85px}
+.frame{background:#0f192c;border-radius:16px;border:1px solid #405775;min-height:275px;padding:20px}
+#phase{color:var(--gold);font-weight:800;margin-bottom:10px}.line{padding:8px 12px;border-left:3px solid var(--gold);background:#263650;border-radius:6px;margin:7px 0;color:#fff2da}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.stat{background:#24344b;border:1px solid #50637d;padding:16px;border-radius:17px;text-align:center}.stat strong{display:block;font-size:28px;color:var(--gold)}
+.wide{margin:20px 0}.blueprints{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.blueprint{border:1px solid #4c617c;border-radius:12px;padding:14px;text-align:center;background:#16283a;opacity:.52}
+.blueprint.unlocked{border-color:#7ae6b1;opacity:1;background:#173b43}.blueprint b{display:block;font-size:13px}
+.newspaper{white-space:pre-wrap;color:#fff0d6;background:#0c1829;border:1px dashed #8c9ab2;padding:22px;border-radius:12px;min-height:160px;font:14px/1.85 ui-monospace,"Microsoft YaHei",monospace}
+footer{border-top:1px solid #3e5169;padding:27px 0 43px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.board{grid-template-columns:1fr}.blueprints{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.crew{grid-template-columns:repeat(2,1fr)}.panel{padding:17px}.stats{gap:5px}.stat{padding:10px}.stat strong{font-size:23px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<div class="wrap">
+<nav><div class="brand">🐒 ProfMonkey <span class="tag">MONKEY EXPEDITIONS v0.15</span></div>
+<div><a href="./governance.html">法令</a> · <a href="./index.html">首页</a></div></nav>
+<section class="hero"><div class="kicker">THREE-ACT ADVENTURES · FICTIONAL RESOURCE ECONOMY · OFFLINE</div>
+<h1>六只猴子，<br><span style="color:var(--gold)">一起出发！</span></h1>
+<p class="lede">猴山终于有了探险队。派遣个性不同的猴子调查香蕉、研究陨石、建设村庄。协作越默契，收获越大；带回的科研和声望还能解锁猴山成果。</p></section>
+<div class="world" aria-label="银河猴山的手绘像素风场景">
+<div class="mountain one"></div><div class="mountain two"></div><div class="mountain three"></div>
+<div class="world-text">🌄 银河猴山 · 第一天</div>
+<div class="world-monkeys"><span class="mini" style="--delay:0s">🎓</span><span class="mini" style="--delay:-.7s">🧢</span><span class="mini" style="--delay:-1.4s">💤</span><span class="mini" style="--delay:-2.1s">🔧</span><span class="mini" style="--delay:-2.8s">⭐</span><span class="mini" style="--delay:-3.5s">🌿</span></div></div>
+<div class="board">
+<section class="panel"><h2>🧭 组建探险队</h2><label for="mission">今天去哪？</label>
+<select id="mission"><option value="banana_scout">🍌 寻找失落香蕉树</option>
+<option value="meteor_lab">🔭 调查银河陨石</option><option value="village_repair">🏡 修建猴山公共桥</option></select>
+<label>挑选2～6只队员</label><div class="crew" id="crew"></div>
+<label for="law">议会条例加成（网页演示开关）</label><select id="law">
+<option value="off">无条例加成</option><option value="on">本任务相关条例已通过</option></select>
+<div class="preview" id="preview" aria-live="polite">组队后显示预测结果</div>
+<div class="cta"><button class="btn" id="launch" type="button">🚀 派遣小队</button><button class="btn alt" id="reset" type="button">↺ 重选小队</button></div>
+<p class="sub">友情与竞争在真实桌宠里会进一步影响任务评分；网页默认使用普通同事关系。</p></section>
+<section class="panel"><h2>🎬 三幕互动探险</h2><div class="frame">
+<div id="phase">待命中 · 尚未派遣</div><div id="lines" aria-live="polite"><div class="line">选择一条任务，派出队伍看看发生什么！</div></div>
+</div><div class="cta" style="margin-top:16px"><button class="btn" id="next" type="button">▶ 下一幕</button><button class="btn alt" id="abort" type="button">⛔ 中途撤回</button></div>
+<p class="sub">必须完整演到第三幕结束才发放游戏资源。中途取消没有任何奖励。</p></section></div>
+<section class="wide"><h2>🏦 猴山资源库</h2><div class="stats">
+<div class="stat">🍌 香蕉库存<strong id="bananas">0</strong></div>
+<div class="stat">🔬 科研点<strong id="science">0</strong></div>
+<div class="stat">⭐ 猴山声望<strong id="reputation">0</strong></div>
+</div></section>
+<section class="wide"><h2>🏆 猴山科研成果</h2><div class="blueprints" id="blueprints"></div></section>
+<section class="panel wide"><h2>🗞️ 猴山日报</h2><div class="newspaper" id="paper" aria-live="polite">暂无探险。</div>
+<div class="cta" style="margin-top:16px"><button class="btn alt" type="button" id="clear">🗑 清空本页演示数据</button></div>
+<p class="sub">所有页面数据只存在内存，刷新即清空。本演示完全离线、不截图、不监控桌面，不连接你的真实桌宠存档。</p></section>
+<footer>🐒 这是一份交互式网页预览；桌面版另有独立 Qt 窗口、角色动作、关系存档与三幕结算。缺失的 v0.10 像素角色动画仍待合并，Windows 真机测试尚未完成。</footer>
+</div>
+<script>
+"use strict";
+const members=[
+['🎓','学究猴','scholar'],['🧢','皮猴','trickster'],['💤','困猴','sleepy'],
+['🔧','发明猴','inventor'],['⭐','队长猴','captain'],['🌿','社恐猴','shy']];
+const skills={scholar:[1,3,2],trickster:[3,0,1],sleepy:[0,0,2],
+inventor:[2,3,1],captain:[1,1,3],shy:[2,2,3]};
+const missions={banana_scout:['🍌 香蕉侦察队',0],meteor_lab:['🔭 陨石研究所',1],village_repair:['🏡 猴山营造队',2]};
+const rewards={
+banana_scout:{success:[5,1,1],mixed:[2,0,1],mishap:[0,0,0]},
+meteor_lab:{success:[0,5,2],mixed:[0,2,1],mishap:[0,0,0]},
+village_repair:{success:[1,1,5],mixed:[0,0,2],mishap:[0,0,0]}};
+const blueprints=[
+['🍌 香蕉研究仓库',[12,0,0]],['🔭 银河猴山望远镜',[0,12,0]],
+['🏛️ 猴山公共广场',[0,0,12]],['🌌 银河猴山联合实验室',[20,20,20]]];
+const $=id=>document.getElementById(id);
+let chosen=new Set([0,1]),live=null,act=0,totals=[0,0,0],news=[];
+function roster(){
+ $('crew').replaceChildren();
+ members.forEach((monkey,i)=>{
+  const button=document.createElement('button');button.type='button';
+  button.className='pet';button.setAttribute('aria-pressed',String(chosen.has(i)));
+  const face=document.createElement('span');face.className='face';face.textContent=monkey[0];
+  const label=document.createElement('b');label.textContent=monkey[1];
+  const caption=document.createElement('small');caption.textContent=monkey[2];
+  button.append(face,label,caption);
+  button.addEventListener('click',()=>{if(live)return; if(chosen.has(i))chosen.delete(i);else chosen.add(i);roster();preview()});
+  $('crew').append(button);
+ });
+}
+function project(){
+ const kind=$('mission').value,team=[...chosen].sort((a,b)=>a-b);
+ if(team.length<2)return null;
+ const index=missions[kind][1],boost=$('law').value==='on';
+ const score=team.reduce((s,id)=>s+skills[members[id][2]][index],0)+(boost?2:0);
+ const outcome=score>=6?'success':score>=3?'mixed':'mishap';
+ const reward=[...rewards[kind][outcome]];
+ if(boost&&outcome!=='mishap')reward[index]+=1;
+ return {kind,team,outcome,reward,score,boost};
+}
+function preview(){
+ $('mission').disabled=!!live;$('law').disabled=!!live;$('launch').disabled=!!live;
+ const p=project();$('preview').textContent=p?
+ '团队协作分 '+p.score+' · '+({success:'大功告成',mixed:'差点成功',mishap:'猴山事故'}[p.outcome])+
+ '\n预计奖励 🍌'+p.reward[0]+' / 🔬'+p.reward[1]+' / ⭐'+p.reward[2]:
+ '至少选择两只猴子。';
+}
+function renderStage(){
+ if(!live)return;
+ $('phase').textContent='第 '+(act+1)+'/3 幕 · '+
+ ['小队出发','发现神秘线索','完成任务'][act];
+ $('lines').replaceChildren();
+ live.team.forEach((index,n)=>{
+  const p=document.createElement('div');p.className='line';
+  const speech=act===0?(n===0?'全员注意，猴山探险队出发！':'装备检查完成，随时出发！'):
+               act===1?(members[index][2]==='inventor'?'我的发明可以派上用场了！':
+                        members[index][2]==='sleepy'?'有没有午休地点？':'现场好像找到新线索了！'):
+               (n===0?({success:'成功了，收获带回猴山！',mixed:'一点小差错，但也有收获。',mishap:'这次失败了，安全返回就好。'}[live.outcome]):
+                 live.outcome==='mishap'?'我去把装备收好。':'下次我们还要合作！');
+  p.textContent=members[index][0]+' '+members[index][1]+'：'+speech;
+  $('lines').append(p);
+ });
+}
+function resetStage(){
+ live=null;act=0;$('phase').textContent='待命中 · 尚未派遣';
+ $('lines').replaceChildren();
+ const line=document.createElement('div');line.className='line';
+ line.textContent='选好队伍，开始下一次虚构探险！';$('lines').append(line);
+ $('next').disabled=true;$('abort').disabled=true;preview();
+}
+function launch(){
+ const p=project();if(!p||live)return;
+ live=p;act=0;renderStage();$('next').disabled=false;$('abort').disabled=false;preview();
+}
+function next(){
+ if(!live)return;
+ if(act<2){act++;renderStage();return}
+ for(let i=0;i<3;i++)totals[i]=Math.min(999,totals[i]+live.reward[i]);
+ const outcome={success:'大功告成',mixed:'差点成功',mishap:'猴山事故'}[live.outcome];
+ news.push(missions[live.kind][0]+' · '+outcome+' · '+
+ live.team.map(i=>members[i][1]).join('、'));
+ if(news.length>36)news.shift();
+ resetStage();renderResults();
+}
+function renderResults(){
+ ['bananas','science','reputation'].forEach((key,i)=>$(key).textContent=totals[i]);
+ $('blueprints').replaceChildren();
+ for(const [title,needs]of blueprints){
+  const unlocked=needs.every((n,i)=>totals[i]>=n);
+  const cell=document.createElement('div');
+  cell.className='blueprint'+(unlocked?' unlocked':'');
+  const name=document.createElement('b');name.textContent=title;
+  const desc=document.createElement('span');desc.textContent=unlocked?'✅ 已解锁':'🔒 尚未解锁';
+  cell.append(name,desc);$('blueprints').append(cell);
+ }
+ $('paper').textContent='🗞️ 银河猴山日报 / 第 '+news.length+' 期\n'+
+ '🍌 香蕉 '+totals[0]+'    🔬 科研 '+totals[1]+'    ⭐ 声望 '+totals[2]+
+ '\n\n'+(news.length?news.slice(-6).reverse().join('\n'):'今天还没有探险，选两只猴子出发吧！')+
+ '\n\n🏆 成果：'+blueprints.filter(([,needs])=>needs.every((n,i)=>totals[i]>=n)).map(([title])=>title).join(' · ');
+}
+$('launch').addEventListener('click',launch);$('next').addEventListener('click',next);
+$('abort').addEventListener('click',resetStage);
+$('reset').addEventListener('click',()=>{if(live)return;chosen=new Set([0,1]);roster();preview()});
+$('clear').addEventListener('click',()=>{resetStage();chosen=new Set([0,1]);totals=[0,0,0];news=[];roster();renderResults()});
+$('mission').addEventListener('change',preview);$('law').addEventListener('change',preview);
+$('next').disabled=true;$('abort').disabled=true;roster();preview();renderResults();
+</script></body></html>
