@@ -24,6 +24,7 @@ from core.governance import MonkeyLaws
 from core.expeditions import ExpeditionStory, ExpeditionJournal, Explorer, plan_expedition, LAW_BONUS
 from core.civilization import BUILDINGS
 from core.city_life import (CityLifeStory, CASE_TITLES, prepare_city_case)
+from core.civic_society import city_society, civic_action_bias
 from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
@@ -61,6 +62,8 @@ class MonkeyColony:
         self.council = CouncilStory()
         self.expedition = ExpeditionStory()
         self.city_life = CityLifeStory()
+        self._civic_snapshot = None
+        self._next_civic_refresh = 0.
         self._on_city_event_open: Callable[[str], None] | None = None
         self.furniture: list[FurnitureWidget] = []
         self._social_timer.start()
@@ -134,6 +137,7 @@ class MonkeyColony:
         profiles = clean_profiles(self.primary.settings.monkey_profiles)
         for idx, pet in enumerate(self.monkeys):
             pet.configure_profile(profiles[idx])
+        self._refresh_civic(force=True)
 
     def configure(self, settings: Settings) -> None:
         """Apply a global preference to every independent entity."""
@@ -148,6 +152,7 @@ class MonkeyColony:
         self.set_count(settings.monkey_count)
         self.apply_profiles()
         self.set_chronicle_enabled(settings.chronicle_enabled)
+        self._refresh_civic(force=True)
 
     def set_mode(self, mode: str) -> None:
         if mode != 'MONKEY':
@@ -158,6 +163,44 @@ class MonkeyColony:
             self.cancel_social()
         for monkey in self.monkeys:
             monkey.set_mode(mode)
+        self._refresh_civic(force=True)
+
+    def society_snapshot(self):
+        """Return a read-only social forecast, even if autonomous mode is off."""
+        if self.expeditions is None:
+            return None
+        return city_society(self.expeditions, self.laws, self.relationships,
+                            self.primary.settings.monkey_profiles, self.count)
+
+    def _refresh_civic(self, now: float | None = None, *, force: bool = False) -> None:
+        """Reuse existing animation heartbeat; no new timer or forced speech."""
+        now = time.monotonic() if now is None else now
+        enabled = (self.primary.settings.civic_autonomy and
+                   self.primary.settings.mode == 'MONKEY' and
+                   self.expeditions is not None)
+        if not enabled:
+            self._civic_snapshot = None
+            for pet in self.monkeys:
+                pet.brain.set_civic_bias(None)
+            return
+        if not force and now < self._next_civic_refresh:
+            return
+        snapshot = self.society_snapshot()
+        if snapshot is None:
+            return
+        self._civic_snapshot = snapshot
+        self._next_civic_refresh = now + 20.0
+        for index, pet in enumerate(self.monkeys):
+            pet.brain.set_civic_bias(civic_action_bias(snapshot.members[index],
+                                                       snapshot))
+
+    def set_civic_autonomy(self, enabled: bool) -> None:
+        """Explicit opt-in; disabling immediately restores old action weights."""
+        enabled = bool(enabled)
+        self.primary.settings.civic_autonomy = enabled
+        for pet in self.monkeys:
+            pet.settings.civic_autonomy = enabled
+        self._refresh_civic(force=True)
 
     def set_behavior(self, behavior: str) -> None:
         """Set a persistent colony-level movement preference."""
@@ -388,6 +431,7 @@ class MonkeyColony:
                 else:
                     self._apply_council_beat()
             return
+        self._refresh_civic(now=now)
         self._physics_tick(now)
         if self.duo.active:
             event = self.duo.event
@@ -424,7 +468,12 @@ class MonkeyColony:
                 and not self.duo.active and self.primary.settings.mode == 'MONKEY'
                 and not (self.laws is not None and self.laws.active('quiet_hours'))
                 and now >= self._next_social_at):
-            self.start_social(self._rng.choice(('meeting', 'banana_duel')))
+            if self.primary.settings.civic_autonomy and self._civic_snapshot is not None:
+                kind = ('meeting' if self._rng.random() <
+                        self._civic_snapshot.meeting_probability else 'banana_duel')
+            else:
+                kind = self._rng.choice(('meeting', 'banana_duel'))
+            self.start_social(kind)
         if now >= self._next_social_at:
             self._next_social_at = now + 300
 
@@ -502,6 +551,7 @@ class MonkeyColony:
                 self.relationships.record_race(plan.first, plan.second)
         if self.quests is not None:
             self.quests.record('group')
+        self._refresh_civic(force=True)
 
     def cancel_city_life(self) -> None:
         if not self.city_life.active:
@@ -601,6 +651,7 @@ class MonkeyColony:
                 if prop.kind in BUILDINGS:
                     self.remove_furniture(prop)
             self.expeditions.clear()
+        self._refresh_civic(force=True)
 
     def start_council(self, issue: str, indices: tuple[int, ...]) -> bool:
         """Stage a user-requested 3-6 monkey vote; no auto polling or user profiling."""
@@ -667,6 +718,7 @@ class MonkeyColony:
                                    plan.seats[1].index)
         if self.quests is not None:
             self.quests.record('group')
+        self._refresh_civic(force=True)
 
     def cancel_council(self) -> None:
         if not self.council.active:
@@ -721,7 +773,7 @@ class MonkeyColony:
                         self.relationships.record_shared_activity(event.first, event.second)
             return
         if self.relationships is not None:
-            if event.kind in ('debate', 'inspection'):
+            if event.kind in ('debate', 'inspection', 'civic_dispute'):
                 self.relationships.record_collision(event.first, event.second)
             elif event.kind == 'prank':
                 self.relationships.record_race(event.first, event.second)
@@ -796,8 +848,12 @@ class MonkeyColony:
                             if p.index in pair and self.monkeys[p.index].isVisible()]
             if len(participants) != 2:
                 return False
+        if force and self.primary.settings.civic_autonomy:
+            self._refresh_civic(force=True)
+        context = (self._civic_snapshot if self.primary.settings.civic_autonomy
+                   and self.primary.settings.mode == 'MONKEY' else None)
         event = self.encounters.choose(now, participants, self.relationships,
-                                       force=force)
+                                       force=force, civic=context)
         if event is None:
             return False
         self._play_encounter(event)
@@ -863,6 +919,7 @@ class MonkeyColony:
             self.cancel_social()
         if self.laws is not None:
             self.laws.clear()
+        self._refresh_civic(force=True)
 
     def start_social(self, name: str) -> bool:
         # No direct-call bypass of an unapproved in-universe trial.
