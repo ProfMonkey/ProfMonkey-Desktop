@@ -50,11 +50,19 @@ class Brain:
                 weights[0] += 17; weights[3] += 32; weights[1] *= .55
             elif self.personality == 'trickster':
                 weights[1] += 20; weights[4] += 15; weights[3] *= .4
+            elif self.personality == 'inventor':
+                weights[1] += 8; weights[2] += 20; weights[4] += 6
+            elif self.personality == 'captain':
+                weights[1] += 18; weights[4] += 18; weights[3] *= .55
+            elif self.personality == 'shy':
+                weights[0] += 34; weights[2] += 12; weights[1] *= .65
             else:  # scholar: prefers pondering and blinking
                 weights[0] += 12; weights[2] += 16
             if state.mode == 'MONKEY':
                 actions.append('run')
-                weights.append((35 if self.personality == 'trickster' else 8 if self.personality == 'sleepy' else 18) + state.mischief / 5)
+                run_bias = {'trickster': 35, 'sleepy': 8, 'inventor': 16,
+                            'captain': 25, 'shy': 5, 'scholar': 18}
+                weights.append(run_bias.get(self.personality, 18) + state.mischief / 5)
             pick = self.rng.choices(actions, weights=weights, k=1)[0]
         state.action = pick
         self.remaining = self.rng.uniform(2.0, 5.0) if pick in ('walk', 'run', 'idle') else self.rng.uniform(0.8, 2.0)
