@@ -107,6 +107,37 @@ class RelationshipStore:
     def record_shared_activity(self, a: int, b: int) -> None:
         self._change(a, b, bond=2, trust=1, rivalry=-1)
 
+    def record_council(self, votes: tuple[tuple[int, str], ...]) -> None:
+        """Atomically apply one completed council ballot to every voting pair.
+
+        Same position builds trust; opposition creates mild rivalry; abstainers
+        take no relationship penalty. Calling code must enforce completion.
+        """
+        if (not isinstance(votes, tuple) or not 3 <= len(votes) <= MAX_MONKEYS
+                or any(not isinstance(item, tuple) or len(item) != 2 or
+                       type(item[0]) is not int or not 0 <= item[0] < MAX_MONKEYS or
+                       item[1] not in ('yes', 'no', 'abstain') for item in votes)
+                or len({a for a, _ in votes}) != len(votes)):
+            raise ValueError('invalid completed council ballot')
+        changes: list[tuple[str, int, int, int]] = []
+        for idx, (a, av) in enumerate(votes):
+            for b, bv in votes[idx + 1:]:
+                if 'abstain' in (av, bv):
+                    continue
+                key = _pair_key(a, b)
+                # bond, trust, rivalry
+                deltas = (2, 1, -1) if av == bv else (-1, 0, 2)
+                changes.append((key, *deltas))
+        for key, bond, trust, rivalry in changes:
+            row = self.pairs.setdefault(key, {'bond': 0, 'rivalry': 0,
+                                               'trust': 0, 'interactions': 0})
+            row['bond'] = max(-100, min(100, row['bond'] + bond))
+            row['trust'] = max(0, min(100, row['trust'] + trust))
+            row['rivalry'] = max(0, min(100, row['rivalry'] + rivalry))
+            row['interactions'] = min(1_000_000, row['interactions'] + 1)
+        if changes:
+            self._save()
+
     def reconcile(self, a: int, b: int) -> None:
         self._change(a, b, bond=10, trust=8, rivalry=-8)
 
