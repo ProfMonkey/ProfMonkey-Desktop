@@ -84,7 +84,8 @@ def derive_factions(seats: tuple[Seat, ...], relations=None) -> tuple[tuple[int,
     """Connected components of strong friendship, 2+ monkeys; not permanent labels.
 
     A new friendship can join two groups. Broken friendship removes edges on
-    the next snapshot. A rivalry never becomes a friendship by transitivity.
+    the next snapshot. Rivalry does not create a friendship edge, although
+    indirectly connected members of a component may still disagree.
     """
     if not 1 <= len(seats) <= 6:
         raise ValueError('invalid colony size')
