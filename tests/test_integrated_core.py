@@ -89,10 +89,10 @@ def test_settings_roundtrip_and_unknown_fields(tmp_path):
     a=Settings(mode='MONKEY',size=200,stories=False,skin='night',history=True)
     store.save(a)
     assert store.load() == a
-    raw=json.loads(store.path.read_text())
+    raw=json.loads(store.path.read_text(encoding='utf-8'))
     raw['hacker'] = 'ignore'
     raw['input_tracking'] = True
-    store.path.write_text(json.dumps(raw))
+    store.path.write_text(json.dumps(raw), encoding='utf-8')
     b=store.load()
     assert b.mode=='MONKEY' and not b.input_tracking
 
