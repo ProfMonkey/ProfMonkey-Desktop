@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 from core.profiles import clean_profiles, PERSONALITIES
+from core.character_raster import raster_mascot
 
 STORIES = {
     'banana': ('香蕉事故调查报告', '教授吃掉证据，摔倒后宣布：都是你的问题！'),
@@ -46,7 +47,6 @@ def render_story_card(idle: Path, profiles: list[dict], count: int,
     title, summary = STORIES[story_key]
     draw.text((66, 108), title, font=_font(43), fill='#f6ca7c')
     draw.text((68, 174), summary, font=_font(22), fill='#e7dfd1')
-    base = Image.open(idle).convert('RGBA')
     cols = min(count, 3)
     rows = (count + cols - 1) // cols
     card_w = 320 if count <= 3 else 340
@@ -64,8 +64,12 @@ def render_story_card(idle: Path, profiles: list[dict], count: int,
         x = row_start_x + col*(card_w+gap)
         y = start_y + row*(card_h+gap)
         draw.rounded_rectangle((x, y, x+card_w, y+card_h), radius=20, fill='#292d40', outline='#5a5364', width=2)
-        frame = idle.parent/'animations'/poses[profiles[i]['personality']]/f'{i%4:02d}.png'
-        art = Image.open(frame).convert('RGBA') if frame.is_file() else base.copy()
+        variant = poses[profiles[i]['personality']]
+        art = raster_mascot(idle.parent if idle.parent.name == 'monkey'
+                            else idle.parent.parent/'monkey',
+                            profiles[i]['personality'], variant,
+                            frame=1 if variant in ('sleep','blink') else 0,
+                            frame_count=4 if variant in ('sleep','blink') else 1)
         art.thumbnail((150, 150), Image.Resampling.LANCZOS)
         image.paste(art, (x+18, y+14), art)
         draw.ellipse((x+card_w-34, y+18, x+card_w-16, y+36), fill=accents[profiles[i]['personality']])
