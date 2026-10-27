@@ -99,7 +99,8 @@ def city_tier(owned: frozenset[str]) -> tuple[int, str]:
                    '🏙️ 猴山城邦')[count]
 
 
-def city_report(owned: frozenset[str], resources: dict[str, int]) -> str:
+def city_report(owned: frozenset[str], resources: dict[str, int],
+                cases: dict[str, dict] | None = None) -> str:
     level, title = city_tier(owned)
     lines = [f'🏗️ 文明阶段 {level}/4 · {title}',
              f'🏦 可用资源：🍌 {resources["bananas"]} | '
@@ -110,4 +111,14 @@ def city_report(owned: frozenset[str], resources: dict[str, int]) -> str:
         lines.append(f'{flag} {building.title} · ' +
                      ('资源足够，点击建造' if eligible else
                       ('已在猴山落成' if key in owned else detail)))
+    if isinstance(cases, dict):
+        lines.append('🗞️ 城市故事进度：')
+        for key in BUILDINGS:
+            if key not in owned:
+                continue
+            row = cases.get(key)
+            stage = row.get('chapter') if isinstance(row, dict) else 0
+            stage = stage if type(stage) is int and 0 <= stage <= 3 else 0
+            suffix = ('✅ 结案' if stage == 3 else f'第{stage+1}章待演出')
+            lines.append(f'• {BUILDINGS[key].title} · {suffix}')
     return '\n'.join(lines)
