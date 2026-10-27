@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
                                QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout)
 from core.city_life import (CASE_TITLES, CASE_CHAPTERS, CASE_CHOICES,
                             prepare_city_case)
+from ui.evolution_dialog import EvolutionDialog
 
 
 class CityLifeDialog(QDialog):
@@ -70,6 +71,9 @@ class CityLifeDialog(QDialog):
         self.paper.setReadOnly(True)
         layout.addWidget(self.paper, 1)
         bottom = QHBoxLayout()
+        evolution = QPushButton('📜 查看后续历史')
+        evolution.clicked.connect(self.open_evolution)
+        bottom.addWidget(evolution)
         refresh = QPushButton('⟳ 刷新城市档案')
         refresh.clicked.connect(self.refresh)
         stop = QPushButton('⏹ 取消当前章节')
@@ -158,4 +162,8 @@ class CityLifeDialog(QDialog):
 
     def _stop(self):
         self.colony.cancel_city_life()
+        self.refresh()
+
+    def open_evolution(self):
+        EvolutionDialog(self.colony, self).exec()
         self.refresh()
