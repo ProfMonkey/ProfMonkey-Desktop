@@ -112,7 +112,7 @@ class EncounterDirector:
                          a.personality, b.personality)
 
     def choose(self, now: float, participants: list[Participant], relations,
-               *, force: bool = False) -> Encounter | None:
+               *, force: bool = False, civic=None) -> Encounter | None:
         """Pick one eligible pair. ``force`` bypasses distance/cooldown for a manual demo."""
         if len(participants) < 2 or (not force and now < self.last_global + self.global_cooldown):
             return None
@@ -130,8 +130,16 @@ class EncounterDirector:
             return None
         _, key, a, b = min(choices, key=lambda e: (e[0], e[1]))
         relation = relations.get(a.index, b.index) if relations is not None else {}
-        kind = self._kind(a, b, relation)
-        event = self._script(a, b, kind)
+        # An enabled civic simulation can supply a building/history-specific
+        # two-beat encounter. The original encounter distribution is untouched
+        # for people who leave the v0.19 toggle disabled.
+        event = None
+        if civic is not None:
+            from core.civic_society import civic_encounter
+            event = civic_encounter(a, b, relation, civic)
+        if event is None:
+            kind = self._kind(a, b, relation)
+            event = self._script(a, b, kind)
         self.last_global = now
         self.last_pair[key] = now
         # Prune old cooldowns to keep state bounded with small monkey count.
