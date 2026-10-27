@@ -32,6 +32,8 @@ def test_six_mascots_are_unique_valid_svg_and_have_bodies():
                 'eyes-open','eyes-closed','mouth-open','mouth-smile','prop-banana'}.issubset(group_ids)
         assert b'cx="74" cy="99"' in data
         assert b'cy="245"' in data  # shared bottom contact anchor
+        assert b'id="head" transform="translate(128 104) scale(.84)' in data
+        # Head now 84% of its previous size, while limbs/body are unchanged.
         content.append(data)
     assert len(content) == len(set(content)) == 6
 
