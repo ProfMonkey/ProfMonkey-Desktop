@@ -23,6 +23,7 @@ from core.expeditions import ExpeditionJournal
 from ui.expedition_dialog import ExpeditionDialog
 from ui.civilization_dialog import CivilizationDialog
 from ui.city_life_dialog import CityLifeDialog
+from ui.evolution_dialog import EvolutionDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -65,6 +66,7 @@ class MonkeyTray:
         self.menu.addAction('🧭 猴山探险局 · 小队与日报', self.show_expeditions)
         self.menu.addAction('🏗️ 猴山文明 · 四座建筑与城市发展', self.show_civilization)
         self.menu.addAction('🗞️ 活着的猴山 · 四大城市连续事件', lambda: self.show_city_life())
+        self.menu.addAction('📜 猴山历史 · 文明演化与新事件', self.show_evolution)
         self.menu.addAction('⛔ 停止当前城市章节', self.colony.cancel_city_life)
         self.menu.addAction('⛔ 停止猴山探险', self.colony.cancel_expedition)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
@@ -168,7 +170,7 @@ class MonkeyTray:
         self.colony.bind_menu(self.menu, self.select_target)
         self.colony.bind_city_story(self.show_city_life)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.17 developer candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.18 developer candidate')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -420,6 +422,9 @@ class MonkeyTray:
 
     def show_city_life(self, case_id: str | None = None) -> None:
         CityLifeDialog(self.colony, case_id).exec()
+
+    def show_evolution(self) -> None:
+        EvolutionDialog(self.colony).exec()
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
