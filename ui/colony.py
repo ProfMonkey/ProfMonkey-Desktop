@@ -458,6 +458,12 @@ class MonkeyColony:
                 self.relationships.record_shared_activity(indices[0], indices[1])
             else:
                 self.relationships.record_collision(indices[0], indices[1])
+        if (self.chronicle is not None and plan.outcome == 'success'
+                and len(plan.crew) >= 2):
+            trigger = {'banana_scout': 'banana_duel', 'meteor_lab': 'launch',
+                       'village_repair': 'meeting'}.get(plan.mission)
+            if trigger is not None:
+                self.chronicle.observe(trigger, plan.crew[0].index, plan.crew[1].index)
         if self.quests is not None:
             self.quests.record('group')
 
