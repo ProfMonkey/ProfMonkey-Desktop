@@ -24,7 +24,9 @@ def test_six_mascots_are_unique_valid_svg_and_have_bodies():
         assert root.attrib['viewBox'] == '0 0 256 256'
         assert root.attrib['width'] == '256'
         assert root.attrib['height'] == '256'
-        assert b'<script' not in data.lower() and b'http://' not in data.lower()
+        assert b'<script' not in data.lower()
+        assert b'href="https://' not in data.lower()
+        assert b'<foreignobject' not in data.lower()
         group_ids = {node.get('id') for node in root.iter() if node.get('id')}
         assert {'pose','left-leg','right-leg','left-arm','right-arm',
                 'eyes-open','eyes-closed','mouth-open','mouth-smile','prop-banana'}.issubset(group_ids)
