@@ -21,6 +21,14 @@ SCENES: dict[str, tuple[GroupBeat, ...]] = {
         GroupBeat(2.0, ('eat_banana', '证据已经被我吃了。'), ('fall', '学术事故！'), ('blink', '全票通过？')),
         GroupBeat(1.8, ('idle', '本次会议圆满结束。'), ('sleep', '我投弃权票。'), ('idle', '散会散会！')),
     ),
+    'rocket_trial': (
+        GroupBeat(1.9, ('wake', '试飞许可证已批准！开始点火！'),
+                  ('blink', '我检查过安全流程。'), ('idle', '所有猴子站到安全线后面！')),
+        GroupBeat(2.0, ('run', '倒计时三、二、一，发射！'),
+                  ('angry', '方向怎么是倒着的？'), ('blink', '这不是飞行，是香蕉的抛物线。')),
+        GroupBeat(2.1, ('fall', '落地成功！火箭选择了躺平。'),
+                  ('wake', '试飞记录已写入猴山档案。'), ('idle', '下次记得带安全帽。')),
+    ),
     'banana_duel': (
         GroupBeat(1.6, ('eat_banana', '这里有一根香蕉！'), ('blink', '我也看见了！')),
         GroupBeat(2.0, ('walk', '先到先得！'), ('run', '规则临时修改！'), ('angry', '不要推我！')),
