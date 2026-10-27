@@ -126,7 +126,7 @@ class RelationshipStore:
                     continue
                 key = _pair_key(a, b)
                 # bond, trust, rivalry
-                deltas = (2, 1, -1) if av == bv else (-1, 0, 2)
+                deltas = (2, 2, -1) if av == bv else (-1, 0, 2)
                 changes.append((key, *deltas))
         for key, bond, trust, rivalry in changes:
             row = self.pairs.setdefault(key, {'bond': 0, 'rivalry': 0,
