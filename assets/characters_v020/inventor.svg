@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="ProfMonkey inventor original balanced-proportion mascot">
+<defs>
+ <linearGradient id="fur" x1="0" y1="0" x2=".9" y2="1"><stop stop-color="#B57C51"/><stop offset="1" stop-color="#75513B"/></linearGradient>
+ <linearGradient id="clothes" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ECE6D8"/><stop offset="1" stop-color="#75513B"/></linearGradient>
+</defs>
+<ellipse cx="128" cy="245" rx="70" ry="6" fill="#4D3732" opacity=".16"/>
+<g id="pose" transform="translate(0 0)" stroke-linecap="round" stroke-linejoin="round">
+ <!-- Signature curling tail, visible behind the smaller, balanced head and long torso -->
+ <path d="M162 197Q227 205 216 168Q210 149 195 163Q190 174 202 177" fill="none" stroke="#75513B" stroke-width="13"/>
+ <path d="M162 197Q227 205 216 168Q210 149 195 163" fill="none" stroke="#B57C51" stroke-width="8"/>
+ <g id="left-leg" transform="translate(0 0)">
+ <path d="M104 201q-18 17-15 38l30 0q12-19 9-34Z" fill="#B57C51" stroke="#75513B" stroke-width="4"/>
+ <path d="M81 233q10-13 32-8l11 12q-17 12-43 2Z" fill="#75513B" stroke="#4B332D" stroke-width="3"/></g>
+ <g id="right-leg" transform="translate(0 0)">
+ <path d="M132 206q0 19 9 33l28-3q0-22-19-39Z" fill="#B57C51" stroke="#75513B" stroke-width="4"/>
+ <path d="M138 233q22-11 34 1l-1 8q-19 6-35-4Z" fill="#75513B" stroke="#4B332D" stroke-width="3"/></g>
+ <path d="M89 138Q73 170 84 212Q126 227 171 212Q182 159 162 133Q128 120 89 138Z" fill="url(#clothes)" stroke="#75513B" stroke-width="4"/>
+ <g id="left-arm" transform="translate(0 0)"><path d="M92 147Q67 148 55 179Q49 190 63 196Q77 197 91 171Z" fill="#ECE6D8" stroke="#75513B" stroke-width="4"/><circle cx="58" cy="191" r="13" fill="#B57C51" stroke="#75513B" stroke-width="3"/><ellipse cx="55" cy="187" rx="6" ry="7" fill="#F5CD9C"/></g>
+ <g id="right-arm" transform="translate(0 0)"><path d="M163 145Q188 150 201 179Q211 192 195 201Q181 201 165 170Z" fill="#ECE6D8" stroke="#75513B" stroke-width="4"/><circle cx="201" cy="194" r="13" fill="#B57C51" stroke="#75513B" stroke-width="3"/><ellipse cx="204" cy="190" rx="6" ry="7" fill="#F5CD9C"/></g>
+ <path d="M93 132l-12 74q45 19 94-1l-13-75-29 3-19-10Z" fill="#ECE6D8" stroke="#795F55" stroke-width="3.8"/><path d="M119 133l8 30 9-29-8-12Z" fill="#D1F2F6"/><path d="M126 151v46m-32-43 20-6m27 0 21 6" stroke="#A8CBD2" stroke-width="2.5"/><rect x="142" y="173" width="19" height="12" rx="2" fill="#4E9BB6"/><path d="M147 178h9" stroke="white" stroke-width="2"/>
+ <!-- Ears, jaw, hair; head deliberately around 100px high rather than oversized 140px -->
+ <circle cx="74" cy="99" r="21" fill="#B57C51" stroke="#75513B" stroke-width="4"/><circle cx="181" cy="99" r="21" fill="#B57C51" stroke="#75513B" stroke-width="4"/>
+ <ellipse cx="74" cy="99" rx="10" ry="13" fill="#F5CD9C"/><ellipse cx="181" cy="99" rx="10" ry="13" fill="#F5CD9C"/>
+ <path d="M75 87Q73 50 104 41Q147 25 175 61Q188 82 180 119Q172 150 127 152Q83 153 76 120Z" fill="url(#fur)" stroke="#75513B" stroke-width="4.5"/>
+ <path d="M85 99Q83 77 108 79Q126 91 145 80Q171 76 172 99Q177 131 149 137Q127 143 106 136Q83 131 85 99Z" fill="#F5CD9C" stroke="#75513B" stroke-width="2"/>
+ <path d="M103 54q10-14 20-8q6-13 16-8q9 3 10 17" fill="none" stroke="#75513B" stroke-width="7"/>
+ <path d="M88 41q35-20 75 1" fill="none" stroke="#61514E" stroke-width="9"/><rect x="86" y="32" width="37" height="21" rx="9" fill="#2EB6E8" stroke="#2B506D" stroke-width="5"/><rect x="133" y="32" width="37" height="21" rx="9" fill="#2EB6E8" stroke="#2B506D" stroke-width="5"/><path d="M100 37l13 0m33 0 14 0" stroke="#E6FCFF" stroke-width="3" opacity=".7"/>
+ <g id="eyes-open" opacity="1"><ellipse cx="111" cy="103" rx="5.3" ry="8" fill="#30252A"/><ellipse cx="144" cy="103" rx="5.3" ry="8" fill="#30252A"/><circle cx="112.5" cy="100" r="2" fill="#fff"/><circle cx="145.5" cy="100" r="2" fill="#fff"/></g>
+ <g id="eyes-closed" opacity="0"><path d="M103 103q8 7 17-1m16 0q8 7 17 0" fill="none" stroke="#40312D" stroke-width="4"/></g>
+ <ellipse cx="91" cy="121" rx="10" ry="4.3" fill="#E39D87" opacity=".6"/><ellipse cx="163" cy="121" rx="10" ry="4.3" fill="#E39D87" opacity=".6"/>
+ <ellipse cx="128" cy="118" rx="6" ry="4.5" fill="#75513B"/>
+ <g id="mouth-smile" opacity="1"><path d="M112 126q16 17 32-1" stroke="#753F3C" stroke-width="3.3" fill="none"/></g>
+ <g id="mouth-open" opacity="0"><ellipse cx="129" cy="132" rx="11" ry="8" fill="#6F3940"/><ellipse cx="129" cy="137" rx="6" ry="3.5" fill="#DF867C"/></g>
+ <g id="prop-banana" opacity="0"><path d="M172 145q-3 21 19 27 10 0 19-16-25 11-29-17Z" fill="#FFE061" stroke="#986C28" stroke-width="2"/><path d="M173 140l7-3m29 20 4-3" stroke="#7B5131" stroke-width="3"/></g>
+ <g transform="rotate(12 207 176)"><path d="M200 141v18l-13 27q2 18 25 18t25-18l-17-27v-18" fill="#5A67CE" stroke="#376075" stroke-width="4"/><path d="M190 178q24-15 44 0l-4 15q-20 13-36 0Z" fill="#77DAF6" opacity=".9"/><circle cx="214" cy="146" r="5" fill="#B8F4F9"/><circle cx="232" cy="133" r="4" fill="#B8F4F9"/></g>
+</g>
+</svg>
