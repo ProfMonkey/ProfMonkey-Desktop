@@ -7,6 +7,7 @@ on:
       - "ui/**"
       - "tests/test_v09_encounters.py"
       - "tests/test_v011_personality_chemistry.py"
+      - "tests/test_v012_chronicle.py"
       - ".github/workflows/personality-core.yml"
   workflow_dispatch:
 
@@ -26,7 +27,7 @@ jobs:
       - name: Compile changed Python modules
         run: python -m compileall -q core ui
       - name: Test offline behavior and regressions
-        run: python -m pytest -q tests/test_v09_encounters.py tests/test_v011_personality_chemistry.py
+        run: python -m pytest -q tests/test_v09_encounters.py tests/test_v011_personality_chemistry.py tests/test_v012_chronicle.py
       - name: Check standalone preview JavaScript syntax
         run: |
           python - <<'PY'
