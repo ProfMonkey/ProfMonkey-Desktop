@@ -1,4 +1,4 @@
-name: v0.12 Windows integrated candidate (code + archived artwork)
+name: v0.13 Windows integrated candidate (code + archived artwork)
 
 on:
   pull_request:
@@ -47,7 +47,7 @@ jobs:
       - name: Publish only as unverified candidate
         uses: actions/upload-artifact@v4
         with:
-          name: ProfMonkeyDesktop-v0.12-Windows-UNVERIFIED
+          name: ProfMonkeyDesktop-v0.13-Windows-UNVERIFIED
           path: dist/ProfMonkeyDesktop/
           retention-days: 7
           if-no-files-found: error
