@@ -374,12 +374,23 @@ class MonkeyColony:
         for pet in self.monkeys:
             pet.exit_social()
 
-    def _maybe_encounter(self, now: float, *, force: bool = False) -> bool:
+    def _maybe_encounter(self, now: float, *, force: bool = False,
+                         pair: tuple[int, int] | None = None) -> bool:
         if (self.count < 2 or self.social.active or self.duo.active or self._race_active or
                 not self.visible() or self.primary.focus.active or
                 any(p.paused for p in self.monkeys)):
             return False
-        event = self.encounters.choose(now, self._participants(), self.relationships,
+        participants = self._participants()
+        if pair is not None:
+            # Reject duplicates, booleans, invalid or hidden members.
+            if (len(pair) != 2 or any(type(i) is not int or not 0 <= i < self.count
+                                      for i in pair) or pair[0] == pair[1]):
+                return False
+            participants = [p for p in participants
+                            if p.index in pair and self.monkeys[p.index].isVisible()]
+            if len(participants) != 2:
+                return False
+        event = self.encounters.choose(now, participants, self.relationships,
                                        force=force)
         if event is None:
             return False
@@ -389,6 +400,10 @@ class MonkeyColony:
     def demo_encounter(self) -> bool:
         """Manually trigger the closest available pair even if auto mode is off."""
         return self._maybe_encounter(time.monotonic(), force=True)
+
+    def demo_pair(self, first: int, second: int) -> bool:
+        """User-selected pair: bypass distance/cooldowns, never busy-state checks."""
+        return self._maybe_encounter(time.monotonic(), force=True, pair=(first, second))
 
     def set_ambient_encounters(self, enabled: bool) -> None:
         if not enabled:
