@@ -14,6 +14,8 @@ from core.focus import format_seconds
 from core.config import ConfigStore
 from core.relationships import RelationshipStore
 from core.quests import QuestBoard
+from core.chronicle import ChronicleStore
+from ui.chronicle_dialog import ChronicleDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -30,8 +32,11 @@ class MonkeyTray:
         self.config = config or ConfigStore()
         self.relationships = RelationshipStore(self.config.folder / 'relationships.json')
         self.quests = QuestBoard(self.config.folder / 'daily_quests.json')
+        self.chronicle = ChronicleStore(self.config.folder / 'chronicle.json',
+                                        enabled=overlay.settings.chronicle_enabled)
         self.colony.relationships = self.relationships
         self.colony.quests = self.quests
+        self.colony.chronicle = self.chronicle
         self.manifest = manifest
         self.site_path = site_path
         self.menu = QMenu(overlay)
@@ -43,6 +48,11 @@ class MonkeyTray:
         self.menu.addAction('🎛 猴山管理局 · 名字与性格', self.open_colony_panel)
         self.menu.addAction('🤝 猴山关系档案 · 好友/死对头/师徒', self.open_relationships)
         self.menu.addAction('📜 今日猴山任务 · 猴学积分', self.show_quests)
+        self.menu.addAction('📖 猴山纪事 · 连续剧情/成长', self.show_chronicle)
+        self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
+        self.chronicle_action.setCheckable(True)
+        self.chronicle_action.setChecked(overlay.settings.chronicle_enabled)
+        self.chronicle_action.toggled.connect(self.set_chronicle_enabled)
         furniture_menu = self.menu.addMenu('🛋 猴山家具与道具')
         for kind, label in [('banana_tree','🍌 放置香蕉树'),('blackboard','📋 放置猴学黑板'),
                             ('trampoline','🛝 放置蹦床'),('chair','🪑 放置教授椅'),('mirror','🪞 放置猴山镜子')]:
@@ -364,6 +374,15 @@ class MonkeyTray:
     def show_quests(self) -> None:
         QuestDialog(self.quests, self.colony.count).exec()
 
+    def set_chronicle_enabled(self, enabled: bool) -> None:
+        self.colony.set_chronicle_enabled(enabled)
+        if self.chronicle_action.isChecked() != enabled:
+            self.chronicle_action.setChecked(enabled)
+        self._save()
+
+    def show_chronicle(self) -> None:
+        ChronicleDialog(self.colony, self.chronicle, self.set_chronicle_enabled).exec()
+
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
                            self.colony.count).exec()
@@ -420,6 +439,7 @@ class MonkeyTray:
             self.refresh_count_label()
             self.mode_actions[new.mode].setChecked(True)
             self.ambient_action.setChecked(new.ambient_encounters)
+            self.chronicle_action.setChecked(new.chronicle_enabled)
             if self.topmost_action.isChecked()!=new.always_on_top:
                 self.topmost_action.setChecked(new.always_on_top)
             self._save()
