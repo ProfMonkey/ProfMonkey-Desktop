@@ -210,7 +210,8 @@ class MonkeyColony:
                 if pet._drag_active or pet.story.active or pet._social_active or pet.body.airborne:
                     pet.set_colony_target(None)
                     continue
-                personality_speed = {"trickster": 155.0, "scholar": 125.0, "sleepy": 88.0}.get(pet.personality, 125.0)
+                personality_speed = {"trickster": 155.0, "scholar": 125.0, "sleepy": 88.0,
+                                     "inventor": 135.0, "captain": 145.0, "shy": 105.0}.get(pet.personality, 125.0)
                 target_x = clamp_x(target_center - pet._sx - pet._size/2,
                                    bounds, pet.width())
                 pet.set_colony_target(target_x, personality_speed)
