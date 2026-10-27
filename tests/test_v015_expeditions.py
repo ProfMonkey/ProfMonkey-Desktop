@@ -187,3 +187,39 @@ def test_local_newspaper_only_describes_in_app_data(tmp_path):
     assert '学究猴' in text and '发明猴' in text
     assert '陨石研究所' in text
     assert '科研' in text
+
+
+def test_multi_monkey_relation_awards_use_one_atomic_save(tmp_path, monkeypatch):
+    from core.relationships import RelationshipStore
+    path=tmp_path/'relationships.json'
+    relations=RelationshipStore(path)
+    old_save=relations._save
+    writes=[]
+    def save():
+        writes.append('one')
+        old_save()
+    monkeypatch.setattr(relations,'_save',save)
+    relations.record_expedition((0,1,2,3,4,5),'success')
+    assert writes==['one']
+    assert len(relations.pairs)==15
+    assert relations.get(0,5)['bond']==3
+    assert relations.get(0,5)['trust']==2
+    assert relations.get(0,5)['interactions']==1
+    relations.record_expedition((0,1),'mixed')
+    assert writes==['one','one']
+    assert relations.get(0,1)['bond']==5
+    relations.record_expedition((0,1),'mishap')
+    assert relations.get(0,1)['rivalry']==2
+
+
+@pytest.mark.parametrize('invalid_team,result',[
+    ((0,), 'success'), ((0,0),'success'), ((0,9),'mixed'),
+    ((True,1),'success'), ([0,1],'success'), ((0,1),'fabricated')
+])
+def test_invalid_relation_team_never_writes_a_file(tmp_path, invalid_team, result):
+    from core.relationships import RelationshipStore
+    path=tmp_path/'relationships.json'
+    relation=RelationshipStore(path)
+    with pytest.raises(ValueError):
+        relation.record_expedition(invalid_team,result)
+    assert not path.exists()
