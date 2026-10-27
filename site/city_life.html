@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111927"><meta name="description" content="ProfMonkey Desktop 猴山城市连载事件：四座建筑、十二个章节、分支选择、猴际关系与资源后果。">
+<title>活着的猴山 · ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#0e1524;--paper:#1b293d;--gold:#f5d491;--ink:#fff2d6;--blue:#b8cade;--line:#586b85;--green:#87e2ba}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:radial-gradient(ellipse at 68% 2%,#344868,transparent 37%),var(--bg);font:15px/1.7 system-ui,"Microsoft YaHei",sans-serif}
+button,select{font:inherit}button{cursor:pointer}a{color:var(--gold)}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.container{max-width:1150px;width:calc(100% - 32px);margin:auto}nav{display:flex;justify-content:space-between;align-items:center;gap:15px;border-bottom:1px solid var(--line);padding:18px 0}
+nav strong{font-size:16px}.status{border:1px solid var(--gold);border-radius:99px;color:var(--gold);padding:3px 8px;font-size:10px;margin-left:7px}
+.hero{padding:48px 0 22px}.overline{font-size:10px;letter-spacing:.21em;font-weight:850;color:var(--gold)}h1{font-size:clamp(38px,7vw,72px);line-height:1.07;margin:15px 0;letter-spacing:-.05em}
+.hero p{max-width:690px;color:var(--blue);font-size:16px}.panel{border:1px solid #536780;border-radius:19px;padding:23px;background:linear-gradient(155deg,#24344b,#17263a)}
+h2{font-size:21px;margin:0 0 15px}.city{position:relative;overflow:hidden;border:1px solid #60758c;border-radius:20px;height:205px;margin-bottom:16px;background:linear-gradient(#3b536d 0%,#67808d 67%,#2f5d64 68%)}
+.moon{position:absolute;right:12%;top:20px;width:50px;height:50px;border-radius:50%;background:#f5da9e;box-shadow:0 0 65px #f4db9e77}
+.tower-row{display:grid;grid-template-columns:repeat(4,1fr);position:absolute;left:3%;right:3%;bottom:12px;height:128px;gap:12px}
+.tower{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;border-radius:10px;background:#152b3acb;border:2px solid #d0b786;padding:7px;text-align:center}
+.tower span{font-size:36px;filter:drop-shadow(0 4px 1px #1b3247)}
+.tower b{font-size:11px}.tower em{font-style:normal;font-size:10px;color:#ffe09a}
+.rows{display:grid;grid-template-columns:.95fr 1.05fr;gap:16px;margin-bottom:18px}
+.cases{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.case{padding:14px;border:1px solid #5c6d82;background:#132336;color:var(--ink);text-align:left;border-radius:13px}
+.case[aria-pressed=true]{border-color:var(--gold);background:#3c3641}
+.case b{display:block;font-size:14px}.case small{color:#c5cbd6;font-size:11px}
+.case.complete{border-color:var(--green)}
+label{display:block;margin:13px 0 5px;font-size:12px;color:var(--blue)}
+select{width:100%;border:1px solid #697c91;border-radius:11px;background:#122235;color:var(--ink);padding:10px}
+.lineup{display:grid;grid-template-columns:1fr 1fr;gap:10px}.btn{border:0;border-radius:11px;background:var(--gold);padding:11px 15px;color:#251f1b;font-weight:850}
+.btn.alt{background:#455874;color:#fff0d8}.btn:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}
+.story{border:1px solid #546f83;border-radius:14px;background:#111d30;min-height:220px;padding:17px}
+#stage{font-size:12px;color:var(--gold);font-weight:900;margin-bottom:12px}
+.line{border-left:3px solid var(--gold);background:#253650;color:#ffebce;border-radius:6px;padding:10px 12px;margin:9px 0}
+.reward{font-size:13px;color:#bee7d2;margin:10px 0}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{background:#15263c;border:1px solid #546c86;border-radius:11px;text-align:center;padding:9px}
+.stat strong{font-size:24px;display:block;color:var(--gold)}
+.feed{white-space:pre-wrap;min-height:125px;border:1px solid #536f85;border-radius:13px;background:#0f1c2e;padding:16px;color:#ffeed6;line-height:1.9}
+.p{color:var(--blue);font-size:12px;margin-bottom:0}
+footer{border-top:1px solid var(--line);padding:23px 0 45px;margin-top:25px;color:#aebed1;font-size:12px}
+@media(max-width:850px){.rows{grid-template-columns:1fr}}
+@media(max-width:520px){.cases{grid-template-columns:1fr}.tower-row{gap:4px;left:2%;right:2%}.tower{padding:3px}.tower span{font-size:30px}.tower b{font-size:9px}.panel{padding:16px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><div class="container">
+<nav><strong>🐒 ProfMonkey <span class="status">LIVING CITY v0.17</span></strong><div><a href="./civilization.html">🏗️ 建造城市</a> · <a href="./index.html">首页</a></div></nav>
+<header class="hero"><div class="overline">FOUR BUILDINGS · TWELVE CHAPTERS · A CITY WITH CONSEQUENCES</div>
+<h1>一座城，<br><span style="color:var(--gold)">也会有自己的故事。</span></h1>
+<p>香蕉仓库失窃、神秘银河信号、猴山庆典与实验室事故。每条故事有三章、每章三幕。你选择谨慎处理还是大胆冒险，都会留下永久的猴山历史。</p></header>
+<div class="city" aria-hidden="true"><div class="moon"></div><div class="tower-row">
+<div class="tower"><span>🍌</span><b>香蕉研究仓库</b><em>神秘失窃</em></div>
+<div class="tower"><span>🔭</span><b>银河望远镜</b><em>未知信号</em></div>
+<div class="tower"><span>🏛️</span><b>公共广场</b><em>猴山庆典</em></div>
+<div class="tower"><span>🧪</span><b>联合实验室</b><em>科研事故</em></div>
+</div></div>
+<div class="rows">
+<section class="panel"><h2>📁 城市档案 · 四个故事</h2><div class="cases" id="cases"></div>
+<p class="p">网页版为了方便演示，默认开放所有四个故事。桌面版必须先实际建成对应建筑。</p>
+<div class="lineup"><div><label for="first">出场猴子 A</label><select id="first"></select></div>
+<div><label for="second">出场猴子 B</label><select id="second"></select></div></div>
+<label for="choice">本章采取什么行动？</label><select id="choice">
+<option value="careful">🔎 谨慎调查 / 优先合作</option>
+<option value="bold">⚡ 大胆冒险 / 临机处理</option></select>
+<div class="reward" id="preview" aria-live="polite"></div>
+<div class="actions"><button class="btn" id="begin" type="button">🎬 开启当前章节</button>
+<button class="btn alt" id="undo" type="button">↺ 重选角色</button></div></section>
+<section class="panel"><h2>🎭 三幕现场 · 猴山短剧</h2><div class="story"><div id="stage" aria-live="polite">等待开幕</div><div id="dialogue" aria-live="polite"><div class="line">选择一个故事，两只猴子和调查方式。</div></div></div>
+<div class="actions"><button class="btn" id="next" type="button">▶ 下一幕 / 结算</button><button class="btn alt" id="abort" type="button">⛔ 中途取消</button></div>
+<p class="p">取消不会更新本章进度。只有第三幕正常结束，才会结算虚构资源与猴际关系。</p></section>
+</div>
+<div class="rows">
+<section class="panel"><h2>🏦 猴山资源与猴际关系</h2><div class="stats">
+<div class="stat">🍌 香蕉<strong id="bananas">12</strong></div><div class="stat">🔬 科研<strong id="science">12</strong></div><div class="stat">⭐ 声望<strong id="reputation">12</strong></div>
+</div><p class="p" id="relationship">👥 两位猴子的关系：普通同事 · 信任 0 / 好感 0 / 竞争 0</p>
+<p class="p">注意：网页使用演示初始资源，与本地桌宠存档完全分离。</p></section>
+<section class="panel"><h2>🗞️ 猴山历史 · 永久章节记录</h2><div class="feed" id="feed" aria-live="polite">尚无已完成的章节。</div>
+<div class="actions"><button class="btn alt" id="clear" type="button">🗑 重置本页演示数据</button></div></section></div>
+<footer>纯前端演示：不访问网络、不保存 localStorage、不读取键盘日志、没有账号或桌面截图。刷新即重新开始。Windows 正式体验、v0.10 六猴全套像素动画仍未完成验收，项目未使用 GitHub Actions。</footer>
+</div>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const stories={
+banana_vault:{name:"🍌 午夜香蕉失窃案",titles:["空空的仓库","失踪的收据","猴山公开听证"],intro:["仓库账本数量对不上！","收据把我们引向老广场。","证据终于摆到了桌面。"],clue:["可疑的香蕉皮脚印出现了。","是有人偷吃还是记录错误？","新的仓储协议引发争论。"],opts:["🔎 公开核对证据","🐒 大胆追查嫌疑猴"],reward:[[-1,0,2],[1,0,-1]]},
+galaxy_scope:{name:"🔭 来自银河深处的信号",titles:["会眨眼的星星","反向观测","第一张星图"],intro:["望远镜突然收到奇怪的数字。","信号居然随镜筒移动。","我们决定公布第一张星图。"],clue:["会不会是外星香蕉价格表？","地面上也许有干扰源。","远处微光留下了更多谜题。"],opts:["📐 严格校准设备","🚀 大胆追踪信号"],reward:[[0,2,1],[0,3,-1]]},
+public_square:{name:"🎉 猴山广场庆典",titles:["庆典准备日","彩排事故","共同的舞台"],intro:["猴山第一届庆典开始筹备！","队伍排错方向，猴子们撞成一团。","六只猴子终于站上同一个舞台。"],clue:["谁负责采购庆典香蕉？","更炫的效果还是更安全的安排？","爱独处的猴子也有自己的位置。"],opts:["🦺 优先照顾所有人","🎆 追加震撼特效"],reward:[[-1,0,2],[-2,0,4]]},
+monkey_academy:{name:"🧪 联合实验室事故",titles:["烟雾报警","失控的机器","新的实验室章程"],intro:["实验室突然冒出紫色烟雾！","一台香蕉机器居然自己写论文。","大家开始讨论未来的科研规范。"],clue:["发明猴坚持这就是预期颜色。","学究猴要求核对原始实验记录。","错误能被承认，也可以成为新发现。"],opts:["🧯 先完成安全检查","⚡ 立即进行新实验"],reward:[[0,-1,2],[0,3,-2]]}
+};
+const monkeys=["🎓 学究猴","🧢 皮猴","💤 困猴","🔧 发明猴","⭐ 队长猴","🌿 社恐猴"];
+let progress,resources,relations,events,active=null,current='banana_vault';
+function resetState(){
+ progress={};Object.keys(stories).forEach(key=>progress[key]={chapter:0,careful:0,bold:0,ending:""});
+ resources=[12,12,12];relations={};events=[];active=null;renderAll();
+}
+function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join(":")}
+function rel(a,b){const key=pairKey(a,b);if(!relations[key])relations[key]={bond:0,trust:0,rivalry:0};return relations[key]}
+function currentPair(){return [Number($('first').value),Number($('second').value)]}
+function selected(){return [current,progress[current],stories[current]]}
+function renderChoices(){
+ const cfg=stories[current],keep=$('choice').value;
+ $('choice').replaceChildren();
+ ['careful','bold'].forEach((route,i)=>{
+  const option=document.createElement('option');option.value=route;option.textContent=cfg.opts[i];
+  $('choice').append(option)
+ });
+ $('choice').value=keep;
+}
+function selectStory(id){
+ if(active)return;
+ current=id;renderChoices();renderAll();
+}
+function renderCards(){
+ $('cases').replaceChildren();
+ Object.entries(stories).forEach(([id,cfg])=>{
+  const row=progress[id];const button=document.createElement('button');
+  button.type='button';button.className='case'+(row.chapter===3?' complete':'');
+  button.setAttribute('aria-pressed',String(current===id));
+  const name=document.createElement('b');name.textContent=cfg.name;
+  const info=document.createElement('small');
+  info.textContent=row.chapter===3?
+   ('✅ 三章完结 · '+(row.ending==='reconciled'?'温暖结局':'开放式争议')):
+   ('📖 进度 '+row.chapter+'/3 章 · 尚有故事');
+  button.append(name,info);button.addEventListener('click',()=>selectStory(id));
+  $('cases').append(button);
+ });
+}
+function preview(){
+ const [id,state,cfg]=selected(),[a,b]=currentPair(),choice=$('choice').value;
+ const r=rel(a,b);
+ $('relationship').textContent='👥 '+monkeys[a]+' / '+monkeys[b]+
+  ' · 好感 '+r.bond+' / 信任 '+r.trust+' / 竞争 '+r.rivalry;
+ const done=state.chapter>=3;
+ $('begin').disabled=!!active||done||a===b;
+ $('preview').textContent=done?('✅ '+cfg.name+' 已完成，结局：'+
+       (state.ending==='reconciled'?'达成共识':'留下争议')+'。不可重复领奖。'):
+  a===b?'请挑选两只不同的猴子。':
+  '第'+(state.chapter+1)+'章 · '+cfg.titles[state.chapter]+'\n预计变化：'+
+    ['🍌','🔬','⭐'].map((sym,i)=>sym+cfg.reward[choice==='careful'?0:1][i]).join(' / ')+
+    '\n慎重选择：猴际关系将直接影响最后一章的结局。';
+}
+function renderAll(){
+ renderCards();preview();
+ ['bananas','science','reputation'].forEach((key,i)=>$(key).textContent=resources[i]);
+ $('feed').textContent=events.length?events.slice(-12).reverse().join('\n'):
+ '尚无已完成的章节。';
+}
+function drawBeat(){
+ if(!active)return;
+ const story=stories[active.id],n=active.chapter,[a,b]=active.people;
+ $('stage').textContent=story.name+' · '+story.titles[n]+
+    ' · 第 '+(active.beat+1)+'/3 幕';
+ const messages=[
+  ['这次事件必须调查清楚！',story.intro[n]],
+  [active.choice==='careful'?'我们先核对证据。':'立即行动！大胆推进。',story.clue[n]],
+  [active.ending==='reconciled'?'大家终于达成了共识！':
+   active.ending==='chaos'?'这件事依然有争议。':'新的线索已经记录在案。',
+   '这次选择将影响猴山未来的故事！']];
+ $('dialogue').replaceChildren();
+ messages[active.beat].forEach((say,i)=>{
+  const line=document.createElement('div');line.className='line';
+  line.textContent=monkeys[i?b:a]+'：'+say;$('dialogue').append(line);
+ });
+}
+function begin(){
+ if(active)return;
+ const [id,state,cfg]=selected(),[a,b]=currentPair(),choice=$('choice').value;
+ if(state.chapter>=3||a===b)return;
+ const careful=state.careful+(choice==='careful');
+ const r=rel(a,b);
+ const ending=state.chapter===2?
+  (careful>=2||(careful>=1&&r.bond>=35&&r.trust>=30)?'reconciled':'chaos'):'';
+ active={id,chapter:state.chapter,people:[a,b],choice,beat:0,ending};
+ $('next').disabled=false;$('abort').disabled=false;preview();drawBeat();
+}
+function finish(){
+ if(!active)return;
+ const a=active,previous=progress[a.id];
+ if(previous.chapter!==a.chapter){abort();return}
+ const delta=stories[a.id].reward[a.choice==='careful'?0:1];
+ delta.forEach((n,i)=>resources[i]=Math.max(0,Math.min(999,resources[i]+n)));
+ previous.chapter++;previous[a.choice]++;
+ if(a.ending)previous.ending=a.ending;
+ const relationship=rel(...a.people);
+ if(a.choice==='careful'){
+  relationship.bond=Math.min(100,relationship.bond+2);
+  relationship.trust=Math.min(100,relationship.trust+1);
+  relationship.rivalry=Math.max(0,relationship.rivalry-1);
+ }else{
+  relationship.bond=Math.max(-100,relationship.bond-1);
+  relationship.rivalry=Math.min(100,relationship.rivalry+2)
+ }
+ if(a.ending==='reconciled'){relationship.bond=Math.min(100,relationship.bond+10);relationship.trust=Math.min(100,relationship.trust+8)}
+ if(a.ending==='chaos'){relationship.rivalry=Math.min(100,relationship.rivalry+5)}
+ events.push(stories[a.id].name+' 第'+(a.chapter+1)+'章 · '+
+  (a.choice==='careful'?'谨慎调查':'大胆行动')+
+  (a.ending?(' · '+(a.ending==='reconciled'?'达成共识':'留下争议')):''));
+ if(events.length>24)events.shift();
+ abort();renderAll();
+}
+function next(){
+ if(!active)return;
+ if(active.beat<2){active.beat++;drawBeat()}else finish()
+}
+function abort(){
+ active=null;$('stage').textContent='等待下一章';
+ $('dialogue').replaceChildren();
+ const note=document.createElement('div');note.className='line';
+ note.textContent='故事可以再次打开；只有完成整章才会结算。';
+ $('dialogue').append(note);$('next').disabled=true;$('abort').disabled=true;preview();
+}
+monkeys.forEach((name,i)=>{
+ for(const id of ['first','second']){
+  const item=document.createElement('option');item.value=String(i);item.textContent=name;
+  $(id).append(item)
+ }
+});
+$('first').value='0';$('second').value='1';
+$('choice').addEventListener('change',preview);
+$('first').addEventListener('change',preview);
+$('second').addEventListener('change',preview);
+$('begin').addEventListener('click',begin);
+$('next').addEventListener('click',next);
+$('abort').addEventListener('click',abort);
+$('clear').addEventListener('click',()=>{abort();resetState()});
+$('undo').addEventListener('click',()=>{if(active)return;$('first').value='0';$('second').value='1';preview()});
+$('next').disabled=true;$('abort').disabled=true;resetState();renderChoices();
+</script></body></html>
