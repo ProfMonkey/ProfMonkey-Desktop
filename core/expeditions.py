@@ -14,6 +14,8 @@ from core.civilization import (BUILDINGS, construction_status, city_tier,
                                mission_city_bonus, sanitize_city)
 from core.city_life import (CASE_TITLES, CityPlan, MAX_CASE_NEWS, case_delta,
                             empty_case, normalize_cases)
+from core.city_evolution import (EvolutionPlan, clean_legacy, prepare_evolution,
+                                 evolution_era, LEGACY_EVENTS)
 
 MISSIONS = {
     'banana_scout': ('🍌 香蕉侦察队', '在猴山寻找传说中的香蕉树'),
@@ -210,6 +212,7 @@ class ExpeditionJournal:
         self.buildings: frozenset[str] = frozenset()
         self.city_cases: dict[str, dict] = {key: empty_case() for key in CASE_TITLES}
         self.city_news: list[dict] = []
+        self.legacy_events: list[dict[str, str]] = []
         self.log: list[dict] = []
         self._load()
 
@@ -224,6 +227,8 @@ class ExpeditionJournal:
         # compatibility while accepting only four known completed structures.
         self.buildings = sanitize_city(raw.get('buildings'))
         self.city_cases = normalize_cases(raw.get('city_cases'), self.buildings)
+        self.legacy_events = clean_legacy(raw.get('legacy_events'),
+                                          self.city_cases, self.buildings)
         raw_news = raw.get('city_news')
         if isinstance(raw_news, list):
             for row in raw_news[-MAX_CASE_NEWS:]:
@@ -268,6 +273,7 @@ class ExpeditionJournal:
                            'buildings': sorted(self.buildings),
                            'city_cases': self.city_cases,
                            'city_news': self.city_news,
+                           'legacy_events': self.legacy_events,
                            'log': self.log}, stream, ensure_ascii=False, indent=2)
             os.replace(path, self.path)
         finally:
@@ -388,12 +394,47 @@ class ExpeditionJournal:
             return False
         return True
 
+    def record_evolution(self, plan: EvolutionPlan, laws=None,
+                         relationships=None) -> bool:
+        """Commit a manually completed v0.18 sequel and balances atomically.
+
+        Validation runs again at settlement, so repealed laws, changed bonds,
+        already-consumed events, forged deltas or cancelled plans cannot reuse
+        a stale UI preview. The separately stored relationship effect is
+        applied by the caller *only after* this commit succeeds.
+        """
+        if not isinstance(plan, EvolutionPlan):
+            return False
+        try:
+            expected = prepare_evolution(plan.event_id, plan.route, self, laws,
+                                         relationships, plan.first, plan.second)
+        except (ValueError, KeyError, TypeError):
+            return False
+        if plan != expected:
+            return False
+        for key, change in zip(RESOURCE_KEYS, plan.resource_delta):
+            if self.resources[key] + change < 0:
+                return False
+        old_resources = self.resources.copy()
+        old_history = list(self.legacy_events)
+        for key, change in zip(RESOURCE_KEYS, plan.resource_delta):
+            self.resources[key] = min(MAX_VALUE, self.resources[key] + change)
+        self.legacy_events.append({'event': plan.event_id, 'route': plan.route})
+        try:
+            self._save()
+        except OSError:
+            self.resources = old_resources
+            self.legacy_events = old_history
+            return False
+        return True
+
     def clear(self) -> None:
         self.resources = {key: 0 for key in RESOURCE_KEYS}
         self.missions = {i: 0 for i in range(6)}
         self.buildings = frozenset()
         self.city_cases = {key: empty_case() for key in CASE_TITLES}
         self.city_news = []
+        self.legacy_events = []
         self.log = []
         try:
             self.path.unlink(missing_ok=True)
@@ -409,7 +450,9 @@ def newspaper(journal: ExpeditionJournal, laws=None, names: tuple[str, ...] = ()
             f'🍌 香蕉 {v["bananas"]} | 🔬 科研 {v["science"]} | ⭐ 声望 {v["reputation"]}',
             f'📦 最近保存 {len(journal.log)} 次探险',
             f'🏗️ 文明阶段：{title} · 已建建筑 {len(journal.buildings)}/4',
-            f'🎬 城市事件已演出 {len(journal.city_news)} 章']
+            f'🎬 城市事件已演出 {len(journal.city_news)} 章',
+            f'📜 文明演化：{evolution_era(journal)[1]} · '
+            f'历史抉择 {len(journal.legacy_events)}/{len(LEGACY_EVENTS)}']
     if laws is not None:
         active = [label for key, label in (
             ('banana_rules', '香蕉共享'), ('quiet_hours', '安静公约'),
@@ -435,6 +478,12 @@ def newspaper(journal: ExpeditionJournal, laws=None, names: tuple[str, ...] = ()
                       ' · 混乱结局' if event['ending']=='chaos' else '')
             rows.append(f'• {CASE_TITLES[event["case"]]}'
                         f' 第{event["chapter"]}章{suffix}')
+    if journal.legacy_events:
+        rows.append('📚 最近历史抉择：')
+        for event in reversed(journal.legacy_events[-3:]):
+            label = LEGACY_EVENTS[event['event']].title
+            route = '公开协作' if event['route'] == 'community' else '精英突破'
+            rows.append(f'• {label} · {route}')
     rewards = journal.unlocked()
     rows.append('🏆 成果：' +
                 ('、'.join(title for _key, title in rewards)
