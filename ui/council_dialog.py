@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QPushButton, QTextEdit, QVBoxLayout,
 )
 from core.council import ISSUES, RESULT_NAMES, Seat, VOTE_NAMES, derive_factions, prepare_council
+from core.governance import POLICIES
 
 
 class CouncilDialog(QDialog):
@@ -96,6 +97,8 @@ class CouncilDialog(QDialog):
             '虚构议案（仅预览）：' + ISSUES[result.issue][1] +
             '\n\n预测选票：\n' + '\n'.join(vote_rows) +
             '\n\n预测结果：' + RESULT_NAMES[result.result] +
+            '\n\n📜 已投票通过后会影响猴山生活：\n' + POLICIES[result.issue][1] +
+            '\n当前法令：' + ('已生效' if self.colony.laws is not None and self.colony.laws.active(result.issue) else '未生效') +
             '\n\n🤝 当前猴际合作网络：\n' + faction_label +
             '\n\n合作小组是根据关系档案动态计算的，并非永久阵营。')
         self.start_button.setEnabled(True)
