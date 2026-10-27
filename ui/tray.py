@@ -379,7 +379,7 @@ class MonkeyTray:
         self._save()
 
     def open_colony_panel(self) -> None:
-        dialog = ColonyPanel(self.overlay.settings)
+        dialog = ColonyPanel(self.overlay.settings, asset_root=self.overlay._art_root)
         if dialog.exec() != QDialog.DialogCode.Accepted:
             return
         updated = dialog.updated(self.overlay.settings)
