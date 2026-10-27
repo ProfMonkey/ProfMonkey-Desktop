@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#121727"><meta name="description" content="ProfMonkey Desktop 三章连续猴山纪事，离线互动网页演示。">
+<title>猴山纪事 · ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#121727;--panel:#222c42;--accent:#f5c77d;--muted:#b8c1d3}
+*{box-sizing:border-box}body{margin:0;color:#fff4dc;background:radial-gradient(ellipse at 50% 0%,#334364,transparent 54%),var(--bg);font:15px/1.8 system-ui,"Microsoft YaHei",sans-serif}
+button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+a{color:var(--accent)}.wrap{width:min(1030px,calc(100% - 30px));margin:auto}
+nav{display:flex;justify-content:space-between;gap:12px;padding:22px 0;border-bottom:1px solid #42506a}.brand{font-weight:900}
+header{padding:52px 0 18px}header h1{font-size:clamp(36px,6vw,62px);line-height:1.15;letter-spacing:-.04em;margin:12px 0 22px}
+.kicker{color:var(--accent);letter-spacing:.12em;font-size:11px;font-weight:800}.intro{color:var(--muted);max-width:760px}
+.board{display:grid;grid-template-columns:.8fr 1.2fr;gap:20px;padding:22px 0 52px}
+.panel{background:linear-gradient(150deg,#28334a,#192334);border:1px solid #44506a;border-radius:24px;padding:28px}
+h2{margin:0 0 18px;font-size:23px}label{display:block;font-size:13px;color:#aebbd0;margin:16px 0 7px}
+select{width:100%;border:1px solid #72809a;border-radius:12px;background:#141d30;color:#fff0d2;padding:11px}
+button{border:none;border-radius:12px;padding:12px 16px;font-weight:820;background:#f5c77d;color:#29231f}button.secondary{color:#fff1d2;background:#3e4961}
+.buttons{display:flex;flex-wrap:wrap;gap:11px;margin-top:24px}.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 20px}
+.step{font-size:12px;text-align:center;padding:12px 6px;border-radius:12px;border:1px solid #515a70;color:#b0bbca}
+.step.active{border-color:#edc278;color:#f5d095;background:#463d32}.step.done{border-color:#6ebfb0;color:#a6e6cf}
+.scene{background:linear-gradient(180deg,#323c56,#1d293e);border:1px solid #5b6882;border-radius:17px;padding:22px;min-height:285px;display:grid;align-content:center;gap:12px}
+.speech{padding:15px 18px;border-radius:12px 12px 12px 3px;background:#fef0cb;color:#40332a;font-weight:700}
+.speech+ .speech{background:#cee2f8;border-radius:12px 12px 3px 12px;color:#23334b}
+.pill{display:inline-flex;color:#f7d19b;background:#4c4252;font-size:12px;border-radius:99px;padding:4px 10px}
+#phase{font-weight:900;color:var(--accent)}.hint{font-size:12px;color:var(--muted)}
+.growth{border-top:1px solid #44516c;padding-top:17px;margin-top:20px;color:#d7dceb}
+footer{padding:20px 0 45px;border-top:1px solid #465169;font-size:12px;color:#b6c1d3}
+@media(max-width:800px){.board{grid-template-columns:1fr}.panel{padding:18px}}
+@media(max-width:400px){.steps{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body>
+<div class="wrap">
+<nav><span class="brand">🐒 ProfMonkey Desktop / 猴山纪事</span><div><a href="./chemistry.html">六猴人格</a> · <a href="./index.html">首页</a></div></nav>
+<header><span class="kicker">LOCAL FICTION · 3 CHAPTERS · 2 ENDINGS</span>
+<h1>昨天丢的香蕉，<br><span style="color:#f5c77d">今天还在调查。</span></h1>
+<p class="intro">让猴子记住自己的经历。三章连续事件、两种关系结局、个人成长档案。下方是浏览器里的离线模拟；真实桌宠的存档需要在应用内主动开启。</p></header>
+<div class="board">
+<section class="panel"><h2>📖 选择猴山案件</h2>
+<label for="series">故事主题</label><select id="series">
+<option value="banana">🍌 消失的香蕉</option><option value="exam">📚 猴山考试周</option>
+<option value="rocket">🚀 不靠谱的试飞计划</option><option value="sleep">💤 消失的出勤记录</option></select>
+<label for="relationship">猴子之间的关系</label><select id="relationship">
+<option value="chaos">竞争激烈 · 争议结局</option><option value="good">好感与信任很高 · 合作结局</option></select>
+<div class="buttons"><button id="play" type="button">▶ 下一幕</button><button id="reset" type="button" class="secondary">↺ 重开这个案件</button></div>
+<div class="growth"><b>🎖 网页演示成长档案</b><div id="xp">研究 0 · 调皮 0 · 友善 0 · Lv.1</div><p class="hint">真实桌宠仅在章节完整播完时结算，离线存档也可在「猴山纪事」中清空。</p></div>
+<p class="hint">🔒 本页面不联网、不需要账户，不监测电脑操作，也不把这份网页演示进度写入本地存储。</p>
+</section>
+<section class="panel"><h2 id="title">🍌 消失的香蕉</h2>
+<div class="steps"><div class="step active" id="s0">第一章 · 线索</div><div class="step" id="s1">第二章 · 调查</div><div class="step" id="s2">第三章 · 结案</div></div>
+<div class="scene" aria-live="polite"><div><span class="pill" id="phase">第一章 / 第一幕</span></div>
+<div class="speech" id="line1">香蕉不见了，现场却有一张收据。</div><div class="speech" id="line2">那张收据上的名字不是我的！</div>
+<p class="hint" id="status">每一章包含两幕，第二幕结束才算一次完整剧情。</p></div></section>
+</div>
+<footer>演示与真实桌宠数据完全分离 · Windows 透明窗口与 v0.10 像素素材仍需人工验收 · ProfMonkey Desktop</footer>
+</div>
+<script>
+"use strict";
+const scripts={
+banana:[
+[["香蕉不见了，现场却有一张收据。","那张收据上的名字不是我的！"],["先把线索登记进猴山档案。","好，但是别再偷吃证据。"]],
+[["监控拍不到，香蕉皮却会说话。","我只发现一串奇怪的脚印。"],["嫌疑猴名单越写越长了。","别急，至少谜题变得有趣了。"]]],
+exam:[
+[["猴山的考试卷竟然自己改分了。","答案写着：以上皆是猴。"],["我们先找出原始试卷。","别把香蕉汁滴在证据上。"]],
+[["原来有人把练习题当成了标准答案！","别紧张，错误总能重做。"],["现在得召开一场复核会议。","会议也可以开得短一点。"]]],
+rocket:[
+[["火箭还没起飞，申请表先上天了。","这是无纸化办公的未来。"],["必须补交安全说明。","我给它加一根备用香蕉。"]],
+[["第二次试飞：推进器方向似乎反了。","不是倒飞，是重力创新。"],["我们先做地面试验。","这次的试验台不会跑路。"]]],
+sleep:[
+[["签到表写着全员到齐。","我确实梦见自己准时上班。"],["请解释梦境与考勤的区别。","最大的区别是梦里有香蕉。"]],
+[["机器算出睡眠时间超过一天。","它把打盹算成了深度研究。"],["我们应该先校准时钟。","或者批准午睡合法化。"]]]
+};
+const endings={
+good:[["误会解开了！猴山继续合作研究。","那我们把这件事写成一份报告。"],["结案：信任比香蕉还稀缺。","这次终于没再丢证据。"]],
+chaos:[["调查结束，结果是所有猴都不服。","那就下次重新投票吧！"],["结案：档案暂存，争议保留。","至少故事比会议有趣。"]]
+};
+const titles={banana:"🍌 消失的香蕉",exam:"📚 猴山考试周",rocket:"🚀 不靠谱的试飞计划",sleep:"💤 消失的出勤记录"};
+const $=id=>document.getElementById(id);
+let chapter=0,beat=0,done=false,xp=0;
+function paint(){
+ const key=$("series").value;
+ const page=chapter===2?endings[$("relationship").value]:scripts[key][chapter];
+ const lines=page[beat];
+ $("title").textContent=titles[key];$("phase").textContent="第"+(chapter+1)+"章 / 第"+(beat+1)+"幕";
+ $("line1").textContent=lines[0];$("line2").textContent=lines[1];
+ for(let i=0;i<3;i++)$("s"+i).className="step"+(i<chapter||done?" done":i===chapter?" active":"");
+ $("play").disabled=done;$("play").textContent=done?"✓ 本案已完结":"▶ 下一幕";
+ $("status").textContent=done?"本案结案。换一个主题，或者点「重开这个案件」。":
+  beat===0?"开场：继续观察这两只猴子。":"本章第二幕：再次点击将完整结算并进入下一章。";
+ const scores={research:0,mischief:0,empathy:0};scores[key==="banana"?"mischief":key==="sleep"?"empathy":"research"]=xp;
+ $("xp").textContent="研究 "+scores.research+" · 调皮 "+scores.mischief+" · 友善 "+scores.empathy+" · Lv."+Math.min(10,1+Math.floor(xp/4));
+}
+function reset(){chapter=0;beat=0;done=false;xp=0;paint()}
+$("play").addEventListener("click",()=>{if(done)return;if(beat===0){beat=1}else{xp++;beat=0;if(chapter===2){done=true;beat=1}else chapter++}paint()});
+$("reset").addEventListener("click",reset);
+$("series").addEventListener("change",reset);
+$("relationship").addEventListener("change",()=>{if(!done)paint()});
+reset();
+</script></body></html>
