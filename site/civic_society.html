@@ -11,7 +11,7 @@ h2{margin:0 0 14px}.small{font-size:12px;color:var(--muted)}label{display:block;
 input[type=checkbox]{width:auto;accent-color:var(--gold)}button{font:inherit;border:1px solid #7893a9;border-radius:9px;background:#36516a;color:var(--ink);padding:10px;cursor:pointer}button.primary{background:var(--gold);color:#29231d;font-weight:900}
 button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 button:disabled{opacity:.4;cursor:not-allowed}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{text-align:center;border:1px solid #638399;border-radius:12px;background:#0c2233;padding:10px}.stat b{display:block;font-size:28px;color:var(--gold)}
-.cast{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.pet{border:1px solid #628196;background:#102237;padding:11px;border-radius:11px}.pet strong{display:block}.pet small{display:block;font-size:12px;color:var(--muted)}
+.cast{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.pet{border:1px solid #628196;background:#102237;padding:11px;border-radius:11px}.pet img{width:100%;height:115px;object-fit:contain;display:block;filter:drop-shadow(0 5px 8px #0006)}.pet strong{display:block}.pet small{display:block;font-size:12px;color:var(--muted)}
 #news,#stage{background:#0c1c2d;border:1px solid #607c92;border-radius:12px;padding:15px;white-space:pre-wrap;min-height:110px;line-height:1.9}.actions{display:flex;gap:9px;flex-wrap:wrap;padding:11px 0}footer{border-top:1px solid #657589;padding:20px 0 50px;color:var(--muted);font-size:12px}
 @media(max-width:850px){.grid{grid-template-columns:1fr}}@media(max-width:500px){.two,.cast{grid-template-columns:1fr}}
 </style></head><body><main>
@@ -76,9 +76,12 @@ function render(){
  $('era').textContent=city.era+' · 建筑 '+city.owned.length+'/4 · 历史 '+city.decided.length+'/5';
  $('members').replaceChildren();
  for(const m of city.members){const div=document.createElement('div');div.className='pet';
- const strong=document.createElement('strong');strong.textContent=m.emoji+' '+m.name;
+ const picture=document.createElement('img');
+ picture.src='../assets/characters_v020/'+['scholar','trickster','sleepy','inventor','captain','shy'][city.members.indexOf(m)]+'.svg';
+ picture.alt=m.name+' 的 v0.20 原创角色';
+ const strong=document.createElement('strong');strong.textContent=m.name;
  const role=document.createElement('small');role.textContent=m.job;
- const faction=document.createElement('small');faction.textContent=m.faction;div.append(strong,role,faction);$('members').append(div)}
+ const faction=document.createElement('small');faction.textContent=m.faction;div.append(picture,strong,role,faction);$('members').append(div)}
  const aa=$('first'),bb=$('second'),a=aa.value,b=bb.value;aa.replaceChildren();bb.replaceChildren();
  for(let i=0;i<city.members.length;i++)for(const el of [aa,bb]){const o=document.createElement('option');o.value=String(i);o.textContent=city.members[i].name;el.append(o)}
  aa.value=Number(a)<city.members.length&&a!==''?a:'0';bb.value=Number(b)<city.members.length&&b!==''?b:String(Math.min(1,city.members.length-1));
