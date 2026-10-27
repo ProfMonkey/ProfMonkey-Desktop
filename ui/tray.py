@@ -59,6 +59,7 @@ class MonkeyTray:
         self.menu.addAction('🏠 召集所有猴子回家', self.reset_position)
         self.count_action = self.menu.addAction('', self.choose_count)
         self.refresh_count_label()
+        self.menu.addAction('🎨 六猴全新造型 · 各有独立角色设计', self.show_character_lineup)
         self.menu.addAction('🎛 猴山管理局 · 名字与性格', self.open_colony_panel)
         self.menu.addAction('🤝 猴山关系档案 · 好友/死对头/师徒', self.open_relationships)
         self.menu.addAction('📜 今日猴山任务 · 猴学积分', self.show_quests)
@@ -177,7 +178,7 @@ class MonkeyTray:
         self.colony.bind_menu(self.menu, self.select_target)
         self.colony.bind_city_story(self.show_city_life)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.19 developer candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.20 six original monkey mascots')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -449,6 +450,10 @@ class MonkeyTray:
             action.setChecked(checked)
             action.blockSignals(False)
 
+    def show_character_lineup(self) -> None:
+        from ui.character_gallery import CharacterGallery
+        CharacterGallery(self.colony).exec()
+
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
                            self.colony.count).exec()
@@ -521,7 +526,8 @@ class MonkeyTray:
         if filename:
             try:
                 from core.export import export_action_gif
-                count = export_action_gif(self.manifest,name,Path(filename))
+                count = export_action_gif(self.manifest,name,Path(filename),
+                                          personality=self.target.personality)
                 QMessageBox.information(None,'导出成功',f'已导出 {count} 帧角色动画；不会包含桌面内容。')
             except (OSError,ValueError,ImportError) as exc:
                 QMessageBox.warning(None,'导出失败',f'{exc}\n需要安装 Pillow: pip install Pillow')
@@ -538,7 +544,8 @@ class MonkeyTray:
         if filename:
             try:
                 from core.export import export_story_gif
-                count = export_story_gif(self.manifest, name, Path(filename))
+                count = export_story_gif(self.manifest, name, Path(filename),
+                                         personality=self.target.personality)
                 QMessageBox.information(None, '导出成功', f'已导出 {count} 帧原创剧情卡片，无任何桌面截图。')
             except (OSError, ValueError, ImportError) as exc:
                 QMessageBox.warning(None, '导出失败', str(exc))
