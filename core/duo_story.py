@@ -30,6 +30,32 @@ OUTCOMES: dict[str, DuoBeat] = {
     'launch': DuoBeat(2.1, ('wake', '允许试飞，但禁止撞桌面。'), ('fall', '发射成功，降落方案忘写了！')),
 }
 
+# Role-addressed second beats avoid giving the captain's line to the sleepy
+# monkey when their indices happen to be reversed.
+ROLE_OUTCOMES: dict[str, dict[str, tuple[str, str]]] = {
+    'invention': {
+        'scholar': ('angry', '风险评估呢？这份报告还得重写。'),
+        'inventor': ('fall', '看来安全按钮也需要安全按钮。')},
+    'inspection': {
+        'captain': ('angry', '不许再修改猴山宪章！'),
+        'trickster': ('blink', '那我申请发布热修复补丁。')},
+    'roll_call': {
+        'captain': ('blink', '出勤率百分之百，清醒率待统计。'),
+        'sleepy': ('sleep', '请替我签收一张请假条。')},
+    'boundary': {
+        'trickster': ('blink', '好，那我们改成安静实验。'),
+        'shy': ('wake', '谢谢，这个我愿意参加。')},
+    'library': {
+        'scholar': ('idle', '这篇论文标题叫《沉默是猴》。'),
+        'shy': ('blink', '终于找到一个不吵闹的角落。')},
+    'sleep_machine': {
+        'inventor': ('blink', '统计完毕：你的睡眠超过上限。'),
+        'sleepy': ('sleep', '那就给上限升个级。')},
+    'launch': {
+        'captain': ('wake', '批准试飞，必须写清楚事故报告。'),
+        'inventor': ('fall', '事故报告我已经预填好了！')},
+}
+
 
 class DuoStory:
     """One encounter, two finite beats, no timers or I/O of its own."""
@@ -51,6 +77,12 @@ class DuoStory:
             e = self.event
             return DuoBeat(2.4, (e.action_first, e.line_first),
                            (e.action_second, e.line_second))
+        role_outcomes = ROLE_OUTCOMES.get(self.event.kind)
+        if role_outcomes:
+            fallback = ('blink', '猴山又有新发现。')
+            return DuoBeat(2.1,
+                           role_outcomes.get(self.event.personality_first, fallback),
+                           role_outcomes.get(self.event.personality_second, fallback))
         return OUTCOMES.get(self.event.kind, OUTCOMES['hello'])
 
     def start(self, event: Encounter) -> bool:
