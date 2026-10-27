@@ -22,6 +22,7 @@ from core.duo_story import DuoStory
 from core.council import CouncilStory, Seat, prepare_council
 from core.governance import MonkeyLaws
 from core.expeditions import ExpeditionStory, ExpeditionJournal, Explorer, plan_expedition, LAW_BONUS
+from core.civilization import BUILDINGS
 from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
@@ -416,7 +417,9 @@ class MonkeyColony:
                              if self.laws is not None and self.laws.active(key))
         roster = tuple(Explorer(p.monkey_index, p.personality) for p in team)
         try:
-            plan = plan_expedition(mission, roster, self.relationships, policies)
+            plan = plan_expedition(
+                mission, roster, self.relationships, policies,
+                self.expeditions.buildings)
         except ValueError:
             return False
         if not self.expedition.start(plan):
@@ -780,8 +783,13 @@ class MonkeyColony:
             self.primary.history.add(name)
 
     def place_furniture(self, kind: str) -> bool:
-        """Place a draggable prop on the desktop; maximum eight props at once."""
+        """Place a draggable prop on desktop, or an actually constructed building."""
         if kind not in PROPS or len(self.furniture) >= 8:
+            return False
+        if (kind in BUILDINGS and
+                (self.expeditions is None or kind not in self.expeditions.buildings)):
+            return False
+        if kind in BUILDINGS and any(p.kind == kind for p in self.furniture):
             return False
         bounds = self.primary._work_area()
         index = len(self.furniture)
@@ -795,6 +803,18 @@ class MonkeyColony:
         self.furniture.append(widget)
         widget.show()
         return True
+
+    def display_city_building(self, key: str) -> bool:
+        """Only completed structures can be displayed as physical Qt props."""
+        if (type(key) is not str or key not in BUILDINGS or
+                self.expeditions is None or key not in self.expeditions.buildings):
+            return False
+        existing = next((prop for prop in self.furniture if prop.kind == key), None)
+        if existing is not None:
+            existing.show()
+            existing.raise_()
+            return True
+        return self.place_furniture(key)
 
     def remove_furniture(self, widget: FurnitureWidget) -> None:
         if widget in self.furniture:
