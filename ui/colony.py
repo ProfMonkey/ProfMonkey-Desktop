@@ -82,6 +82,7 @@ class MonkeyColony:
             pet = self.monkeys.pop()
             pet.story.cancel()
             pet._timer.stop()
+            pet.audio.set_enabled(False)
             pet.hide()
             pet.close()
             pet.deleteLater()
@@ -780,4 +781,5 @@ class MonkeyColony:
         for monkey in self.monkeys:
             monkey.story.cancel()
             monkey._timer.stop()
+            monkey.audio.set_enabled(False)
             monkey.close()
