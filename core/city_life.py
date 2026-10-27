@@ -52,6 +52,14 @@ CASE_EFFECTS = {
     'monkey_academy': {'careful': (0, -1, 2), 'bold': (0, 3, -2)},
 }
 MAX_CASE_NEWS = 24
+PERSONA_REPLIES = {
+    'scholar': ('我们先把证据链整理清楚。', '理论可以先不完美，实验必须做！'),
+    'trickster': ('查案先从香蕉皮开始，嘿嘿。', '我有个大胆计划，保证很有趣！'),
+    'sleepy': ('先查完案，再让我睡一会儿。', '边打盹边冒险也是本事。'),
+    'inventor': ('我用自己做的工具检验一下。', '我保证这台机器不会再爆炸！'),
+    'captain': ('全员注意安全，按计划行动。', '听我口令，现在开始行动！'),
+    'shy': ('让我在角落里核对材料吧。', '我也想试一次新的办法……'),
+}
 
 
 @dataclass(frozen=True)
@@ -111,7 +119,9 @@ def case_delta(case_id: str, choice: str) -> tuple[int, int, int]:
 
 def prepare_city_case(case_id: str, state: dict[str, object],
                       first: int, second: int, choice: str,
-                      *, bond: int = 0, trust: int = 0) -> CityPlan:
+                      *, bond: int = 0, trust: int = 0,
+                      first_personality: str | None = None,
+                      second_personality: str | None = None) -> CityPlan:
     """Deterministic planned scene. The journal separately verifies progress."""
     if type(case_id) is not str or case_id not in CASE_TITLES:
         raise ValueError('unknown city case')
@@ -133,6 +143,14 @@ def prepare_city_case(case_id: str, state: dict[str, object],
                   (careful_total >= 1 and bond >= 35 and trust >= 30)
                   else 'chaos')
     choice_text = CASE_CHOICES[case_id][0 if choice == 'careful' else 1]
+    preferred = 0 if choice == 'careful' else 1
+    first_reply = (PERSONA_REPLIES[first_personality][preferred]
+                   if first_personality in PERSONA_REPLIES
+                   else ('我找到了一条线索！' if choice == 'careful'
+                         else '先大胆行动，别让谜题逃走！'))
+    second_reply = (PERSONA_REPLIES[second_personality][preferred]
+                    if second_personality in PERSONA_REPLIES
+                    else clue)
     conclusion = (
         '大家达成共识，猴山迎来了新的篇章！' if ending == 'reconciled' else
         '问题依然存在，猴山还需要更多理解。' if ending == 'chaos' else
@@ -141,10 +159,9 @@ def prepare_city_case(case_id: str, state: dict[str, object],
     beats = (
         LivingBeat(1.7, ((first, 'wake', title + '！'),
                          (second, 'blink', start))),
-        LivingBeat(2.1, ((first, 'walk', '我找到了一条线索！' if choice == 'careful'
-                          else '先大胆行动，别让谜题逃走！'),
+        LivingBeat(2.1, ((first, 'walk', first_reply),
                          (second, 'angry' if choice == 'bold' else 'blink',
-                          clue + ' ' + choice_text))),
+                          clue + ' ' + second_reply + ' ' + choice_text))),
         LivingBeat(2.0, ((first, 'idle', conclusion),
                          (second, 'wake' if ending != 'chaos' else 'angry',
                           '这次选择已经写入猴山历史。'))),
