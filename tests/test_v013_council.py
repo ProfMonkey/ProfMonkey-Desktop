@@ -131,9 +131,12 @@ def test_timed_three_beat_story_can_interrupt_without_finishing():
             timeline.advance(.4)
         assert timeline.index == beat + 1
     assert timeline.finished and timeline.beat is None
+    assert timeline.consume_completion()
+    assert not timeline.consume_completion()
     assert timeline.advance(.4) is False
     timeline.cancel()
     assert timeline.beat is None
+    assert not timeline.consume_completion()
     with pytest.raises(ValueError):
         timeline.advance(-.01)
     with pytest.raises(ValueError):
