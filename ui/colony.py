@@ -361,6 +361,9 @@ class MonkeyColony:
                 pet.social_pose(action, phrase)
 
     def _complete_duo(self) -> None:
+        # Do not commit a still-playing or cancelled two-beat incident.
+        if not self.duo.finished:
+            return
         event = self.duo.event
         if event is None:
             return
