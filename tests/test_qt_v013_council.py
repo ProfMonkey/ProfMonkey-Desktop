@@ -62,6 +62,7 @@ def test_council_requires_full_three_beat_completion_and_cancel(tmp_path, app):
         while not colony.council.finished:
             colony.council.advance(.4)
         colony._complete_council()
+        colony._complete_council()  # duplicate completion must be idempotent
         assert colony.relationships.get(0,1)['interactions'] == 1
         colony.cancel_council()
         assert not any(p._social_active for p in colony.monkeys)
