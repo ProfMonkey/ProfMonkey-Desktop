@@ -26,6 +26,8 @@ class Encounter:
     action_second: str
     line_first: str
     line_second: str
+    personality_first: str = ''
+    personality_second: str = ''
 
 
 class EncounterDirector:
@@ -48,6 +50,19 @@ class EncounterDirector:
             return 'debate'
         if relation.get('bond', 0) >= 35 and relation.get('trust', 0) >= 30:
             return 'high_five'
+        pair = frozenset((a.personality, b.personality))
+        # Relationship wins over personality: friends cooperate, rivals argue.
+        special = {
+            frozenset(('scholar', 'inventor')): 'invention',
+            frozenset(('captain', 'trickster')): 'inspection',
+            frozenset(('captain', 'sleepy')): 'roll_call',
+            frozenset(('trickster', 'shy')): 'boundary',
+            frozenset(('scholar', 'shy')): 'library',
+            frozenset(('inventor', 'sleepy')): 'sleep_machine',
+            frozenset(('captain', 'inventor')): 'launch',
+        }
+        if pair in special:
+            return special[pair]
         if 'sleepy' in (a.personality, b.personality):
             return 'nap'
         if 'trickster' in (a.personality, b.personality) and self.rng.random() < .55:
@@ -63,8 +78,36 @@ class EncounterDirector:
             'prank': ('blink', 'angry', '你背后有一根会写代码的香蕉！', '不要拿学术问题开玩笑！'),
             'hello': ('blink', 'wake', '早上好，今天研究什么？', '研究为什么猴子还没下班。'),
         }
-        act_a, act_b, line_a, line_b = lines[kind]
-        return Encounter(a.index, b.index, kind, act_a, act_b, line_a, line_b)
+        roles = {
+            'invention': {
+                'scholar': ('blink', '你这发明经过学术审查了吗？'),
+                'inventor': ('wake', '当然！我自己签的字。')},
+            'inspection': {
+                'captain': ('angry', '猴山纪律检查！谁又偷改值班表？'),
+                'trickster': ('blink', '不是偷改，是优化排班算法！')},
+            'roll_call': {
+                'captain': ('wake', '全体集合！报数！'),
+                'sleepy': ('sleep', '……梦里已经报过了。')},
+            'boundary': {
+                'trickster': ('blink', '要不要参加香蕉吓人实验？'),
+                'shy': ('idle', '我想先在旁边看一看……')},
+            'library': {
+                'scholar': ('blink', '来图书馆一起研究猴学？'),
+                'shy': ('idle', '好，只要我们小声一点。')},
+            'sleep_machine': {
+                'inventor': ('wake', '我发明了自动睡眠统计仪！'),
+                'sleepy': ('sleep', '不用统计，我正在睡。')},
+            'launch': {
+                'captain': ('angry', '这台火箭有安全说明吗？'),
+                'inventor': ('wake', '有！写着：尽量别炸。')},
+        }
+        if kind in roles:
+            act_a, line_a = roles[kind].get(a.personality, ('blink', '猴山实验开始！'))
+            act_b, line_b = roles[kind].get(b.personality, ('blink', '收到。'))
+        else:
+            act_a, act_b, line_a, line_b = lines[kind]
+        return Encounter(a.index, b.index, kind, act_a, act_b, line_a, line_b,
+                         a.personality, b.personality)
 
     def choose(self, now: float, participants: list[Participant], relations,
                *, force: bool = False) -> Encounter | None:
