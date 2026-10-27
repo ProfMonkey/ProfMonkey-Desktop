@@ -17,6 +17,7 @@ class Settings:
     colony_behavior: str = 'free'  # free / follow; followers can track the professor
     collisions_enabled: bool = True  # soft sprite-to-sprite cartoon collisions
     ambient_encounters: bool = False  # opt-in autonomous two-monkey micro-stories
+    chronicle_enabled: bool = False  # opt-in fictional, local, bounded continuity
     sound: bool = False
     always_on_top: bool = True
     stories: bool = True
@@ -39,7 +40,7 @@ class Settings:
         self.colony_behavior = self.colony_behavior if self.colony_behavior in ('free', 'follow') else 'free'
         self.quiet_interval = max(90, min(3600, int(self.quiet_interval)))
         self.monkey_interval = max(40, min(1800, int(self.monkey_interval)))
-        for attr in ('sound', 'always_on_top', 'stories', 'history', 'progress_enabled', 'social_enabled', 'collisions_enabled', 'ambient_encounters'):
+        for attr in ('sound', 'always_on_top', 'stories', 'history', 'progress_enabled', 'social_enabled', 'collisions_enabled', 'ambient_encounters', 'chronicle_enabled'):
             setattr(self, attr, bool(getattr(self, attr)))
         # No system-wide input watcher in this build; prohibit enabling it silently.
         quotes = self.custom_quotes if isinstance(self.custom_quotes, list) else []
