@@ -21,6 +21,7 @@ from core.governance import MonkeyLaws
 from ui.law_dialog import MonkeyLawDialog
 from core.expeditions import ExpeditionJournal
 from ui.expedition_dialog import ExpeditionDialog
+from ui.civilization_dialog import CivilizationDialog
 from core.story_card import STORIES, render_story_card
 from ui.relationship_dialog import RelationshipDialog
 from ui.quest_dialog import QuestDialog
@@ -61,6 +62,7 @@ class MonkeyTray:
         self.menu.addAction('🗳 猴山议会 · 三猴投票与合作网络', self.open_council)
         self.menu.addAction('📜 猴山自治 · 法令与火箭试飞', self.show_laws)
         self.menu.addAction('🧭 猴山探险局 · 小队与日报', self.show_expeditions)
+        self.menu.addAction('🏗️ 猴山文明 · 四座建筑与城市发展', self.show_civilization)
         self.menu.addAction('⛔ 停止猴山探险', self.colony.cancel_expedition)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
         self.chronicle_action.setCheckable(True)
@@ -162,7 +164,7 @@ class MonkeyTray:
         self.menu.addAction('❌ 退出 ProfMonkey',self.quit)
         self.colony.bind_menu(self.menu, self.select_target)
         self.tray = QSystemTrayIcon(icon,overlay)
-        self.tray.setToolTip('ProfMonkey Desktop · v0.15 developer candidate')
+        self.tray.setToolTip('ProfMonkey Desktop · v0.16 developer candidate')
         self.tray.setContextMenu(self.menu)
         self.tray.activated.connect(self.on_tray_activated)
         self.has_tray = QSystemTrayIcon.isSystemTrayAvailable()
@@ -408,6 +410,9 @@ class MonkeyTray:
 
     def show_expeditions(self) -> None:
         ExpeditionDialog(self.colony).exec()
+
+    def show_civilization(self) -> None:
+        CivilizationDialog(self.colony).exec()
 
     def open_relationships(self) -> None:
         RelationshipDialog(self.relationships, self.overlay.settings.monkey_profiles,
