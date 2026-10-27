@@ -46,4 +46,4 @@ def test_council_page_controls_and_no_remote_dependencies():
 
 def test_documentation_explicitly_marks_candidate_not_real_windows_acceptance():
     notes=(ROOT/'docs/release_notes_v013.md').read_text(encoding='utf-8')
-    assert 'Windows 真机' in notes and '用户手动' in notes
+    assert 'Windows 真机' in notes and '由用户手动选择' in notes
