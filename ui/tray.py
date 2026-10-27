@@ -64,7 +64,7 @@ class MonkeyTray:
         self.menu.addAction('📜 猴山自治 · 法令与火箭试飞', self.show_laws)
         self.menu.addAction('🧭 猴山探险局 · 小队与日报', self.show_expeditions)
         self.menu.addAction('🏗️ 猴山文明 · 四座建筑与城市发展', self.show_civilization)
-        self.menu.addAction('🗞️ 活着的猴山 · 四大城市连续事件', self.show_city_life)
+        self.menu.addAction('🗞️ 活着的猴山 · 四大城市连续事件', lambda: self.show_city_life())
         self.menu.addAction('⛔ 停止当前城市章节', self.colony.cancel_city_life)
         self.menu.addAction('⛔ 停止猴山探险', self.colony.cancel_expedition)
         self.chronicle_action = self.menu.addAction('📖 记录猴山纪事（默认关）')
