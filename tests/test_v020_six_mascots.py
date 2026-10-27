@@ -64,7 +64,7 @@ def test_posed_monkeys_are_independently_changed():
     assert professor != professor_walk
     assert professor != trickster
     assert b'rotate(' in professor_walk
-    assert b'rotate(' not in pose_svg(ART_ROOT,'scholar','idle',0,4).split(b'id="pose"')[1].split(b'>')[0]
+    assert b'rotate(0 128 192)' in pose_svg(ART_ROOT,'scholar','idle',0,4)
 
 
 @pytest.mark.parametrize('arg',[
