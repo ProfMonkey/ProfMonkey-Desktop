@@ -43,7 +43,8 @@ def render_colony_portrait(idle: Path, profiles: list[dict], count: int,
     hgap = 18
     start_x = (W - (cols*card_w+(cols-1)*hgap))//2
     start_y = 160 if rows==2 else 176
-    accents = {'scholar':'#eac373','trickster':'#f8a391','sleepy':'#9cbde2'}
+    accents = {'scholar':'#eac373','trickster':'#f8a391','sleepy':'#9cbde2',
+               'inventor':'#71ddd3','captain':'#86a8fd','shy':'#96d7ab'}
     for i in range(count):
         col,row = i % cols, i//cols
         x = start_x+col*(card_w+hgap)
@@ -51,7 +52,8 @@ def render_colony_portrait(idle: Path, profiles: list[dict], count: int,
         draw.rounded_rectangle((x,y,x+card_w,y+card_h),radius=20,fill='#242737',outline='#5e5150',width=2)
         # Portrait art stays entirely within the card, even with six characters.
         art_size = 157 if rows == 2 else 258
-        variant = {'scholar':'idle','trickster':'angry','sleepy':'sleep'}[profiles[i]['personality']]
+        variant = {'scholar':'idle','trickster':'angry','sleepy':'sleep',
+                   'inventor':'blink','captain':'wake','shy':'idle'}[profiles[i]['personality']]
         pose = idle.parent / 'animations' / variant / f'{i%4:02d}.png'
         art=Image.open(pose).convert('RGBA') if pose.is_file() else base.copy()
         art.thumbnail((art_size,art_size),Image.Resampling.LANCZOS)

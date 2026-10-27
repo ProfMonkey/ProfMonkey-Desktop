@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101625">
+<meta name="description" content="ProfMonkey 六猴人格化学反应离线演示，选择两只猴子，观看两幕短剧。">
+<title>猴山化学反应 | ProfMonkey Desktop</title>
+<style>
+:root{color-scheme:dark;--bg:#101625;--panel:#1c263b;--muted:#b4bfd3;--gold:#ffcf79;--line:#3a465e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#354468 0,transparent 46%),var(--bg);color:#fff2df;font:16px/1.65 system-ui,"Microsoft YaHei",sans-serif}
+a{color:var(--gold)}button,select{font:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.wrap{width:min(1100px,calc(100% - 36px));margin:auto}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0;border-bottom:1px solid var(--line)}
+.brand{font-weight:900;letter-spacing:.03em}.pill{font-size:12px;color:#201a15;background:var(--gold);padding:5px 10px;border-radius:99px;font-weight:800}
+header{padding:58px 0 28px}h1{font-size:clamp(34px,6vw,72px);line-height:1.14;letter-spacing:-.04em;margin:14px 0 20px}
+.lead{max-width:720px;color:var(--muted);margin:0 0 25px}h2{font-size:22px;margin:0 0 16px}
+.gallery{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin:20px 0 35px}
+.card{border:1px solid var(--line);border-radius:18px;background:linear-gradient(150deg,#273249,#1b2234);padding:18px 6px 14px;text-align:center}
+.card svg{display:block;width:100%;height:auto;max-width:108px;margin:auto;filter:drop-shadow(0 10px 3px #12151a);image-rendering:pixelated}
+.card b{display:block;font-size:14px;margin-top:9px}.card small{display:block;color:var(--muted);font-size:11px}
+.playground{display:grid;grid-template-columns:.78fr 1.22fr;gap:22px;padding-bottom:60px}
+.controls,.stage{border:1px solid var(--line);border-radius:23px;background:rgba(27,35,52,.95);padding:28px}
+label{display:block;color:var(--muted);font-size:13px;margin:16px 0 5px}select{display:block;width:100%;background:#131c2e;border:1px solid #576580;color:#fff0d6;border-radius:12px;padding:13px}
+.buttons{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}button{background:#eec377;color:#2c2522;border:none;padding:13px 16px;border-radius:12px;font-weight:850}button.secondary{background:#343e56;color:#f9eacb}button:disabled{opacity:.5;cursor:not-allowed}
+.stage{position:relative;min-height:410px;overflow:hidden;background:radial-gradient(circle at 50% 70%,#45546e,#192239 70%)}
+.stage::after{content:"";position:absolute;left:8%;right:8%;bottom:47px;height:3px;background:#e8b778;opacity:.55}
+.stage-figures{display:flex;justify-content:space-around;align-items:end;min-height:165px;padding-bottom:10px;gap:12px}
+.figure{width:44%;max-width:190px;text-align:center;position:relative;z-index:1}.figure svg{display:block;margin:auto;max-height:135px;image-rendering:pixelated}
+.figure strong{display:block;font-size:13px;color:var(--gold)}
+.bubbles{display:grid;grid-template-columns:1fr 1fr;gap:12px;min-height:115px;margin:17px 0}
+.bubble{background:#fff3ce;color:#293143;padding:17px 15px;border-radius:17px;font-weight:700;font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.bubble:nth-child(2){background:#cdddf4}
+.tag{font-size:12px;color:#ffda94;letter-spacing:.04em}.beat{font-size:14px;color:#c7cbda;margin:10px 0 0}
+.note{font-size:12px;color:#a9b1c2;border-left:3px solid #cfaa72;padding-left:12px;margin:22px 0 0}
+footer{border-top:1px solid var(--line);padding:23px 0 45px;color:var(--muted);font-size:12px}
+@media(max-width:900px){.gallery{grid-template-columns:repeat(3,1fr)}.playground{grid-template-columns:1fr}}
+@media(max-width:480px){.gallery{grid-template-columns:repeat(2,1fr)}.controls,.stage{padding:18px}.bubbles{grid-template-columns:1fr}.stage{min-height:unset}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><div class="brand">🐒 ProfMonkey <span class="pill">v0.11 DEMO</span></div><a href="./index.html">← 返回介绍页</a></nav>
+<header><div class="tag">OFFLINE PIXEL PREVIEW / 六只猴子 × 七类专属相遇</div><h1>同一座猴山，<br>不同的<em style="color:var(--gold);font-style:normal">猴际关系。</em></h1>
+<p class="lead">队长猴查寝，困猴在梦里打卡；发明猴申请火箭试飞，队长猴开始写事故预案。选择两只猴子，看一场完整的两幕小事故。</p></header>
+<div class="gallery" id="gallery" aria-label="六只角色的示意像素头像"></div>
+<section class="playground">
+<div class="controls"><h2>🎭 组合实验室</h2>
+<label for="first">第一只猴子</label><select id="first"></select>
+<label for="second">第二只猴子</label><select id="second"></select>
+<label for="relation">两只猴子的关系</label><select id="relation"><option value="normal">普通同事 · 性格驱动</option><option value="friend">好朋友 · 优先击掌</option><option value="rival">死对头 · 优先争论</option></select>
+<div class="buttons"><button id="begin" type="button">🐒 开始一场相遇</button><button id="next" type="button" class="secondary">第二幕 →</button></div>
+<p class="note">这里是独立离线网页模拟，不连接桌宠，不读取鼠标键盘内容，也不会修改游戏的关系存档。Github 版本的新像素脸是网页示意，不代表 v0.10 动画帧已合并。</p>
+</div>
+<div class="stage" aria-live="polite"><div class="tag" id="sceneTitle">MONKEY SOCIAL LAB</div>
+<div class="bubbles"><div class="bubble" id="line1">选好角色，点击开始相遇。</div><div class="bubble" id="line2">猴山的秘密不止一根香蕉。</div></div>
+<div class="stage-figures"><div class="figure"><div id="fig1"></div><strong id="name1">学究猴</strong></div><div class="figure"><div id="fig2"></div><strong id="name2">发明猴</strong></div></div>
+<div class="beat" id="beatInfo">角色会影响台词、剧情与行为倾向。</div></div>
+</section>
+<footer>ProfMonkey Desktop · 源码候选预览。Windows 真机透明穿透、六猴像素资源与打包仍需独立验收。<br>Made for monkeys, not for spying.</footer>
+</div>
+<script>
+"use strict";
+const cast=[
+  {id:"scholar",name:"🎓 学究猴",trait:"严格审稿",coat:"#f5e8cb",hat:"#f5e8cb"},
+  {id:"trickster",name:"🧢 皮猴",trait:"专攻捣蛋",coat:"#e98d4b",hat:"#ee9d55"},
+  {id:"sleepy",name:"💤 困猴",trait:"睡眠专家",coat:"#a28cd7",hat:"#8d74cf"},
+  {id:"inventor",name:"🔧 发明猴",trait:"事故制造",coat:"#51b7b2",hat:"#46bfb6"},
+  {id:"captain",name:"⭐ 队长猴",trait:"秩序守护",coat:"#719ae7",hat:"#6391e2"},
+  {id:"shy",name:"🌿 社恐猴",trait:"安静观察",coat:"#83ba75",hat:"#7dac73"}
+];
+const dialogue={
+ invention:{scholar:["你这发明经过学术审查了吗？","风险评估呢？这份报告还得重写。"],inventor:["当然！我自己签的字。","看来安全按钮也需要安全按钮。"]},
+ inspection:{captain:["猴山纪律检查！谁又偷改值班表？","不许再修改猴山宪章！"],trickster:["不是偷改，是优化排班算法！","那我申请发布热修复补丁。"]},
+ roll_call:{captain:["全体集合！报数！","出勤率百分之百，清醒率待统计。"],sleepy:["……梦里已经报过了。","请替我签收一张请假条。"]},
+ boundary:{trickster:["要不要参加香蕉吓人实验？","好，那我们改成安静实验。"],shy:["我想先在旁边看一看……","谢谢，这个我愿意参加。"]},
+ library:{scholar:["来图书馆一起研究猴学？","这篇论文标题叫《沉默是猴》。"],shy:["好，只要我们小声一点。","终于找到一个不吵闹的角落。"]},
+ sleep_machine:{inventor:["我发明了自动睡眠统计仪！","统计完毕：你的睡眠超过上限。"],sleepy:["不用统计，我正在睡。","那就给上限升个级。"]},
+ launch:{captain:["这台火箭有安全说明吗？","批准试飞，必须写清楚事故报告。"],inventor:["有！写着：尽量别炸。","事故报告我已经预填好了！"]},
+ high_five:{default:["我们合作成功了！","猴山双强，击掌！"]},
+ debate:{default:["这次不能再让步了！","不吵了，先复现实验。"]},
+ nap:{default:["先睡五分钟……","休息是一门严谨的学科。"]},
+ prank:{default:["你背后有一根会写代码的香蕉！","等等，香蕉真的会写代码？"]},
+ hello:{default:["今天研究什么？","研究为什么猴子还没下班。"]}
+};
+const special={"inventor|scholar":"invention","captain|trickster":"inspection","captain|sleepy":"roll_call","shy|trickster":"boundary","scholar|shy":"library","inventor|sleepy":"sleep_machine","captain|inventor":"launch"};
+const $=id=>document.getElementById(id);
+let current=null,phase=0;
+function rect(x,y,w,h,c){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+c+'"/>'}
+function sprite(person){
+ let s=rect(3,7,4,5,"#986343")+rect(17,7,4,5,"#986343")+rect(6,5,12,13,"#986343");
+ s+=rect(7,7,10,8,"#c89763")+rect(8,9,2,2,"#251b21")+rect(14,9,2,2,"#251b21")+rect(11,13,3,2,"#704939");
+ s+=rect(5,17,14,5,person.coat)+rect(7,21,4,2,"#7f5138")+rect(14,21,4,2,"#7f5138");
+ const p=person.id;
+ if(p==="scholar"){s+=rect(7,9,5,4,"none")+'<rect x="7" y="9" width="5" height="4" fill="none" stroke="#283240" stroke-width="1"/><rect x="13" y="9" width="5" height="4" fill="none" stroke="#283240" stroke-width="1"/>'+rect(11,11,3,1,"#283240")+rect(11,17,2,5,"#e4534c")}
+ if(p==="trickster"){s+=rect(5,4,14,3,person.hat)+rect(3,6,17,2,person.hat)+rect(16,3,3,2,"#ffd379")}
+ if(p==="sleepy"){s+=rect(7,2,11,3,person.hat)+rect(10,1,7,2,person.hat)+rect(16,2,3,2,"#f9e3d9")}
+ if(p==="inventor"){s+=rect(5,7,7,5,"#3bced2")+rect(13,7,7,5,"#3bced2")+rect(11,9,3,1,"#f6e18d")+rect(5,4,14,2,"#276475")}
+ if(p==="captain"){s+=rect(5,3,14,4,person.hat)+rect(4,7,16,2,"#456ab4")+rect(11,4,3,3,"#fbe07b")}
+ if(p==="shy"){s+=rect(4,4,4,14,person.hat)+rect(18,4,4,14,person.hat)+rect(6,3,13,3,person.hat)+rect(7,17,10,4,person.hat)}
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" shape-rendering="crispEdges" aria-hidden="true">'+s+'</svg>';
+}
+function pick(){return [cast.find(p=>p.id===$("first").value),cast.find(p=>p.id===$("second").value)]}
+function showCast(){const people=pick(); $("fig1").innerHTML=sprite(people[0]);$("fig2").innerHTML=sprite(people[1]);$("name1").textContent=people[0].name;$("name2").textContent=people[1].name}
+function start(){
+ const people=pick();if(people[0].id===people[1].id){$("sceneTitle").textContent="请选两只不同的猴子";return}
+ let key=$("relation").value==="friend"?"high_five":$("relation").value==="rival"?"debate":special[[people[0].id,people[1].id].sort().join("|")];
+ if(!key){key=people.some(p=>p.id==="sleepy")?"nap":people.some(p=>p.id==="trickster")?"prank":"hello"}
+ current={people:people,key:key};phase=0;paint();
+}
+function paint(){
+ if(!current)return;showCast();const people=current.people,key=current.key;
+ people.forEach((p,i)=>{const lines=dialogue[key][p.id]||dialogue[key].default||["猴山实验开始！","下次再来！"];$(i===0?"line1":"line2").textContent=lines[phase]});
+ $("sceneTitle").textContent="事件 "+key.toUpperCase()+" · "+(phase===0?"第一幕":"第二幕");
+ $("beatInfo").textContent=phase===0?"开场：猴子之间产生了事件。":"收尾：一场完整相遇，到这里才会更新游戏里的关系。";
+ $("next").disabled=phase===1;
+}
+cast.forEach(p=>{const card=document.createElement("div");card.className="card";card.innerHTML=sprite(p)+"<b></b><small></small>";card.querySelector("b").textContent=p.name;card.querySelector("small").textContent=p.trait;$("gallery").appendChild(card);["first","second"].forEach(id=>{const o=document.createElement("option");o.value=p.id;o.textContent=p.name;$(id).appendChild(o)})});
+$("first").value="scholar";$("second").value="inventor";showCast();$("begin").addEventListener("click",start);
+$("next").addEventListener("click",()=>{if(!current)start();else if(phase===0){phase=1;paint()}});
+$("first").addEventListener("change",showCast);$("second").addEventListener("change",showCast);start();
+</script>
+</body>
+</html>

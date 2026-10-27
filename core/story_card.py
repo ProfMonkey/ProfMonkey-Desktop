@@ -53,8 +53,10 @@ def render_story_card(idle: Path, profiles: list[dict], count: int,
     card_h = 210 if rows == 2 else 270
     gap = 16
     start_y = 240
-    accents = {'scholar':'#eac373','trickster':'#f8a391','sleepy':'#9cbde2'}
-    poses = {'scholar':'idle','trickster':'angry','sleepy':'sleep'}
+    accents = {'scholar':'#eac373','trickster':'#f8a391','sleepy':'#9cbde2',
+               'inventor':'#71ddd3','captain':'#86a8fd','shy':'#96d7ab'}
+    poses = {'scholar':'idle','trickster':'angry','sleepy':'sleep',
+             'inventor':'blink','captain':'wake','shy':'idle'}
     for i in range(count):
         col, row = i % cols, i // cols
         row_count = min(cols, count - row*cols)

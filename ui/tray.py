@@ -71,6 +71,7 @@ class MonkeyTray:
         self.ambient_action.setChecked(overlay.settings.ambient_encounters)
         self.ambient_action.toggled.connect(self.set_ambient_encounters)
         group_menu.addAction('🎭 让附近两只猴子互动一次', self.demo_encounter)
+        group_menu.addAction('🧪 指定两只猴子上演双幕短剧', self.choose_duo_pair)
         group_menu.addAction('🍌 放置公共香蕉 · 猴子竞速', self.drop_shared_banana)
         social = self.menu.addMenu('🤝 猴子之间的互动')
         social.addAction('🗳 召集猴学委员会',lambda:self.launch_social('meeting'))
@@ -236,6 +237,28 @@ class MonkeyTray:
         if not self.colony.demo_encounter():
             QMessageBox.information(None, '🐒 猴山偶遇',
                 '需要至少两只空闲的猴子；专注、暂停、短剧或投掷期间暂不能触发。')
+
+    def choose_duo_pair(self) -> None:
+        if self.colony.count < 2:
+            QMessageBox.information(None, '🐒 猴山化学反应', '请先在猴山管理局增加至至少两只猴子。')
+            return
+        from core.profiles import PERSONALITIES
+        labels = [f'#{i+1}  {pet.display_name} · {PERSONALITIES.get(pet.personality, "学究猴")}'
+                  for i, pet in enumerate(self.colony.monkeys)]
+        first, ok = QInputDialog.getItem(
+            None, '🧪 猴山化学反应', '选择第一只猴子', labels, 0, False)
+        if not ok:
+            return
+        first_index = labels.index(first)
+        options = [(i, text) for i, text in enumerate(labels) if i != first_index]
+        second, ok = QInputDialog.getItem(
+            None, '🧪 猴山化学反应', '选择第二只猴子', [text for _, text in options], 0, False)
+        if not ok:
+            return
+        second_index = next(i for i, text in options if text == second)
+        if not self.colony.demo_pair(first_index, second_index):
+            QMessageBox.information(None, '🐒 暂时无法演出',
+                '两只猴子需可见且空闲；暂停、专注、拖动、联合短剧或香蕉竞速时暂不能触发。')
 
     def drop_shared_banana(self) -> None:
         if self.colony.drop_shared_banana():

@@ -5,6 +5,9 @@ PERSONALITIES = {
     'scholar': '学究猴',
     'trickster': '皮猴',
     'sleepy': '困猴',
+    'inventor': '发明猴',
+    'captain': '队长猴',
+    'shy': '社恐猴',
 }
 DEFAULT_NAMES = ('猴教授', '猴助教', '猴学博士', '香蕉主任', '摸鱼研究员', '实习猴')
 
@@ -24,7 +27,7 @@ def clean_profiles(raw: object) -> list[dict[str, str]]:
     values = raw if isinstance(raw, list) else []
     for i in range(6):
         row = values[i] if i < len(values) and isinstance(values[i], dict) else {}
-        personality = row.get('personality', 'scholar' if i == 0 else 'trickster' if i % 2 else 'sleepy')
+        personality = row.get('personality', tuple(PERSONALITIES)[i])
         if not isinstance(personality, str) or personality not in PERSONALITIES:
             personality = 'scholar'
         profiles.append({'name': clean_name(row.get('name'), i), 'personality': personality})

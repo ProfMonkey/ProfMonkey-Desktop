@@ -18,6 +18,7 @@ from core.profiles import clean_profiles
 from core.relationships import RelationshipStore
 from core.quests import QuestBoard
 from core.encounters import EncounterDirector, Participant, Encounter
+from core.duo_story import DuoStory
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
 from ui.overlay import MonkeyOverlay
@@ -46,6 +47,7 @@ class MonkeyColony:
         self.relationships: RelationshipStore | None = None
         self.quests: QuestBoard | None = None
         self.encounters = EncounterDirector()
+        self.duo = DuoStory()
         self.furniture: list[FurnitureWidget] = []
         self._social_timer.start()
 
@@ -66,6 +68,7 @@ class MonkeyColony:
         value to Settings/ConfigStore. Closing companions stops their timers.
         """
         target = clamp_count(count)
+        self.cancel_duo()
         if self.social.active:
             self.cancel_social()
         self.cancel_shared_banana()
@@ -109,6 +112,7 @@ class MonkeyColony:
     def configure(self, settings: Settings) -> None:
         """Apply a global preference to every independent entity."""
         self.cancel_social()
+        self.cancel_duo()
         self.cancel_shared_banana()
         for monkey in self.monkeys:
             monkey.configure(settings)
@@ -116,6 +120,8 @@ class MonkeyColony:
         self.apply_profiles()
 
     def set_mode(self, mode: str) -> None:
+        if mode != 'MONKEY':
+            self.cancel_duo()
         for monkey in self.monkeys:
             monkey.set_mode(mode)
 
@@ -142,7 +148,7 @@ class MonkeyColony:
     def drop_shared_banana(self) -> bool:
         """Spawn a visible banana token; the colony races to claim it."""
         if (self.count < 2 or self._race_active or not self.visible()
-                or self.primary.focus.active or self.social.active
+                or self.primary.focus.active or self.social.active or self.duo.active
                 or any(p.paused or p.story.active or p._drag_active or p._social_active
                        for p in self.monkeys)):
             return False
@@ -210,7 +216,8 @@ class MonkeyColony:
                 if pet._drag_active or pet.story.active or pet._social_active or pet.body.airborne:
                     pet.set_colony_target(None)
                     continue
-                personality_speed = {"trickster": 155.0, "scholar": 125.0, "sleepy": 88.0}.get(pet.personality, 125.0)
+                personality_speed = {"trickster": 155.0, "scholar": 125.0, "sleepy": 88.0,
+                                     "inventor": 135.0, "captain": 145.0, "shy": 105.0}.get(pet.personality, 125.0)
                 target_x = clamp_x(target_center - pet._sx - pet._size/2,
                                    bounds, pet.width())
                 pet.set_colony_target(target_x, personality_speed)
@@ -283,9 +290,25 @@ class MonkeyColony:
                 or self.primary.focus.active):
             if self.primary.focus.active and self.social.active:
                 self.cancel_social()
+            if self.duo.active:
+                self.cancel_duo()
             return
         self._physics_tick(now)
-        if (not self.social.active and not self._race_active and self.count >= 2
+        if self.duo.active:
+            event = self.duo.event
+            members = [p for p in self.monkeys
+                       if p.monkey_index in (event.first, event.second)]
+            if (len(members) != 2 or any(
+                    p._drag_active or p.story.active or not p._social_active
+                    for p in members)):
+                self.cancel_duo()
+            elif self.duo.advance(dt):
+                if self.duo.finished:
+                    self._complete_duo()
+                    self.cancel_duo()
+                else:
+                    self._apply_duo_beat()
+        if (not self.social.active and not self.duo.active and not self._race_active and self.count >= 2
                 and self.primary.settings.ambient_encounters
                 and self.primary.settings.mode == "MONKEY"):
             self._maybe_encounter(now)
@@ -302,7 +325,8 @@ class MonkeyColony:
                         self._release_group_poses()
             return
         if (self.count >= 2 and self.primary.settings.social_enabled
-                and self.primary.settings.mode == 'MONKEY' and now >= self._next_social_at):
+                and not self.duo.active and self.primary.settings.mode == 'MONKEY'
+                and now >= self._next_social_at):
             self.start_social(self._rng.choice(('meeting', 'banana_duel')))
         if now >= self._next_social_at:
             self._next_social_at = now + 300
@@ -319,28 +343,54 @@ class MonkeyColony:
         ) for p in self.monkeys]
 
     def _play_encounter(self, event: Encounter) -> None:
-        first = next(p for p in self.monkeys if p.monkey_index == event.first)
-        second = next(p for p in self.monkeys if p.monkey_index == event.second)
-        for pet, action, phrase, other in (
-            (first, event.action_first, event.line_first, second),
-            (second, event.action_second, event.line_second, first),
-        ):
-            pet.play_action(action)
-            pet._say(f'{pet.display_name} 对 {other.display_name}：{phrase}', 3.5)
-        if self.relationships is not None:
-            if event.kind == 'debate':
-                self.relationships.record_collision(first.monkey_index, second.monkey_index)
-            elif event.kind == 'prank':
-                self.relationships.record_race(first.monkey_index, second.monkey_index)
-            else:
-                self.relationships.record_shared_activity(first.monkey_index, second.monkey_index)
+        """Begin a finite two-beat scene. No relationship effect until finished."""
+        if self.duo.start(event):
+            self._apply_duo_beat()
 
-    def _maybe_encounter(self, now: float, *, force: bool = False) -> bool:
-        if (self.count < 2 or self.social.active or self._race_active or
+    def _apply_duo_beat(self) -> None:
+        event, beat = self.duo.event, self.duo.beat
+        if event is None or beat is None:
+            return
+        for index, (action, phrase) in ((event.first, beat.first), (event.second, beat.second)):
+            pet = next((p for p in self.monkeys if p.monkey_index == index), None)
+            if pet is not None:
+                pet.social_pose(action, phrase)
+
+    def _complete_duo(self) -> None:
+        event = self.duo.event
+        if event is None or self.relationships is None:
+            return
+        if event.kind in ('debate', 'inspection'):
+            self.relationships.record_collision(event.first, event.second)
+        elif event.kind == 'prank':
+            self.relationships.record_race(event.first, event.second)
+        else:
+            self.relationships.record_shared_activity(event.first, event.second)
+
+    def cancel_duo(self) -> None:
+        if not self.duo.active:
+            return
+        self.duo.cancel()
+        for pet in self.monkeys:
+            pet.exit_social()
+
+    def _maybe_encounter(self, now: float, *, force: bool = False,
+                         pair: tuple[int, int] | None = None) -> bool:
+        if (self.count < 2 or self.social.active or self.duo.active or self._race_active or
                 not self.visible() or self.primary.focus.active or
                 any(p.paused for p in self.monkeys)):
             return False
-        event = self.encounters.choose(now, self._participants(), self.relationships,
+        participants = self._participants()
+        if pair is not None:
+            # Reject duplicates, booleans, invalid or hidden members.
+            if (len(pair) != 2 or any(type(i) is not int or not 0 <= i < self.count
+                                      for i in pair) or pair[0] == pair[1]):
+                return False
+            participants = [p for p in participants
+                            if p.index in pair and self.monkeys[p.index].isVisible()]
+            if len(participants) != 2:
+                return False
+        event = self.encounters.choose(now, participants, self.relationships,
                                        force=force)
         if event is None:
             return False
@@ -351,7 +401,13 @@ class MonkeyColony:
         """Manually trigger the closest available pair even if auto mode is off."""
         return self._maybe_encounter(time.monotonic(), force=True)
 
+    def demo_pair(self, first: int, second: int) -> bool:
+        """User-selected pair: bypass distance/cooldowns, never busy-state checks."""
+        return self._maybe_encounter(time.monotonic(), force=True, pair=(first, second))
+
     def set_ambient_encounters(self, enabled: bool) -> None:
+        if not enabled:
+            self.cancel_duo()
         self.primary.settings.ambient_encounters = bool(enabled)
         for pet in self.monkeys:
             pet.settings.ambient_encounters = bool(enabled)
@@ -381,6 +437,7 @@ class MonkeyColony:
             return False
         if not self.social.start(name, self.count):
             return False
+        self.cancel_duo()
         self.cancel_shared_banana()
         # Assemble on the same screen; no cursor movement or other window control.
         self.gather_for_meeting()
@@ -465,6 +522,8 @@ class MonkeyColony:
             target._say('教授专座已被占领。闲人免进。', 2.5)
 
     def toggle_pause(self, enabled: bool) -> None:
+        if enabled:
+            self.cancel_duo()
         for monkey in self.monkeys:
             monkey.toggle_pause(enabled)
 
@@ -491,6 +550,7 @@ class MonkeyColony:
             prop.show()
 
     def hide_all(self) -> None:
+        self.cancel_duo()
         self.cancel_shared_banana()
         for monkey in self.monkeys:
             monkey.hide()
@@ -501,6 +561,7 @@ class MonkeyColony:
         return any(monkey.isVisible() for monkey in self.monkeys)
 
     def gather(self) -> None:
+        self.cancel_duo()
         self.cancel_shared_banana()
         if self.social.active and any(p._social_active for p in self.monkeys):
             self.cancel_social()
@@ -533,6 +594,7 @@ class MonkeyColony:
         self.show_all()
 
     def prepare_focus(self) -> None:
+        self.cancel_duo()
         self.cancel_shared_banana()
         self.cancel_social()
         """Cancel old stories as soon as primary activates a focus session."""
@@ -546,6 +608,7 @@ class MonkeyColony:
 
     def quit_all(self) -> None:
         self._social_timer.stop()
+        self.cancel_duo()
         self.cancel_shared_banana()
         self.cancel_social()
         self.clear_furniture()
