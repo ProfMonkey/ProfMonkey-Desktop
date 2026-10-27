@@ -134,6 +134,7 @@ class MonkeyColony:
         if mode != 'MONKEY':
             self.cancel_duo()
             self.cancel_council()
+            self.cancel_social()
         for monkey in self.monkeys:
             monkey.set_mode(mode)
 
@@ -310,7 +311,7 @@ class MonkeyColony:
         self._last_social_tick = now
         if (not self.primary.isVisible() or any(p.paused for p in self.monkeys)
                 or self.primary.focus.active):
-            if self.primary.focus.active and self.social.active:
+            if self.social.active:
                 self.cancel_social()
             if self.duo.active:
                 self.cancel_duo()
@@ -738,6 +739,7 @@ class MonkeyColony:
         if enabled:
             self.cancel_duo()
             self.cancel_council()
+            self.cancel_social()
         for monkey in self.monkeys:
             monkey.toggle_pause(enabled)
 
@@ -766,6 +768,7 @@ class MonkeyColony:
     def hide_all(self) -> None:
         self.cancel_council()
         self.cancel_duo()
+        self.cancel_social()
         self.cancel_shared_banana()
         for monkey in self.monkeys:
             monkey.hide()
