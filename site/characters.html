@@ -1,0 +1,38 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101824"><meta name="description" content="ProfMonkey Desktop v0.20 六只原创全身比例猴子角色，完全离线 SVG 角色展示。"><title>六只全新猴子 · ProfMonkey Studio</title>
+<style>:root{color-scheme:dark;--gold:#ffd68e;--muted:#b9c9d3}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -10%,#38536a,transparent 32%),#0e1725;color:#fff3e3;font:15px/1.6 system-ui,"Microsoft YaHei",sans-serif}
+a{color:var(--gold);text-decoration:none}main{width:min(1200px,calc(100% - 30px));margin:auto}nav{display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid #50677b;gap:14px}
+header{padding:45px 0 27px}header small{color:var(--gold);font-size:12px;letter-spacing:.2em;font-weight:800}h1{font-size:clamp(40px,7vw,74px);line-height:1.15;margin:12px 0}h1 em{color:var(--gold);font-style:normal}header p{max-width:840px;color:var(--muted);font-size:16px}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding-bottom:20px}button{font:inherit;background:#344f68;color:#fff3e3;border:1px solid #849caf;border-radius:10px;padding:10px 14px;cursor:pointer}
+button:focus-visible,button:hover{border-color:var(--gold);outline:2px solid #f6d18f}button[aria-pressed=true]{background:var(--gold);color:#262018}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:17px;margin:8px 0 60px}
+.card{overflow:hidden;border:1px solid #5a7086;border-radius:20px;background:#172a3d;transition:transform .2s,box-shadow .2s;position:relative}
+.card:hover{transform:translateY(-7px);box-shadow:0 15px 60px #f4bc6940}.art{height:277px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% 75%,#54748794,transparent 58%),linear-gradient(135deg,#1b3946,#0c1d2e);padding:10px}
+.art img{width:min(96%,240px);height:250px;object-fit:contain;filter:drop-shadow(0 12px 15px #0007);animation:float 3.2s ease-in-out infinite}
+.card:nth-child(2n) img{animation-delay:-.7s}.card:nth-child(3n) img{animation-delay:-1.4s}.info{padding:18px 21px 24px}.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.number{font-weight:950;font-size:28px;color:var(--gold)}h2{font-size:24px;margin:0}.desc{font-size:13px;color:var(--muted);min-height:50px}.badge{display:inline-block;padding:5px 9px;border-radius:30px;background:#354f63;font-size:12px;color:#e7efdf}
+.card.active{outline:3px solid var(--gold)}.stage{padding:23px;border-radius:16px;border:1px solid #60788d;background:#14283e;margin-bottom:44px;display:flex;gap:18px;align-items:center;justify-content:space-between}
+.stage b{font-size:22px}.stage p{margin:7px 0;color:var(--muted)}.stage strong{color:var(--gold)}footer{border-top:1px solid #5b7184;padding:20px 0 45px;color:var(--muted);font-size:12px}
+@keyframes float{50%{transform:translateY(-5px)}}@media(max-width:960px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:580px){.grid{grid-template-columns:1fr}.stage{display:block} .art{height:245px}.art img{height:224px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}</style></head>
+<body><main><nav><b>🐒 ProfMonkey · CHARACTER STUDIO v0.20</b><div><a href="index.html">返回首页</a> · <a href="civic_society.html">猴山社会</a></div></nav>
+<header><small>ORIGINAL SIX · REAL GAME ASSETS</small><h1>脑袋缩小了。<br><em>个性藏不住。</em></h1><p>这次不是换六张封面：六只猴子的躯干、四肢、服装、配饰、表情与动作资源都重新设计。比例更协调，站姿、装备、气质完全不同。下方图片直接读取和 Windows 桌宠相同的六个 SVG 角色文件。</p></header>
+<div class="controls"><span>🎨 画廊光影：</span><button id="night" aria-pressed="true" type="button">🌌 星空舞台</button><button id="day" aria-pressed="false" type="button">☀️ 明亮展台</button><span style="color:var(--muted);font-size:13px">按角色卡片可查看详细介绍</span></div>
+<div class="grid" id="cast">
+<article class="card" data-key="scholar" tabindex="0" role="button" aria-label="选中学究猴"><div class="art"><img src="../assets/characters_v020/scholar.svg" alt="戴圆框眼镜、穿学究制服、抱书的全身猴子"></div><div class="info"><div class="top"><span class="number">01</span><span class="badge">学术派</span></div><h2>🎓 学究猴</h2><p class="desc">外套、红色领结和参考书。他是真的在研究香蕉。</p></div></article>
+<article class="card" data-key="trickster" tabindex="0" role="button" aria-label="选中皮猴"><div class="art"><img src="../assets/characters_v020/trickster.svg" alt="穿深色兜帽、藏香蕉的顽皮全身猴子"></div><div class="info"><div class="top"><span class="number">02</span><span class="badge">调皮派</span></div><h2>🍌 皮猴</h2><p class="desc">深色兜帽、香蕉背包和眨眼表情。最大的特长是制造意外。</p></div></article>
+<article class="card" data-key="sleepy" tabindex="0" role="button" aria-label="选中困猴"><div class="art"><img src="../assets/characters_v020/sleepy.svg" alt="穿蓝色运动服、戴耳机的慵懒全身猴子"></div><div class="info"><div class="top"><span class="number">03</span><span class="badge">佛系派</span></div><h2>💤 困猴</h2><p class="desc">蓝色连帽衫、耳机和半眯的眼睛。猴山唯一的睡眠研究权威。</p></div></article>
+<article class="card" data-key="inventor" tabindex="0" role="button" aria-label="选中发明猴"><div class="art"><img src="../assets/characters_v020/inventor.svg" alt="戴蓝色实验护目镜、穿实验服并带试管的全身猴子"></div><div class="info"><div class="top"><span class="number">04</span><span class="badge">科技派</span></div><h2>🧪 发明猴</h2><p class="desc">护目镜、试管和实验服。每次研究都可能惊动猴山。</p></div></article>
+<article class="card" data-key="captain" tabindex="0" role="button" aria-label="选中队长猴"><div class="art"><img src="../assets/characters_v020/captain.svg" alt="红色制服、队长帽和规划地图的全身猴子"></div><div class="info"><div class="top"><span class="number">05</span><span class="badge">管理派</span></div><h2>🧭 队长猴</h2><p class="desc">红色制服、勋章和猴山地图。自封文明建设总指挥。</p></div></article>
+<article class="card" data-key="shy" tabindex="0" role="button" aria-label="选中社恐猴"><div class="art"><img src="../assets/characters_v020/shy.svg" alt="绿色套衫、抱着小书的安静全身猴子"></div><div class="info"><div class="top"><span class="number">06</span><span class="badge">隐居派</span></div><h2>🌿 社恐猴</h2><p class="desc">绿色外套、小书和柔和表情。发明猴炸实验室时它正在读书。</p></div></article>
+</div>
+<section class="stage"><div><b>🐒 <span id="selected">六位角色 · 一座猴山</span></b><p id="characterInfo">点击任意一张角色卡，了解它在城市里的工作与性格。</p></div><div><strong>13 种动作状态</strong><p>Windows 客户端内还有眨眼、散步、奔跑、睡觉、摔倒、吃香蕉等动作，由同一套矢量角色驱动。</p></div></section>
+<footer>原创 v0.20 SVG 角色资源 · 完全离线 · 浏览器仅展示静态角色，Qt 程序在游戏中生成动作帧。当前为开发候选，Windows 实机仍需验证。</footer></main>
+<script>"use strict";
+const details={scholar:['学究猴','习惯独立研究，喜欢观测台与实验档案。'],trickster:['皮猴','喜欢恶作剧、广场活动与香蕉失窃调查。'],sleepy:['困猴','总是想睡觉，却经常被迫参与猴山值班。'],inventor:['发明猴','偏爱实验室，看到银河信号比看到香蕉还兴奋。'],captain:['队长猴','负责猴山纪律、规划与突发事件处理。'],shy:['社恐猴','喜欢安静研究，比较擅长低调合作。']};
+for(const card of document.querySelectorAll('.card')){
+ function select(){document.querySelectorAll('.card').forEach(n=>n.classList.remove('active'));card.classList.add('active');const d=details[card.dataset.key];document.getElementById('selected').textContent=d[0];document.getElementById('characterInfo').textContent=d[1]}
+ card.addEventListener('click',select);card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();select()}})
+}
+for(const [id,color] of [['night','linear-gradient(135deg,#1b3946,#0c1d2e)'],['day','linear-gradient(135deg,#E8E1C7,#BACED1)']]){
+ document.getElementById(id).addEventListener('click',()=>{for(const v of ['night','day'])document.getElementById(v).setAttribute('aria-pressed',String(v===id));for(const card of document.querySelectorAll('.art'))card.style.background=color;})
+}</script></body></html>
