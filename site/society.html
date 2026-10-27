@@ -64,7 +64,7 @@ footer{border-top:1px solid var(--line);padding:28px 0 42px;color:var(--muted);f
 <div class="actions"><button type="button" class="btn alt" id="addFriend">🤝 让前两只参会猴子结盟</button>
 <button type="button" class="btn alt" id="addRival">⚡ 让前两只参会猴子变成对手</button>
 <button type="button" class="btn alt" id="reset">↺ 重置网络</button></div>
-<p class="note" id="groups">绿色实线表示达到合作阈值的关系，红色虚线表示明显竞争。本页演示数据只在当前页面内存中使用，刷新即清零。</p></section>
+<p class="note" id="groups">绿色实线表示达到合作阈值的关系，红色虚线表示明显竞争。表决会逐步改变关系；网页示例只存于当前页面内存，刷新即清零。</p></section>
 </div>
 <footer>🔒 本页面完全离线、不截图、不监听真实系统操作，也不会改动猴山程序里的关系存档。真实桌宠的「猴山议会」由用户右键手动开启。<br>ProfMonkey Desktop · 开源源码候选版，Windows 真机验收仍需进行。</footer></div>
 <script>
@@ -112,8 +112,8 @@ let score=3*views[people[i][0]][topic];
 ids.filter(j=>i!==j).forEach(j=>{
 const relation=edges.get(pair(i,j));
 const preference=views[people[j][0]][topic];const sign=Math.sign(preference);
-if(relation==="friend")score+=sign;
-if(relation==="rival")score-=sign;
+if(relation&&relation.bond>=35&&relation.trust>=30&&relation.rivalry<55)score+=sign;
+else if(relation&&(relation.rivalry>=55||relation.bond<=-35))score-=sign;
 });
 return [i,score>0?"yes":score<0?"no":"abstain"];
 });
@@ -147,25 +147,34 @@ function commit(){
 const rows=meeting.ballot;
 rows.forEach(([i,vi],pos)=>rows.slice(pos+1).forEach(([j,vj])=>{
 if(vi==="abstain"||vj==="abstain")return;
-const k=pair(i,j);
-if(vi===vj){edges.set(k,"friend");}
-else if(edges.get(k)!=="friend"){edges.set(k,"rival");}
+const k=pair(i,j),old=edges.get(k)||{bond:0,trust:0,rivalry:0};
+if(vi===vj){
+edges.set(k,{bond:Math.min(100,old.bond+2),trust:Math.min(100,old.trust+2),rivalry:Math.max(0,old.rivalry-1)});
+}else{
+edges.set(k,{bond:Math.max(-100,old.bond-1),trust:old.trust,rivalry:Math.min(100,old.rivalry+2)});
+}
 }));
 drawNetwork();
-message("本次三幕议会结束。合作与竞争关系已更新（仅此离线网页演示）。");
+message("本次三幕议会结束。每对猴子的好感、信任或竞争已小幅变化；关系达到阈值才会形成合作小组。");
 }
 function alliances(){
 const parent=people.map((_,i)=>i);
 function find(i){while(parent[i]!==i)i=parent[i];return i}
-for(const [key,value] of edges){if(value!=="friend")continue;const [a,b]=key.split(":").map(Number);parent[find(b)]=find(a)}
+for(const [key,value] of edges){
+if(!(value.bond>=35&&value.trust>=30&&value.rivalry<55))continue;
+const [a,b]=key.split(":").map(Number);parent[find(b)]=find(a)}
 const components=new Map();people.forEach((_,i)=>{const k=find(i);const group=components.get(k)||[];group.push(i);components.set(k,group)});
 return [...components.values()].filter(g=>g.length>1);
 }
 function drawNetwork(){
 const ns="http://www.w3.org/2000/svg";const root=$("network");root.replaceChildren();
 const points=people.map((p,i)=>{const rad=(i*60-90)*Math.PI/180;return [420+290*Math.cos(rad),145+100*Math.sin(rad)]});
-for(const [pairKey,value]of edges){const [a,b]=pairKey.split(":").map(Number);
-const line=document.createElementNS(ns,"line");line.setAttribute("x1",points[a][0]);line.setAttribute("y1",points[a][1]);line.setAttribute("x2",points[b][0]);line.setAttribute("y2",points[b][1]);if(value==="rival")line.setAttribute("class","enemy");root.append(line);
+for(const [pairKey,value]of edges){
+const friend=value.bond>=35&&value.trust>=30&&value.rivalry<55;
+const rival=value.rivalry>=55||value.bond<=-35;
+if(!friend&&!rival)continue;
+const [a,b]=pairKey.split(":").map(Number);
+const line=document.createElementNS(ns,"line");line.setAttribute("x1",points[a][0]);line.setAttribute("y1",points[a][1]);line.setAttribute("x2",points[b][0]);line.setAttribute("y2",points[b][1]);if(rival)line.setAttribute("class","enemy");root.append(line);
 }
 points.forEach(([x,y],i)=>{
 const circle=document.createElementNS(ns,"circle");circle.setAttribute("cx",x);circle.setAttribute("cy",y);circle.setAttribute("r","27");circle.setAttribute("fill",people[i][2]);root.append(circle);
@@ -178,7 +187,8 @@ function changeEdge(mode){
 if(meeting){message("议会演出中不能改变关系，请重置后再试。");return}
 const ids=[...chosen].sort((a,b)=>a-b);
 if(ids.length<2){message("请至少选择两只猴子。");return}
-edges.set(pair(ids[0],ids[1]),mode);drawNetwork();
+edges.set(pair(ids[0],ids[1]),mode==="friend"?
+{bond:40,trust:35,rivalry:0}:{bond:-20,trust:0,rivalry:60});drawNetwork();
 }
 $("start").addEventListener("click",start);$("next").addEventListener("click",advance);
 $("addFriend").addEventListener("click",()=>changeEdge("friend"));
