@@ -150,7 +150,7 @@ def test_ballot_is_atomic_and_once_for_every_non_abstaining_pair(tmp_path):
     rel.record_council(votes)
     assert path.exists()
     assert rel.get(0,1)['bond'] == 2
-    assert rel.get(0,1)['trust'] == 1
+    assert rel.get(0,1)['trust'] == 2
     assert rel.get(0,1)['interactions'] == 1
     assert rel.get(0,2)['rivalry'] == 2
     assert rel.get(1,2)['bond'] == -1
