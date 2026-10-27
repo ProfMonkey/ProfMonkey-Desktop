@@ -366,9 +366,8 @@ class MonkeyColony:
                 or any(p.paused for p in self.monkeys)):
             return False
         if (not isinstance(indices, tuple) or not 3 <= len(indices) <= self.count
-                or len(set(indices)) != len(indices)
                 or any(type(i) is not int or not 0 <= i < self.count
-                       for i in indices)):
+                       for i in indices) or len(set(indices)) != len(indices)):
             return False
         people = [self.monkeys[i] for i in indices]
         if any(not p.isVisible() or p._drag_active or p.story.active or
@@ -408,7 +407,7 @@ class MonkeyColony:
                 self.monkeys[index].social_pose(action, phrase)
 
     def _complete_council(self) -> None:
-        if not self.council.finished:
+        if not self.council.consume_completion():
             return
         plan = self.council.plan
         if plan is None:
