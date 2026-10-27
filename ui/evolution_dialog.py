@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QHBoxLayout, QLabel,
                                QMessageBox, QPlainTextEdit, QPushButton, QVBoxLayout)
 from core.city_evolution import (LEGACY_EVENTS, ROUTES, evolution_report,
                                  legacy_status, prepare_evolution)
+from core.city_life import PERSONA_REPLIES
 
 
 class EvolutionDialog(QDialog):
@@ -127,8 +128,19 @@ class EvolutionDialog(QDialog):
             return
         else:
             self.scene_index += 1
+        speech = ''
+        if self.scene_index == 1:
+            selected_route = 0 if self.plan.route == 'community' else 1
+            voices = []
+            for index in (self.plan.first, self.plan.second):
+                pet = self.colony.monkeys[index]
+                personality = getattr(pet, 'personality', None)
+                reaction = PERSONA_REPLIES.get(
+                    personality, ('大家一起商量一下。', '我想大胆试试！'))[selected_route]
+                voices.append(f'{pet.display_name}：{reaction}')
+            speech = '\n' + '\n'.join(voices)
         self.scene.setText(f'第 {self.scene_index+1}/3 幕\n'
-                           + self.plan.scenes[self.scene_index])
+                           + self.plan.scenes[self.scene_index] + speech)
         self.advance.setText('✅ 完成并结算' if self.scene_index == 2 else '▶️ 下一幕')
 
     def finish(self):
