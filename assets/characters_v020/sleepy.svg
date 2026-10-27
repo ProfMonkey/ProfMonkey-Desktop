@@ -19,7 +19,8 @@
  <g id="left-arm" transform="translate(0 0)"><path d="M92 147Q67 148 55 179Q49 190 63 196Q77 197 91 171Z" fill="#5B80B9" stroke="#51433F" stroke-width="4"/><circle cx="58" cy="191" r="13" fill="#927060" stroke="#51433F" stroke-width="3"/><ellipse cx="55" cy="187" rx="6" ry="7" fill="#E7C9AE"/></g>
  <g id="right-arm" transform="translate(0 0)"><path d="M163 145Q188 150 201 179Q211 192 195 201Q181 201 165 170Z" fill="#5B80B9" stroke="#51433F" stroke-width="4"/><circle cx="201" cy="194" r="13" fill="#927060" stroke="#51433F" stroke-width="3"/><ellipse cx="204" cy="190" rx="6" ry="7" fill="#E7C9AE"/></g>
  <path d="M84 136Q76 169 88 205q40 14 80-1 11-39 0-70l-15-15-56 2Z" fill="#5B80B9" stroke="#51433F" stroke-width="3.5"/><path d="M106 129q-17 22-2 37m45-37q17 23 3 37" fill="none" stroke="#83AFDC" stroke-width="5"/><path d="M116 155q12 9 24 0" fill="none" stroke="#D8ECF3" stroke-width="4"/><path d="M113 183q13 4 28 0" stroke="#BDD8EB" stroke-width="3"/>
- <!-- Ears, jaw, hair; head deliberately around 100px high rather than oversized 140px -->
+ <!-- Compact 0.84x head rig: visible chest, longer torso and legs. -->
+ <g id="head" transform="translate(128 104) scale(.84) translate(-128 -104)">
  <circle cx="74" cy="99" r="21" fill="#927060" stroke="#51433F" stroke-width="4"/><circle cx="181" cy="99" r="21" fill="#927060" stroke="#51433F" stroke-width="4"/>
  <ellipse cx="74" cy="99" rx="10" ry="13" fill="#E7C9AE"/><ellipse cx="181" cy="99" rx="10" ry="13" fill="#E7C9AE"/>
  <path d="M75 87Q73 50 104 41Q147 25 175 61Q188 82 180 119Q172 150 127 152Q83 153 76 120Z" fill="url(#fur)" stroke="#51433F" stroke-width="4.5"/>
@@ -33,6 +34,7 @@
  <g id="mouth-smile" opacity="1"><path d="M112 126q16 17 32-1" stroke="#753F3C" stroke-width="3.3" fill="none"/></g>
  <g id="mouth-open" opacity="0"><ellipse cx="129" cy="132" rx="11" ry="8" fill="#6F3940"/><ellipse cx="129" cy="137" rx="6" ry="3.5" fill="#DF867C"/></g>
  <g id="prop-banana" opacity="0"><path d="M172 145q-3 21 19 27 10 0 19-16-25 11-29-17Z" fill="#FFE061" stroke="#986C28" stroke-width="2"/><path d="M173 140l7-3m29 20 4-3" stroke="#7B5131" stroke-width="3"/></g>
+ </g><!-- end compact head rig -->
  <path d="M183 192q14-6 26 3l13 21q-25 7-45-3Z" fill="#E6D5B3" stroke="#9B8B7F" stroke-width="3"/><path d="M197 201h10" stroke="#7C9BAD" stroke-width="3"/>
 </g>
 </svg>
