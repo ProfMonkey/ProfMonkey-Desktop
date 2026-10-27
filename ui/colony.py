@@ -634,6 +634,9 @@ class MonkeyColony:
             self.laws.clear()
 
     def start_social(self, name: str) -> bool:
+        # No direct-call bypass of an unapproved in-universe trial.
+        if name == 'rocket_trial' and (self.laws is None or not self.laws.active('rocket_license')):
+            return False
         if (self.council.active or self.count < 2 or not self.visible() or self.primary.focus.active
                 or any(p.paused or p.story.active or p._drag_active for p in self.monkeys)):
             return False
