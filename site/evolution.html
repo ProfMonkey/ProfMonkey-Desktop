@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>猴山文明演化 · ProfMonkey Desktop v0.18</title>
+<style>
+:root{--gold:#f4d394;--ink:#ffeed3;--muted:#bfd0dc}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 75% 1%,#3b5365,transparent 40%),#101b2b;color:var(--ink);font:15px/1.65 system-ui,"Microsoft YaHei",sans-serif}
+main{max-width:1080px;margin:auto;padding:20px}a{color:var(--gold)}nav{display:flex;justify-content:space-between;gap:10px;align-items:center}
+header{padding:35px 0}h1{font-size:clamp(37px,7vw,66px);line-height:1.1;letter-spacing:-.05em;margin:10px 0}h1 em{color:var(--gold);font-style:normal}header p{max-width:730px;color:var(--muted)}
+.tag{color:var(--gold);letter-spacing:.16em;font-size:11px;font-weight:850}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid #607489;border-radius:17px;background:linear-gradient(155deg,#27384d,#182637);padding:20px;margin-bottom:15px}
+h2{font-size:20px;margin:0 0 12px}.hint{font-size:12px;color:var(--muted)}.two{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+label{display:block;color:var(--muted);font-size:12px;margin:9px 0}input,select{font:inherit;background:#102135;color:var(--ink);border:1px solid #8694a2;border-radius:9px;padding:9px;width:100%}
+input[type=checkbox]{width:auto}.events{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{font:inherit;cursor:pointer;border:1px solid #718ca2;background:#2c455d;color:var(--ink);border-radius:10px;padding:11px}
+button:focus-visible,select:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}button:disabled{opacity:.4;cursor:not-allowed}
+.event{text-align:left}.event b{display:block}.event small{display:block;color:var(--muted)}.event[aria-pressed=true]{border-color:var(--gold);background:#534d4b}
+.mainbtn{background:var(--gold);color:#302719;border:0;font-weight:850}.stage{white-space:pre-wrap;background:#0d1d31;border:1px solid #8097a6;border-radius:10px;min-height:148px;padding:19px;margin:14px 0}.actions{display:flex;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;text-align:center}.stats div{background:#0d2031;border-radius:10px;padding:10px;border:1px solid #607489}.stats b{display:block;font-size:27px;color:var(--gold)}
+.history{white-space:pre-wrap;background:#11243b;padding:15px;border-radius:11px;line-height:2;min-height:135px}
+footer{border-top:1px solid #536b84;color:var(--muted);padding:18px 0;font-size:12px}
+@media(max-width:730px){.grid{grid-template-columns:1fr}.two,.events{grid-template-columns:1fr}}
+</style></head><body><main>
+<nav><strong>🐒 ProfMonkey <span class="tag">HISTORY v0.18</span></strong><span><a href="city_life.html">🗞️ 连续案件</a> · <a href="index.html">首页</a></span></nav>
+<header><div class="tag">THE CITY REMEMBERS WHAT HAPPENED</div><h1>猴山的过去，<br>决定它的<em>未来。</em></h1><p>上一代猴子留下的案件结局、法令与信任，不只会出现在档案里，还能触发真正的新事件。你的每一次抉择，都会成为下一段文明的条件。</p></header>
+<div class="grid"><div>
+<section class="panel"><h2>⏳ 给网页演示设置一段历史</h2>
+<p class="hint">此处仅用于模拟 v0.17 的历史：网页版可任意切换旧案结局；真实桌面端必须先建建筑、演完各案三章。</p><div class="two">
+<label>🍌 香蕉仓库<select id="banana_vault"><option value="reconciled">和解</option><option value="chaos">争议</option><option value="">未结案</option></select></label>
+<label>🔭 星际信号<select id="galaxy_scope"><option value="reconciled">和解</option><option value="chaos">争议</option><option value="">未结案</option></select></label>
+<label>🎉 广场庆典<select id="public_square"><option value="reconciled">和解</option><option value="chaos">争议</option><option value="">未结案</option></select></label>
+<label>🧪 实验室<select id="monkey_academy"><option value="">未结案</option><option value="reconciled">和解</option><option value="chaos">争议</option></select></label></div>
+<div class="two"><label>两猴好感：<output id="bond-num">12</output><input id="bond" type="range" min="0" max="50" value="12"></label>
+<label>两猴信任：<output id="trust-num">12</output><input id="trust" type="range" min="0" max="50" value="12"></label></div>
+<label><input id="law" type="checkbox" checked> 猴山已经通过一条有效法令</label></section>
+<section class="panel"><h2>🗝️ 历史触发的五个事件</h2><div id="event-list" class="events"></div>
+<p class="hint">宪章需要 ≥3 件旧案结案、≥2 件后续事件、其中 ≥1 次合作决策、一项法令、两猴好感 ≥6 且信任 ≥8。</p></section></div>
+<div>
+<section class="panel"><h2 id="case-title">🎭 事件小剧场</h2><p class="hint" id="description"></p>
+<label>本次选择<select id="route"><option value="community">合作共享</option><option value="elite">独立突破</option></select></label>
+<p class="hint" id="preview"></p><div class="stage" id="scene" aria-live="polite">点击下方按钮开始。未演完三幕，不结算任何资源。</div>
+<div class="actions"><button class="mainbtn" id="advance">🎬 开始第一幕</button><button id="cancel">⛔ 取消</button></div></section>
+<section class="panel"><h2>🏦 演示资源</h2><div class="stats"><div>🍌 香蕉<b id="bananas">20</b></div><div>🔬 科研<b id="science">20</b></div><div>⭐ 声望<b id="reputation">20</b></div></div></section>
+<section class="panel"><h2>📜 文明年鉴</h2><div id="era" class="tag"></div><div class="history" id="chronicle"></div><button id="reset">↻ 重置网页演示</button></section></div></div>
+<footer>纯本地 HTML 演示：不读取实际桌宠存档，不保存账号或位置，不调用网络，刷新即清除。Windows Qt 客户端功能需要本机验收，本页不代表已发布正式安装包。</footer>
+</main><script>
+'use strict';
+const $=id=>document.getElementById(id);
+const sources=['banana_vault','galaxy_scope','public_square','monkey_academy'];
+const data={
+ granary:{t:'🍌 第二次仓库会议',src:'banana_vault',a:['共管钥匙','秘密追踪'],d:[[-2,0,3],[2,0,-2]],s:['旧收据重新摆上桌面','钥匙登记制度引起争论','新制度开始改变仓库']},
+ star_chart:{t:'🔭 星图的第二个坐标',src:'galaxy_scope',a:['公开观测日志','秘密研发探测器'],d:[[0,-1,3],[0,4,-2]],s:['信号再次出现','旧数据指向猴山钟楼','猴山要决定发现属于谁']},
+ festival_custom:{t:'🎉 庆典后的第一条传统',src:'public_square',a:['所有猴子都能登台','组建精英表演队'],d:[[-1,0,4],[0,0,2]],s:['广场迎来新表演者','大家投票决定节目','庆典拥有了长期传统']},
+ safety_code:{t:'🧪 事故后的安全复盘',src:'monkey_academy',a:['透明审计双猴复核','高风险突破实验'],d:[[0,-2,4],[0,5,-3]],s:['紫色烟雾的记录重现','学究猴与发明猴争论','猴山科研有了新规则']},
+ constitution:{t:'🏛️ 猴山共同宪章',src:null,a:['公开议事','精英决策'],d:[[-2,-2,7],[3,2,-3]],s:['所有案卷来到广场','猴山重新讨论过去的选择','新的宪章成为历史']}
+};
+let resources=[20,20,20],history=[],selected='granary',active=null,act=-1;
+function completed(){return sources.filter(s=>$(s).value!=='').length}
+function unlocked(id){
+ if(history.some(h=>h.id===id))return '已写入史册';
+ if(data[id].src)return $(data[id].src).value===''?'原案尚未结案':'可以开启';
+ if(completed()<3||history.length<2||!history.some(h=>h.route==='community'))return '需要3件旧案及2件后续与1次合作';
+ if(!$('law').checked)return '需要有效自治法令';
+ if(+$('bond').value<6||+$('trust').value<8)return '需要两猴的信任和好感';
+ return '可以开启'
+}
+function delta(id,route){
+ const e=data[id],n=route==='community'?0:1,d=e.d[n].slice(),ending=e.src?$(e.src).value:'';
+ if(n===0&&ending==='reconciled')d[2]+=1;
+ if(n===1&&ending==='chaos')d[2]-=1;
+ return d
+}
+function render(){
+ $('event-list').replaceChildren();
+ for(const id of Object.keys(data)){
+  const b=document.createElement('button');
+  b.className='event';b.disabled=active!==null;b.setAttribute('aria-pressed',String(id===selected));
+  const title=document.createElement('b');title.textContent=data[id].t;
+  const hint=document.createElement('small');hint.textContent=unlocked(id);
+  b.append(title,hint);b.addEventListener('click',()=>{selected=id;render()});$('event-list').append(b);
+ }
+ const e=data[selected];$('case-title').textContent=e.t;
+ $('route').options[0].textContent=e.a[0];$('route').options[1].textContent=e.a[1];
+ $('description').textContent=e.src?'由 '+e.src+' 已完成的三章引发的新后续故事。':'从三件旧案与自治法令中生成猴山新制度。';
+ $('preview').textContent='资源变化（🍌/🔬/⭐）：'+delta(selected,$('route').value).join(' / ')+'；'+unlocked(selected);
+ $('route').disabled=active!==null;
+ for(const id of [...sources,'bond','trust','law'])$(id).disabled=active!==null;
+ $('advance').disabled=active===null&&unlocked(selected)!=='可以开启';
+ ['bananas','science','reputation'].forEach((k,i)=>$(k).textContent=resources[i]);
+ $('bond-num').textContent=$('bond').value;$('trust-num').textContent=$('trust').value;
+ const era=history.some(h=>h.id==='constitution')?'4/4 · 🏛️ 共治时代':history.length>=2?'3/4 · 📚 制度萌芽时代':completed()?'2/4 · 🗞️ 记忆时代':'1/4 · 🏗️ 建设时代';
+ $('era').textContent='文明纪元 '+era;
+ $('chronicle').textContent=history.length?history.map((h,i)=>(i+1)+' · '+data[h.id].t+' — '+data[h.id].a[h.route==='community'?0:1]).join('\n'):'还没有新的历史抉择。'
+}
+$('advance').addEventListener('click',()=>{
+ if(active===null){if(unlocked(selected)!=='可以开启')return;active={id:selected,route:$('route').value,d:delta(selected,$('route').value)};act=0;}
+ else if(act===2){
+  if(active.d.some((v,i)=>resources[i]+v<0)){$('scene').textContent='虚构资源不足，请取消后调整策略。';return}
+  active.d.forEach((v,i)=>resources[i]=Math.min(999,resources[i]+v));
+  history.push({id:active.id,route:active.route});
+  $('bond').value=Math.max(0,Math.min(50,+$('bond').value+(active.route==='community'?4:-1)));
+  $('trust').value=Math.max(0,Math.min(50,+$('trust').value+(active.route==='community'?2:0)));
+  active=null;act=-1;$('scene').textContent='✅ 完成！选择、资源和关系已写入演示历史。';$('advance').textContent='🎬 开始第一幕';render();return;
+ }else act++;
+ const e=data[active.id];$('scene').textContent='第 '+(act+1)+'/3 幕\n'+e.s[act]+(act===0&&e.src?$(e.src).value==='chaos'?'。旧案的争议继续发酵。':'。旧案的和解带来了合作。':'。')+(act===1?'\n选择：'+e.a[active.route==='community'?0:1]:'');
+ $('advance').textContent=act===2?'✅ 结算事件':'▶ 下一幕';render()
+});
+$('cancel').addEventListener('click',()=>{active=null;act=-1;$('scene').textContent='⛔ 已取消，没有结算任何资源与历史。';$('advance').textContent='🎬 开始第一幕';render()});
+$('reset').addEventListener('click',()=>{if(active!==null)return;resources=[20,20,20];history=[];sources.forEach((id,i)=>{$(id).value=i===3?'':'reconciled'});$('bond').value=12;$('trust').value=12;$('law').checked=true;selected='granary';$('scene').textContent='🎬 所有演示数据已重置。';render()});
+for(const id of [...sources,'bond','trust','law','route'])$(id).addEventListener('change',render);
+render();
+</script></body></html>
