@@ -14,8 +14,16 @@ def test_manifest_resolves_all_delivered_animation_frames():
     specs = load_manifest(MANIFEST)
     assert {'idle', 'blink', 'walk', 'turn', 'sleep', 'wake', 'fall', 'get_up'} <= set(specs)
     assert sum(len(spec.frames) for spec in specs.values()) >= 40
+    from core.character_art import CHARACTERS, pose_svg
+    # v0.20 deliberately keeps the old manifest's sequencing metadata,
+    # but paints every frame from bundled editable SVG instead of missing
+    # legacy binary frames. All six must support every advertised action.
     for spec in specs.values():
-        assert all((MANIFEST.parent / f).is_file() for f in spec.frames)
+        for persona in CHARACTERS:
+            for i, _frame_name in enumerate(spec.frames):
+                svg = pose_svg(MANIFEST.parent, persona, spec.name,
+                               i, len(spec.frames))
+                assert b'viewBox="0 0 256 256"' in svg
         assert spec.anchor == (0.5, 0.96)
 
 
