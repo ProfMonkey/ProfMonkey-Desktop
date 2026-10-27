@@ -428,6 +428,89 @@ class MonkeyColony:
         if now >= self._next_social_at:
             self._next_social_at = now + 300
 
+    def start_city_life(self, case_id: str, first: int, second: int,
+                        choice: str) -> bool:
+        """Manually play the next uncompleted chapter of an owned building."""
+        if (self.expeditions is None or self.count < 2 or
+                self.city_life.active or self.council.active or self.expedition.active
+                or self.duo.active or self.social.active or self._race_active
+                or self.primary.focus.active or not self.primary.isVisible()
+                or any(p.paused for p in self.monkeys)):
+            return False
+        if (type(case_id) is not str or case_id not in CASE_TITLES or
+                case_id not in self.expeditions.buildings or
+                type(first) is not int or type(second) is not int or
+                first == second or not 0 <= first < self.count or
+                not 0 <= second < self.count):
+            return False
+        pair = (self.monkeys[first], self.monkeys[second])
+        if any(not pet.isVisible() or pet._drag_active or pet.story.active
+               or pet._social_active or pet.body.airborne or pet._demo_enabled
+               for pet in pair):
+            return False
+        values = self.relationships.get(first, second) if self.relationships else {}
+        try:
+            plan = prepare_city_case(
+                case_id, self.expeditions.city_cases[case_id], first, second,
+                choice, bond=values.get('bond', 0), trust=values.get('trust', 0))
+        except ValueError:
+            return False
+        if not self.city_life.start(plan):
+            return False
+        left, top, right, bottom = self.primary._work_area()
+        available = max(0., right-left-max(p.width() for p in pair))
+        for n, pet in enumerate(pair):
+            new_x = left + available*n
+            pet.set_colony_target(None)
+            pet.body.x = max(left, min(right-pet.width(), new_x))
+            pet.body.y = max(top, bottom-pet.height())
+            pet.body.vx = pet.body.vy = 0.
+            pet.body.airborne = False
+            pet.move(round(pet.body.x), round(pet.body.y))
+            pet._last_move = (round(pet.body.x), round(pet.body.y))
+        self._last_social_tick = time.monotonic()
+        self._apply_city_life_beat()
+        return True
+
+    def _apply_city_life_beat(self) -> None:
+        beat = self.city_life.beat
+        if beat is None:
+            return
+        for index, action, speech in beat.poses:
+            if index < self.count:
+                self.monkeys[index].social_pose(action, speech)
+
+    def _complete_city_life(self) -> None:
+        if not self.city_life.consume_completion():
+            return
+        plan = self.city_life.plan
+        if (plan is None or self.expeditions is None or
+                not self.expeditions.record_city_chapter(plan)):
+            return
+        # Relationship fallout affects later chapters' endings; persistence
+        # is only after the completed chapter has been committed exactly once.
+        if self.relationships is not None:
+            if plan.choice == 'careful':
+                self.relationships.record_shared_activity(plan.first, plan.second)
+            else:
+                self.relationships.record_collision(plan.first, plan.second)
+            if plan.ending == 'reconciled':
+                self.relationships.reconcile(plan.first, plan.second)
+            elif plan.ending == 'chaos':
+                self.relationships.record_race(plan.first, plan.second)
+        if self.quests is not None:
+            self.quests.record('group')
+
+    def cancel_city_life(self) -> None:
+        if not self.city_life.active:
+            return
+        pair = (self.city_life.plan.first, self.city_life.plan.second)
+        self.city_life.cancel()
+        for index in pair:
+            if index < self.count:
+                self.monkeys[index].exit_social()
+        self._next_social_at = time.monotonic() + self._rng.uniform(240, 420)
+
     def start_expedition(self, mission: str, indices: tuple[int, ...]) -> bool:
         """Manually stage a 2-6 member fictional exploration, never in background."""
         if (self.expeditions is None or self.count < 2 or self.social.active
@@ -507,6 +590,7 @@ class MonkeyColony:
         self._next_social_at = time.monotonic() + self._rng.uniform(240, 420)
 
     def clear_expeditions(self) -> None:
+        self.cancel_city_life()
         self.cancel_expedition()
         if self.expeditions is not None:
             # Clearing the save invalidates construction ownership: remove
@@ -907,6 +991,8 @@ class MonkeyColony:
             action, phrase = stories[widget.kind]
             target.play_action(action)
             target._say(phrase, 2.7)
+            if self._on_city_event_open is not None:
+                self._on_city_event_open(widget.kind)
             return
         if widget.kind == 'trampoline':
             target.play_action('fall')
