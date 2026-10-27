@@ -10,6 +10,10 @@ PROPS = {
     'trampoline': ('🛝', '蹦床'),
     'chair': ('🪑', '教授椅'),
     'mirror': ('🪞', '猴山镜子'),
+    'banana_vault': ('🍌', '香蕉研究仓库'),
+    'galaxy_scope': ('🔭', '银河望远镜'),
+    'public_square': ('🏛️', '猴山公共广场'),
+    'monkey_academy': ('🌌', '猴山联合实验室'),
 }
 
 
