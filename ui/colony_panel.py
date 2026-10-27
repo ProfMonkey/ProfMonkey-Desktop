@@ -1,6 +1,9 @@
 """Explicit opt-in local colony management; no windows/network introspection."""
 from __future__ import annotations
 from dataclasses import replace
+from pathlib import Path
+from PySide6.QtCore import Qt
+from ui.character_render import render_mascot
 from PySide6.QtWidgets import (QCheckBox, QComboBox, QDialog, QGridLayout,
      QHBoxLayout, QLabel, QLineEdit, QPushButton, QSpinBox, QVBoxLayout)
 from core.config import Settings
@@ -8,10 +11,11 @@ from core.profiles import PERSONALITIES, clean_profiles
 
 
 class ColonyPanel(QDialog):
-    def __init__(self, current: Settings, parent=None) -> None:
+    def __init__(self, current: Settings, parent=None, asset_root: Path | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle('🐒 猴山控制台 · ProfMonkey Desktop')
-        self.resize(570, 565)
+        self.resize(680, 710)
+        self._asset_root = asset_root
         self.setStyleSheet('''
           QDialog {background:#151923;color:#ffedcf} QLabel {color:#ffedcf}
           QLineEdit,QComboBox,QSpinBox {background:#282b3a;border:1px solid #525066;
@@ -37,11 +41,12 @@ class ColonyPanel(QDialog):
         self.names: list[QLineEdit] = []
         self.personalities: list[QComboBox] = []
         self.rows = []
+        self.portraits = []
         profiles = clean_profiles(current.monkey_profiles)
         grid=QGridLayout()
         grid.setHorizontalSpacing(10);grid.setVerticalSpacing(7)
-        grid.addWidget(QLabel('编号'),0,0);grid.addWidget(QLabel('名字（最多12字）'),0,1)
-        grid.addWidget(QLabel('性格'),0,2)
+        grid.addWidget(QLabel('头像'),0,0);grid.addWidget(QLabel('编号'),0,1);grid.addWidget(QLabel('名字（最多12字）'),0,2)
+        grid.addWidget(QLabel('性格'),0,3)
         for i in range(6):
             label = QLabel(f'#{i+1}')
             name = QLineEdit(profiles[i]['name']);name.setMaxLength(12)
@@ -49,9 +54,19 @@ class ColonyPanel(QDialog):
             for code, personality in PERSONALITIES.items():
                 combo.addItem(personality,code)
             combo.setCurrentIndex(list(PERSONALITIES).index(profiles[i]['personality']))
-            grid.addWidget(label,i+1,0);grid.addWidget(name,i+1,1);grid.addWidget(combo,i+1,2)
+            portrait = QLabel()
+            portrait.setFixedSize(69,69)
+            portrait.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            portrait.setStyleSheet('background:#2d4352;border-radius:10px')
+            grid.addWidget(portrait,i+1,0)
+            grid.addWidget(label,i+1,1)
+            grid.addWidget(name,i+1,2)
+            grid.addWidget(combo,i+1,3)
+            self.portraits.append(portrait)
             self.names.append(name);self.personalities.append(combo)
-            self.rows.append((label,name,combo))
+            self.rows.append((portrait,label,name,combo))
+            combo.currentIndexChanged.connect(lambda _i, index=i: self._update_portrait(index))
+            self._update_portrait(i)
         root.addLayout(grid)
         self.count.valueChanged.connect(self._update_rows)
         self._update_rows(self.count.value())
@@ -71,6 +86,15 @@ class ColonyPanel(QDialog):
         accept.clicked.connect(lambda:self._finish('save'))
         footer.addWidget(cancel);footer.addStretch();footer.addWidget(accept)
         root.addLayout(footer)
+
+    def _update_portrait(self, index: int) -> None:
+        if self._asset_root is None:
+            return
+        personality = self.personalities[index].currentData()
+        portrait = render_mascot(self._asset_root, personality).scaled(
+            65,65,Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation)
+        self.portraits[index].setPixmap(portrait)
 
     def _update_rows(self, count: int) -> None:
         for idx, widgets in enumerate(self.rows):
