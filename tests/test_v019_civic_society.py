@@ -157,6 +157,16 @@ def test_civic_encounter_uses_existing_pair_and_completion_types(tmp_path):
     expected = director.choose(100,people,None,force=True,civic=snapshot)
     assert expected.kind.startswith('civic_')
     assert expected.first == 0 and expected.second == 1
+    assert expected.outcome_first is not None
+    assert expected.outcome_second is not None
+    from core.duo_story import DuoStory
+    scene = DuoStory()
+    assert scene.start(expected)
+    # Second act has own history follow-up, never the legacy hello fallback.
+    for _ in range(6):
+        scene.advance(.5)
+    assert scene.beat.first == expected.outcome_first
+    assert scene.beat.second == expected.outcome_second
     # Legacy engine is unaffected by a null civic context.
     old = EncounterDirector(max_distance=100).choose(100,people,None,force=True)
     assert not old.kind.startswith('civic_')
