@@ -7,6 +7,9 @@ on:
       - "ui/**"
       - "tests/test_v09_encounters.py"
       - "tests/test_v011_personality_chemistry.py"
+      - "tests/test_v012_chronicle.py"
+      - "tests/test_v012_site.py"
+      - "site/**"
       - ".github/workflows/personality-core.yml"
   workflow_dispatch:
 
@@ -26,16 +29,18 @@ jobs:
       - name: Compile changed Python modules
         run: python -m compileall -q core ui
       - name: Test offline behavior and regressions
-        run: python -m pytest -q tests/test_v09_encounters.py tests/test_v011_personality_chemistry.py
+        run: python -m pytest -q tests/test_v09_encounters.py tests/test_v011_personality_chemistry.py tests/test_v012_chronicle.py tests/test_v012_site.py
       - name: Check standalone preview JavaScript syntax
         run: |
           python - <<'PY'
           from pathlib import Path
           import re
-          html = Path('site/chemistry.html').read_text(encoding='utf-8')
-          matches = re.findall(r'<script>(.*?)</script>', html, re.S)
-          assert len(matches) == 1, 'expected one self-contained script'
-          Path('chemistry-check.js').write_text(matches[0], encoding='utf-8')
-          assert 'href="chemistry.html"' in Path('site/index.html').read_text(encoding='utf-8')
+          for name in ('chemistry', 'chronicle'):
+              html = Path(f'site/{name}.html').read_text(encoding='utf-8')
+              matches = re.findall(r'<script>(.*?)</script>', html, re.S)
+              assert len(matches) == 1, f'{name}: expected one self-contained script'
+              Path(f'{name}-check.js').write_text(matches[0], encoding='utf-8')
+              assert f'href="{name}.html"' in Path('site/index.html').read_text(encoding='utf-8')
           PY
           node --check chemistry-check.js
+          node --check chronicle-check.js

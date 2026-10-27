@@ -77,6 +77,8 @@ class DuoStory:
             e = self.event
             return DuoBeat(2.4, (e.action_first, e.line_first),
                            (e.action_second, e.line_second))
+        if self.event.outcome_first is not None and self.event.outcome_second is not None:
+            return DuoBeat(2.1, self.event.outcome_first, self.event.outcome_second)
         role_outcomes = ROLE_OUTCOMES.get(self.event.kind)
         if role_outcomes:
             fallback = ('blink', '猴山又有新发现。')

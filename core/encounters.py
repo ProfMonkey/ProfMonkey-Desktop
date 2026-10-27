@@ -28,6 +28,8 @@ class Encounter:
     line_second: str
     personality_first: str = ''
     personality_second: str = ''
+    outcome_first: tuple[str, str] | None = None
+    outcome_second: tuple[str, str] | None = None
 
 
 class EncounterDirector:

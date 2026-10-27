@@ -19,6 +19,7 @@ from core.relationships import RelationshipStore
 from core.quests import QuestBoard
 from core.encounters import EncounterDirector, Participant, Encounter
 from core.duo_story import DuoStory
+from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
 from ui.overlay import MonkeyOverlay
@@ -46,6 +47,8 @@ class MonkeyColony:
         self._race_active = False
         self.relationships: RelationshipStore | None = None
         self.quests: QuestBoard | None = None
+        self.chronicle: ChronicleStore | None = None
+        self._active_chapter: Chapter | None = None
         self.encounters = EncounterDirector()
         self.duo = DuoStory()
         self.furniture: list[FurnitureWidget] = []
@@ -118,6 +121,7 @@ class MonkeyColony:
             monkey.configure(settings)
         self.set_count(settings.monkey_count)
         self.apply_profiles()
+        self.set_chronicle_enabled(settings.chronicle_enabled)
 
     def set_mode(self, mode: str) -> None:
         if mode != 'MONKEY':
@@ -357,22 +361,80 @@ class MonkeyColony:
                 pet.social_pose(action, phrase)
 
     def _complete_duo(self) -> None:
-        event = self.duo.event
-        if event is None or self.relationships is None:
+        # Do not commit a still-playing or cancelled two-beat incident.
+        if not self.duo.finished:
             return
-        if event.kind in ('debate', 'inspection'):
-            self.relationships.record_collision(event.first, event.second)
-        elif event.kind == 'prank':
-            self.relationships.record_race(event.first, event.second)
-        else:
-            self.relationships.record_shared_activity(event.first, event.second)
+        event = self.duo.event
+        if event is None:
+            return
+        if self._active_chapter is not None:
+            chapter = self._active_chapter
+            if self.chronicle is not None and self.chronicle.complete(chapter):
+                # Follow-up fiction changes relationships only on completed beats.
+                if self.relationships is not None:
+                    if chapter.branch == 'chaos' and chapter.chapter == 2:
+                        self.relationships.record_collision(event.first, event.second)
+                    else:
+                        self.relationships.record_shared_activity(event.first, event.second)
+            return
+        if self.relationships is not None:
+            if event.kind in ('debate', 'inspection'):
+                self.relationships.record_collision(event.first, event.second)
+            elif event.kind == 'prank':
+                self.relationships.record_race(event.first, event.second)
+            else:
+                self.relationships.record_shared_activity(event.first, event.second)
+        if self.chronicle is not None:
+            self.chronicle.observe(event.kind, event.first, event.second)
 
     def cancel_duo(self) -> None:
+        self._active_chapter = None
         if not self.duo.active:
             return
         self.duo.cancel()
         for pet in self.monkeys:
             pet.exit_social()
+
+    def play_chronicle_chapter(self, case_id: int) -> bool:
+        """A user action only; never automatically opens another chapter."""
+        if (self.chronicle is None or not self.chronicle.enabled or self.count < 2
+                or self.duo.active or self.social.active or self._race_active
+                or not self.visible() or self.primary.focus.active
+                or any(p.paused for p in self.monkeys)):
+            return False
+        case = next((c for c in self.chronicle.pending(member_count=self.count)
+                     if c['id'] == case_id), None)
+        if case is None:
+            return False
+        first, second = case['first'], case['second']
+        participants = self._participants()
+        if (any(participants[index].busy for index in (first, second)) or
+                any(not self.monkeys[index].isVisible() for index in (first, second))):
+            return False
+        relation = self.relationships.get(first, second) if self.relationships else {}
+        chapter = self.chronicle.preview(case_id, relation)
+        if chapter is None:
+            return False
+        event = Encounter(first, second, 'chronicle',
+                          chapter.opening[0][0], chapter.opening[1][0],
+                          chapter.opening[0][1], chapter.opening[1][1],
+                          outcome_first=chapter.ending[0],
+                          outcome_second=chapter.ending[1])
+        if not self.duo.start(event):
+            return False
+        self._active_chapter = chapter
+        self._apply_duo_beat()
+        return True
+
+    def set_chronicle_enabled(self, enabled: bool) -> None:
+        if not enabled and self._active_chapter is not None:
+            self.cancel_duo()
+        if self.chronicle is not None:
+            self.chronicle.enabled = bool(enabled)
+        self.primary.settings.chronicle_enabled = bool(enabled)
+        for pet in self.monkeys:
+            pet.settings.chronicle_enabled = bool(enabled)
+
 
     def _maybe_encounter(self, now: float, *, force: bool = False,
                          pair: tuple[int, int] | None = None) -> bool:
@@ -448,6 +510,8 @@ class MonkeyColony:
     def _complete_social(self, name: str) -> None:
         """Commit social effects only after a group story reaches its ending."""
         indices = [pet.monkey_index for pet in self.monkeys]
+        if self.chronicle is not None and len(indices) >= 2:
+            self.chronicle.observe(name, indices[0], indices[1])
         if self.relationships is not None:
             if name == 'meeting':
                 self.relationships.record_meeting(indices)
