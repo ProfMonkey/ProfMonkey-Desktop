@@ -127,7 +127,9 @@ class CityLifeDialog(QDialog):
         try:
             plan=prepare_city_case(case_id,state,first,second,
                  self.choice.currentData(),
-                 bond=rel.get('bond',0),trust=rel.get('trust',0))
+                 bond=rel.get('bond',0),trust=rel.get('trust',0),
+                 first_personality=self.colony.monkeys[first].personality,
+                 second_personality=self.colony.monkeys[second].personality)
         except ValueError:
             self.preview.setText('当前章节或行动方式无效。')
             self.start_button.setEnabled(False)
