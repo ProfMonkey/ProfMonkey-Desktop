@@ -260,6 +260,23 @@ class SecretJournal:
             return False
         return True
 
+    def epilogue(self) -> str | None:
+        """Final in-world easter egg unlocked by completing all six stories.
+
+        This is narrative only: there is no seventh pet, paid DLC, or extra
+        resource claim. The final text respects the 6 branch outcomes.
+        """
+        if any(self.cases[key]['chapter']!=3 for key in SECRET_CASES):
+            return None
+        revealed=sum(row['ending']=='unmasked' for row in self.cases.values())
+        if revealed>=4:
+            return ('🌠 隐藏终章：六份案卷背面拼成一行字——'
+                    '“第七位见证者，一直坐在屏幕外。”'
+                    '六只猴子同时抬头。它们发现，真正记录猴山历史的是你。')
+        return ('🌑 隐藏终章：六份保密档案的封口印，'
+                '拼成了一个还没出现的脚印。'
+                '队长锁上档案柜，柜子里却传出一声轻轻的“谢谢”。')
+
     def clear(self):
         old=(dict(self.gestures),{k:dict(v) for k,v in self.cases.items()},
              list(self.news))
