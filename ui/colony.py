@@ -96,6 +96,19 @@ class MonkeyColony:
             pet._say(hints.get(gesture, '发现了隐藏线索！'), 3.1)
 
     def bind_menu(self, menu, on_menu_open: Callable[[MonkeyOverlay], None]) -> None:
+        # The colony receives the existing tray QMenu here. Add the optional
+        # secret cases without changing established tray controls.
+        if self.secrets is None:
+            from core.config import ConfigStore
+            self.bind_secrets(SecretJournal(ConfigStore().folder / 'secrets_v021.json'))
+        from PySide6.QtGui import QAction
+        from ui.secret_dialog import SecretDialog
+        action=QAction('🗝️ 六猴隐藏事件簿 · 剧情和彩蛋', menu)
+        action.triggered.connect(lambda checked=False: SecretDialog(self).exec())
+        menu.insertAction(menu.actions()[0] if menu.actions() else None, action)
+        stop=QAction('⏹ 停止当前隐藏章节', menu)
+        stop.triggered.connect(lambda checked=False:self.cancel_secret())
+        menu.insertAction(menu.actions()[1] if len(menu.actions())>1 else None,stop)
         self._menu = menu
         self._on_menu_open = on_menu_open
         for monkey in self.monkeys:
@@ -781,7 +794,7 @@ class MonkeyColony:
         """Stage a user-requested 3-6 monkey vote; no auto polling or user profiling."""
         if (self.count < 3 or self.social.active or self.duo.active
                 or self.council.active or self.expedition.active
-                or self.city_life.active or self._race_active
+                or self.city_life.active or self.secret_story.active or self._race_active
                 or self.primary.focus.active or not self.primary.isVisible()
                 or any(p.paused for p in self.monkeys)):
             return False
@@ -959,7 +972,7 @@ class MonkeyColony:
 
     def _maybe_encounter(self, now: float, *, force: bool = False,
                          pair: tuple[int, int] | None = None) -> bool:
-        if (self.count < 2 or self.social.active or self.duo.active or self.council.active or self.expedition.active or self.city_life.active or self._race_active or
+        if (self.count < 2 or self.social.active or self.duo.active or self.council.active or self.expedition.active or self.city_life.active or self.secret_story.active or self._race_active or
                 not self.visible() or self.primary.focus.active or
                 any(p.paused for p in self.monkeys)):
             return False
@@ -1051,7 +1064,7 @@ class MonkeyColony:
         if name == 'rocket_trial' and (self.laws is None or not self.laws.active('rocket_license')):
             return False
         if (self.council.active or self.expedition.active or self.city_life.active
-                or self.count < 2 or not self.visible() or self.primary.focus.active
+                or self.secret_story.active or self.count < 2 or not self.visible() or self.primary.focus.active
                 or any(p.paused or p.story.active or p._drag_active for p in self.monkeys)):
             return False
         if not self.social.start(name, self.count):
