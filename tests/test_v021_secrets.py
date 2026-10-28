@@ -80,8 +80,12 @@ def test_gestures_only_explicit_and_bounded(tmp_path):
 def test_unlock_gates_use_actual_existing_game_context(tmp_path,context):
     j=SecretJournal(tmp_path/'s.json')
     profiles=clean_profiles([])
-    for case_id in SECRET_CASES:
+    # Event-specific old city decisions are deliberately separate from gesture
+    # easter eggs; some cases are discoverable immediately in an established city.
+    for case_id in ('banana_receipt','shadow_07','sleep_strike'):
         assert not j.unlocked(case_id,6,profiles,context)[0]
+    for case_id in ('signal_404','button_zero','last_ballot'):
+        assert j.unlocked(case_id,6,profiles,context)[0]
     j.gestures.update(feeds=3,rapid_taps=2,races=1,mirrors=1)
     for case_id in SECRET_CASES:
         assert j.unlocked(case_id,6,profiles,context)[0],case_id
