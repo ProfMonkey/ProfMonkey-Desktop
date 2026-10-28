@@ -210,3 +210,17 @@ def test_clear_only_secrets_and_preserve_other_user_records(tmp_path,context):
     assert all(row['chapter']==0 for row in j.cases.values())
     assert all(v==0 for v in j.gestures.values())
     assert other.read_text()=='SENTINEL'
+
+def test_secret_finale_requires_six_complete_cases(tmp_path,context):
+    j=make(tmp_path)
+    assert j.epilogue() is None
+    for case_id in SECRET_CASES:
+        profiles,a,b=cast(case_id)
+        for route in ('reveal','reveal','hide'):
+            plan=prepare_secret(j,case_id,a,b,route,6,profiles,context)
+            assert j.record(plan,6,profiles,context)
+    assert j.epilogue() is not None
+    assert '第七位见证者' in j.epilogue()
+    assert len(j.news)==18
+    j.clear()
+    assert j.epilogue() is None
