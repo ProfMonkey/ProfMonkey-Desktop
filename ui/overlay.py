@@ -53,6 +53,9 @@ class MonkeyOverlay(QWidget):
         self.progress = progress
         self.focus = focus if focus is not None else FocusClock()
         self.is_primary = is_primary
+        # Set by MonkeyColony after local SecretJournal is attached. Never
+        # reaches keyboard hooks or real user documents.
+        self.secret_gesture = None
         self.monkey_index = monkey_index
         self.display_name = ''
         self.personality = 'scholar'
@@ -277,6 +280,8 @@ class MonkeyOverlay(QWidget):
         self.audio.play('banana')
         self._say('香蕉到账！猴力恢复 🍌')
         self._record_progress('feeds')
+        if self.secret_gesture is not None:
+            self.secret_gesture('feed', self)
         return True
 
     def say_quote(self) -> str:
@@ -604,6 +609,8 @@ class MonkeyOverlay(QWidget):
                     self._click_times.append(now)
                     tapped = sum(1 for t in self._click_times if now-t<4.)
                     self._say('别戳了！' if tapped>=4 else self._rng.choice(('嗯？','教授在思考','你点我干嘛？')))
+                    if tapped == 4 and self.secret_gesture is not None:
+                        self.secret_gesture('rapid_tap', self)
                     self.player.request('angry' if tapped>=4 else 'blink',force=True,restart=True)
                 else:
                     self._story_index = -1
