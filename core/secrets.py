@@ -1,6 +1,6 @@
 """ProfMonkey v0.21: six *hidden* investigations and non-intrusive easter eggs.
 
-All content is fictional. Player gestures only count after actual pet UI actions:
+All events are fictional. Player gestures only count after actual pet UI actions:
 feeding, a 4-click streak, completing a public banana race, touching a mirror.
 No OS telemetry, timers, screenshot, clipboard, keyboard or web access.
 
