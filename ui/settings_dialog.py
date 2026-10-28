@@ -35,7 +35,7 @@ class SettingsDialog(QDialog):
         self.quotes.setFixedHeight(82)
         self.top = QCheckBox('窗口始终置顶'); self.top.setChecked(current.always_on_top)
         self.skin = QComboBox()
-        for label, code in [('教授猴','professor'),('熬夜猴','night'),('西装猴','suit'),('考试周猴','exam')]:
+        for label, code in [('教授猴','professor'),('熬夜猴','night'),('西装猴','suit'),('考试周猴','exam'),('Pixel Art','pixel')]:
             self.skin.addItem(label,code)
             if code == current.skin:
                 self.skin.setCurrentIndex(self.skin.count()-1)
