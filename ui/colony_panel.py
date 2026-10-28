@@ -16,6 +16,7 @@ class ColonyPanel(QDialog):
         self.setWindowTitle('🐒 猴山控制台 · ProfMonkey Desktop')
         self.resize(680, 710)
         self._asset_root = asset_root
+        self._skin = current.skin
         self.setStyleSheet('''
           QDialog {background:#151923;color:#ffedcf} QLabel {color:#ffedcf}
           QLineEdit,QComboBox,QSpinBox {background:#282b3a;border:1px solid #525066;
@@ -91,9 +92,10 @@ class ColonyPanel(QDialog):
         if self._asset_root is None:
             return
         personality = self.personalities[index].currentData()
-        portrait = render_mascot(self._asset_root, personality).scaled(
-            65,65,Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation)
+        transform = (Qt.TransformationMode.FastTransformation if self._skin == 'pixel'
+                     else Qt.TransformationMode.SmoothTransformation)
+        portrait = render_mascot(self._asset_root, personality, skin=self._skin).scaled(
+            65,65,Qt.AspectRatioMode.KeepAspectRatio, transform)
         self.portraits[index].setPixmap(portrait)
 
     def _update_rows(self, count: int) -> None:
