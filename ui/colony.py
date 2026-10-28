@@ -25,6 +25,7 @@ from core.expeditions import ExpeditionStory, ExpeditionJournal, Explorer, plan_
 from core.civilization import BUILDINGS
 from core.city_life import (CityLifeStory, CASE_TITLES, prepare_city_case)
 from core.civic_society import city_society, civic_action_bias
+from core.secrets import SecretJournal, SecretStory, prepare_secret
 from core.chronicle import ChronicleStore, Chapter
 from ui.furniture import FurnitureWidget, PROPS
 from core.config import Settings
@@ -62,6 +63,8 @@ class MonkeyColony:
         self.council = CouncilStory()
         self.expedition = ExpeditionStory()
         self.city_life = CityLifeStory()
+        self.secrets: SecretJournal | None = None
+        self.secret_story = SecretStory()
         self._civic_snapshot = None
         self._next_civic_refresh = 0.
         self._on_city_event_open: Callable[[str], None] | None = None
@@ -76,6 +79,22 @@ class MonkeyColony:
         """Let a finished desktop building open its specific in-game case."""
         self._on_city_event_open = open_case
 
+    def bind_secrets(self, journal: SecretJournal) -> None:
+        """Bind only local fictional gesture counts to each living overlay."""
+        self.secrets = journal
+        for pet in self.monkeys:
+            pet.secret_gesture = self._record_secret_gesture
+
+    def _record_secret_gesture(self, gesture: str, pet: MonkeyOverlay) -> None:
+        if self.secrets is not None and self.secrets.observe_gesture(gesture):
+            hints = {
+                'feed': '🍌 仓库多了一张没有名字的收据……',
+                'rapid_tap': '💤 困猴递来一张睡眠罢工申请！',
+                'race': '🍌 香蕉赛跑里好像掉了一张旧账单。',
+                'mirror': '👤 镜子里仿佛多出了第七道影子。',
+            }
+            pet._say(hints.get(gesture, '发现了隐藏线索！'), 3.1)
+
     def bind_menu(self, menu, on_menu_open: Callable[[MonkeyOverlay], None]) -> None:
         self._menu = menu
         self._on_menu_open = on_menu_open
@@ -89,6 +108,7 @@ class MonkeyColony:
         value to Settings/ConfigStore. Closing companions stops their timers.
         """
         target = clamp_count(count)
+        self.cancel_secret()
         self.cancel_city_life()
         self.cancel_expedition()
         self.cancel_council()
@@ -113,6 +133,8 @@ class MonkeyColony:
                                 focus=self.primary.focus,
                                 is_primary=False,
                                 seed=20261025 + idx * 1009,monkey_index=idx)
+            if self.secrets is not None:
+                pet.secret_gesture = self._record_secret_gesture
             if self._menu:
                 pet.set_context_menu(self._menu, self._on_menu_open)
             pet.toggle_pause(self.primary.paused)
@@ -130,6 +152,7 @@ class MonkeyColony:
         self.apply_profiles()
 
     def apply_profiles(self) -> None:
+        self.cancel_secret()
         if self.city_life.active:
             self.cancel_city_life()
         if self.expedition.active:
@@ -141,6 +164,7 @@ class MonkeyColony:
 
     def configure(self, settings: Settings) -> None:
         """Apply a global preference to every independent entity."""
+        self.cancel_secret()
         self.cancel_city_life()
         self.cancel_expedition()
         self.cancel_social()
@@ -156,6 +180,7 @@ class MonkeyColony:
 
     def set_mode(self, mode: str) -> None:
         if mode != 'MONKEY':
+            self.cancel_secret()
             self.cancel_city_life()
             self.cancel_expedition()
             self.cancel_duo()
@@ -227,6 +252,7 @@ class MonkeyColony:
         if (self.count < 2 or self._race_active or not self.visible()
                 or self.primary.focus.active or self.social.active or self.duo.active
                 or self.council.active or self.expedition.active or self.city_life.active
+                or self.secret_story.active
                 or any(p.paused or p.story.active or p._drag_active or p._social_active
                        for p in self.monkeys)):
             return False
@@ -262,6 +288,7 @@ class MonkeyColony:
         winner_name = winner.display_name
         self.cancel_shared_banana()
         winner.feed_banana()
+        self._record_secret_gesture('race', winner)
         if self.quests is not None:
             self.quests.record('race')
             self.quests.record('feed')
@@ -385,6 +412,24 @@ class MonkeyColony:
                 self.cancel_expedition()
             if self.city_life.active:
                 self.cancel_city_life()
+            if self.secret_story.active:
+                self.cancel_secret()
+            return
+        if self.secret_story.active:
+            plan = self.secret_story.plan
+            pair = [self.monkeys[i] for i in (plan.first, plan.second)
+                    if 0 <= i < self.count]
+            if (len(pair) != 2 or any(
+                p._drag_active or p.story.active or p.paused
+                or not p.isVisible() or not p._social_active
+                for p in pair)):
+                self.cancel_secret()
+            elif self.secret_story.advance(dt):
+                if self.secret_story.finished:
+                    self._complete_secret()
+                    self.cancel_secret()
+                else:
+                    self._apply_secret_beat()
             return
         if self.city_life.active:
             plan = self.city_life.plan
@@ -477,11 +522,90 @@ class MonkeyColony:
         if now >= self._next_social_at:
             self._next_social_at = now + 300
 
+    def start_secret(self, case_id: str, first: int, second: int,
+                     route: str) -> bool:
+        """Act a hidden chapter on the real desktop with two original monkeys."""
+        if (self.secrets is None or self.count < 2 or
+                self.secret_story.active or self.city_life.active
+                or self.expedition.active or self.council.active
+                or self.duo.active or self.social.active or self._race_active
+                or self.primary.focus.active or not self.primary.isVisible()
+                or self.primary.settings.mode != 'MONKEY'
+                or any(p.paused for p in self.monkeys)):
+            return False
+        if (type(first) is not int or type(second) is not int or
+                not 0 <= first < self.count or not 0 <= second < self.count
+                or first == second):
+            return False
+        pair=(self.monkeys[first],self.monkeys[second])
+        if any(not p.isVisible() or p._drag_active or p.story.active
+               or p._social_active or p.body.airborne or p._demo_enabled
+               for p in pair):
+            return False
+        try:
+            plan=prepare_secret(self.secrets,case_id,first,second,
+                route,self.count,self.primary.settings.monkey_profiles,
+                self.expeditions)
+        except (ValueError,KeyError):
+            return False
+        if not self.secret_story.start(plan):
+            return False
+        left,top,right,bottom=self.primary._work_area()
+        width=max(p.width() for p in pair)
+        for n,pet in enumerate(pair):
+            new_x=left+max(0.,right-left-width)*n
+            pet.set_colony_target(None)
+            pet.body.x=max(left,min(right-pet.width(),new_x))
+            pet.body.y=max(top,bottom-pet.height())
+            pet.body.vx=pet.body.vy=0.
+            pet.body.airborne=False
+            pet.move(round(pet.body.x),round(pet.body.y))
+            pet._last_move=(round(pet.body.x),round(pet.body.y))
+        self._last_social_tick=time.monotonic()
+        self._apply_secret_beat()
+        return True
+
+    def _apply_secret_beat(self) -> None:
+        beat=self.secret_story.beat
+        if beat is None:return
+        for idx,action,dialogue in beat.poses:
+            if 0<=idx<self.count:
+                self.monkeys[idx].social_pose(action,dialogue)
+
+    def _complete_secret(self) -> None:
+        if not self.secret_story.consume_completion():return
+        plan=self.secret_story.plan
+        if (plan is None or self.secrets is None or
+                not self.secrets.record(
+                    plan,self.count,self.primary.settings.monkey_profiles,
+                    self.expeditions)):
+            return
+        # The existing relationship file remains a distinct transaction.
+        if self.relationships is not None:
+            if plan.route=='reveal':
+                self.relationships.record_shared_activity(plan.first,plan.second)
+            else:
+                self.relationships.record_collision(plan.first,plan.second)
+        if self.quests is not None:
+            self.quests.record('group')
+        self._refresh_civic(force=True)
+
+    def cancel_secret(self) -> None:
+        if not self.secret_story.active:return
+        plan=self.secret_story.plan
+        pair=(plan.first,plan.second)
+        self.secret_story.cancel()
+        for idx in pair:
+            if 0<=idx<self.count:
+                self.monkeys[idx].exit_social()
+        self._next_social_at=time.monotonic()+self._rng.uniform(240,420)
+
     def start_city_life(self, case_id: str, first: int, second: int,
                         choice: str) -> bool:
         """Manually play the next uncompleted chapter of an owned building."""
         if (self.expeditions is None or self.count < 2 or
-                self.city_life.active or self.council.active or self.expedition.active
+                self.city_life.active or self.secret_story.active
+                or self.council.active or self.expedition.active
                 or self.duo.active or self.social.active or self._race_active
                 or self.primary.focus.active or not self.primary.isVisible()
                 or any(p.paused for p in self.monkeys)):
@@ -567,7 +691,7 @@ class MonkeyColony:
         """Manually stage a 2-6 member fictional exploration, never in background."""
         if (self.expeditions is None or self.count < 2 or self.social.active
                 or self.duo.active or self.council.active or self.expedition.active
-                or self.city_life.active
+                or self.city_life.active or self.secret_story.active
                 or self._race_active or self.primary.focus.active
                 or not self.primary.isVisible() or any(p.paused for p in self.monkeys)):
             return False
@@ -794,7 +918,8 @@ class MonkeyColony:
         """A user action only; never automatically opens another chapter."""
         if (self.chronicle is None or not self.chronicle.enabled or self.count < 2
                 or self.duo.active or self.council.active or self.expedition.active
-                or self.city_life.active or self.social.active or self._race_active
+                or self.city_life.active or self.secret_story.active
+                or self.social.active or self._race_active
                 or not self.visible() or self.primary.focus.active
                 or any(p.paused for p in self.monkeys)):
             return False
@@ -1024,6 +1149,8 @@ class MonkeyColony:
         if widget.kind in ('blackboard', 'mirror'):
             target = self.primary
             if target.start_story('blackboard' if widget.kind == 'blackboard' else 'mirror'):
+                if widget.kind == 'mirror':
+                    self._record_secret_gesture('mirror', target)
                 if self.quests is not None:
                     self.quests.record('story')
             else:
@@ -1063,6 +1190,7 @@ class MonkeyColony:
 
     def toggle_pause(self, enabled: bool) -> None:
         if enabled:
+            self.cancel_secret()
             self.cancel_city_life()
             self.cancel_expedition()
             self.cancel_duo()
@@ -1094,6 +1222,7 @@ class MonkeyColony:
             prop.show()
 
     def hide_all(self) -> None:
+        self.cancel_secret()
         self.cancel_city_life()
         self.cancel_expedition()
         self.cancel_council()
@@ -1109,6 +1238,7 @@ class MonkeyColony:
         return any(monkey.isVisible() for monkey in self.monkeys)
 
     def gather(self) -> None:
+        self.cancel_secret()
         self.cancel_city_life()
         self.cancel_expedition()
         self.cancel_council()
