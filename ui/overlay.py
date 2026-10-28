@@ -75,7 +75,7 @@ class MonkeyOverlay(QWidget):
         # v0.20: all 6 mascots are vector originals. Do not load obsolete,
         # missing v0.9 idle.png or reuse one giant-headed image for everyone.
         first_profile = clean_profiles(self.settings.monkey_profiles)[monkey_index]
-        self._fallback = render_mascot(self._art_root, first_profile['personality'])
+        self._fallback = render_mascot(self._art_root, first_profile['personality'], skin=self.settings.skin)
         if self._fallback.isNull():
             raise ValueError('six-monkey artwork missing or invalid')
         self.player = AnimationPlayer(load_manifest(manifest_file or image_file.parent/'manifest.json'))
@@ -180,7 +180,7 @@ class MonkeyOverlay(QWidget):
         # full-body sprite, hit region and all future animations. No stale
         # professor frame remains in a companion's cache.
         if previous != self.personality and hasattr(self, '_sprite_cache'):
-            self._fallback = render_mascot(self._art_root, self.personality)
+            self._fallback = render_mascot(self._art_root, self.personality, skin=self.settings.skin)
             self._fallback_original = self._fallback
             self._sprite_cache.clear()
             self._hit_cache.clear()
@@ -303,13 +303,15 @@ class MonkeyOverlay(QWidget):
         spec = self.player.specs[name]
         try:
             pix = render_mascot(self._art_root, self.personality,
-                                name, idx, len(spec.frames))
+                                name, idx, len(spec.frames), skin=self.settings.skin)
         except (OSError, ValueError):
             self._missing_frames.add(f'{self.personality}:{name}:{idx}')
             pix = self._fallback_original
-        pix = pix.scaled(size, size, Qt.AspectRatioMode.IgnoreAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        transform = (Qt.TransformationMode.FastTransformation if self.settings.skin == 'pixel'
+                     else Qt.TransformationMode.SmoothTransformation)
+        pix = pix.scaled(size, size, Qt.AspectRatioMode.IgnoreAspectRatio, transform)
         if facing == -1:
-            pix = pix.transformed(QTransform().scale(-1, 1), Qt.TransformationMode.SmoothTransformation)
+            pix = pix.transformed(QTransform().scale(-1, 1), transform)
         self._sprite_cache[key] = pix
         return pix
 
@@ -649,12 +651,12 @@ class MonkeyOverlay(QWidget):
 
     def paintEvent(self,event) -> None:
         p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, self.settings.skin != 'pixel')
+        p.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, self.settings.skin != 'pixel')
         # Animated in-app character only; never any real desktop pixels.
         p.drawPixmap(self._sx,self._sy,self._sprite)
         # Modest decorative costume accents for three palette variants.
-        if self.settings.skin != 'professor':
+        if self.settings.skin not in ('professor', 'pixel'):
             accent = {'night':'#7257CD','suit':'#172E47','exam':'#4BA57B'}[self.settings.skin]
             p.setPen(Qt.PenStyle.NoPen)
             p.setBrush(QColor(accent))
