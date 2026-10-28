@@ -114,6 +114,9 @@ class SecretDialog(QDialog):
             items.append(
                 f'{label} · 第{entry["chapter"]}章 · '
                 f'{ROUTE_NAMES[entry["route"]]}')
+        final = journal.epilogue()
+        if final is not None:
+            items.insert(1, '\n🏆 六案全部结案 · 发现最终隐藏彩蛋：\n'+final+'\n')
         self.log.setPlainText('\n'.join(items))
         available,reason=journal.unlocked(
             key,self.colony.count,self.colony.primary.settings.monkey_profiles,
