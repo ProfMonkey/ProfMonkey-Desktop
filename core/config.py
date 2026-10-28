@@ -37,7 +37,7 @@ class Settings:
         self.monkey_count = clamp_count(self.monkey_count)
         from core.profiles import clean_profiles
         self.monkey_profiles = clean_profiles(self.monkey_profiles)
-        self.skin = self.skin if self.skin in ('professor', 'night', 'suit', 'exam') else 'professor'
+        self.skin = self.skin if self.skin in ('professor', 'night', 'suit', 'exam', 'pixel') else 'professor'
         self.colony_behavior = self.colony_behavior if self.colony_behavior in ('free', 'follow') else 'free'
         self.quiet_interval = max(90, min(3600, int(self.quiet_interval)))
         self.monkey_interval = max(40, min(1800, int(self.monkey_interval)))
