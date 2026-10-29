@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 PERSONALITIES = {
-    'scholar': '学究猴',
-    'trickster': '皮猴',
-    'sleepy': '困猴',
-    'inventor': '发明猴',
-    'captain': '队长猴',
-    'shy': '社恐猴',
+    # Keep legacy keys stable so existing saves and story records still load.
+    'scholar': '教授猴',
+    'captain': '探险猴',
+    'inventor': '编程猴',
+    'sleepy': '摸鱼猴',
+    'trickster': '干饭猴',
+    'shy': '酷帅猴',
 }
-DEFAULT_NAMES = ('猴教授', '猴助教', '猴学博士', '香蕉主任', '摸鱼研究员', '实习猴')
+DEFAULT_NAMES = ('猴教授', '小探险家', '代码猴', '摸鱼研究员', '香蕉主任', '酷帅猴')
 
 
 def clean_name(value: object, index: int = 0) -> str:

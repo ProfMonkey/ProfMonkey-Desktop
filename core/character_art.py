@@ -1,7 +1,7 @@
-"""Deterministic v0.20 art director for six ORIGINAL balanced monkey mascots.
+"""Deterministic v0.22 art director for six monkeys sharing the approved professor prototype.
 
 This is transparent 256x256 Qt-safe SVG; every role has its own vector drawing,
-outfit, accessory, fur colors and silhouette. No AI-poster raster baked into
+small role accessories, with shared fur, muzzle, outline, body proportions and tail. No AI-poster raster baked into
 sprites, no dependence on missing v0.10 frames, and no network access.
 Source SVGs are intentionally editable and retained alongside game code.
 
@@ -14,7 +14,7 @@ from functools import lru_cache
 from math import sin, pi
 from pathlib import Path
 
-CHARACTERS = ('scholar', 'trickster', 'sleepy', 'inventor', 'captain', 'shy')
+CHARACTERS = ('scholar', 'captain', 'inventor', 'sleepy', 'trickster', 'shy')
 SUPPORTED_ACTIONS = frozenset((
     'idle','blink','walk','turn','sleep','wake','fall','get_up',
     'eat_banana','slip','angry','dragged','run'
