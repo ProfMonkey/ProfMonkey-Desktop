@@ -47,7 +47,7 @@ button:disabled{opacity:.4;cursor:not-allowed}.two{display:grid;grid-template-co
 "use strict";
 const $=id=>document.getElementById(id), buildings=['banana_vault','galaxy_scope','public_square','monkey_academy'],
 history=['granary','star_chart','festival_custom','safety_code','constitution'],
-people=[['🎓','学究猴','galaxy_scope',2],['🧢','皮猴','public_square',-2],['💤','困猴','banana_vault',0],['🔧','发明猴','monkey_academy',-2],['⭐','队长猴','banana_vault',1],['🌿','社恐猴','galaxy_scope',2]],
+people=[['🎓','教授猴','galaxy_scope',2],['🧢','干饭猴','public_square',-2],['💤','摸鱼猴','banana_vault',0],['🔧','编程猴','monkey_academy',-2],['⭐','探险猴','banana_vault',1],['🌿','酷帅猴','galaxy_scope',2]],
 jobs={banana_vault:'🍌 仓库管理员',galaxy_scope:'🔭 星际观测员',public_square:'🎉 广场策划师',monkey_academy:'🧪 联合实验员'};
 let relations={},log=[],turn=0,city=null;
 function pairKey(a,b){return [a,b].sort((x,y)=>x-y).join(':')}
