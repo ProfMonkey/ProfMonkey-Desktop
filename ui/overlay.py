@@ -66,7 +66,7 @@ class MonkeyOverlay(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating, True)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        self.setWindowTitle('ProfMonkey Desktop · v0.20 六猴原创形象候选')
+        self.setWindowTitle('ProfMonkey Desktop · v0.22 教授猴原型六猴版')
         self.setToolTip('ProfMonkey 🐒 左键轻戳或拖动；右键菜单')
         self.setMouseTracking(True)
         self._menu: QMenu | None = None

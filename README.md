@@ -1,8 +1,20 @@
 # 🐒 ProfMonkey Desktop — 你的电脑里，住进了一只不太正常的猴子
 
-> **当前默认分支 `main` 保存早期 v0.9 工程。本分支 `feature/v020-six-monkey-redesign` 是在 v0.19 基础上的 v0.20 **全新六猴原创形象源码候选**。六只角色均已拥有独立的可缩放 SVG 本体和 13 类姿态动画；完全不依赖已经丢失的 v0.10 396 帧像素图。现在的实现是矢量卡通而不是声称恢复旧版像素素材。Windows 真机仍未验收、不是安装版，GitHub Actions 未使用。**
+> **当前默认分支 `main` 保存早期 v0.9 工程。本分支 `feature/v022-professor-style-six-monkeys` 基于 v0.21，统一六猴美术原型并修复 Windows 环境安装检查。六只角色均为透明 SVG，沿用现有 13 类动作、剧情与存档；这是源码候选，不是已验收安装版。Windows 真机验收仍待完成；不创建 PR、不使用 GitHub Actions。**
 
 一只原创教授猴，在 Windows 桌面上走走停停、眨眼、睡觉、吃香蕉，还会给你整出有前因后果的荒诞事故。默认**安静、离线、无输入监听、不抢鼠标**。可随时暂停、拖走、隐藏或退出。
+
+
+## 🎨 v0.22 独立开发分支：教授猴原型 · 六猴统一重绘
+
+- 六只角色共享同一套棕色身体、奶油色口鼻、圆耳朵、粗黑描边和卷尾巴；不再是六种互不相关的卡通，也不堆叠复杂衣服。
+- 角色顺序：🎓 教授猴、🧭 探险猴、💻 编程猴、💤 摸鱼猴、🍌 干饭猴、😎 酷帅猴。只用少量标志性配件区分角色。
+- 直接替换 `assets/characters_v020/*.svg`，桌面透明窗口、13 类动画、猴山合照、故事卡和 GIF 继续使用这些角色源文件；像素模式改为对同一角色逐帧做最近邻缩放，不再跳到旧精灵表。
+- 旧存档的 `scholar/trickster/sleepy/inventor/captain/shy` 内部键保持不变，已保存的人格、剧情和猴际关系无需迁移。
+- `setup_windows.bat` 增加 Pillow/QtSvg 导入验收；遇到 `ImportError: cannot import name '_imaging' from PIL` 时，会尝试强制重装 Pillow 二进制 wheel 并再次验证。
+- 新增 `tests/test_v022_character_prototype.py`。没有使用 GitHub Actions；测试尚未在用户 Windows 真机运行。下载源码后先双击 `setup_windows.bat`，再双击 `run_windows.bat`；需要打包时再运行 `build_windows.bat`。
+
+[六猴角色设计馆](site/characters.html) · [v0.22 更新与验收说明](docs/release_notes_v022.md)
 
 ![13 种动作集合](docs/P03_P12_13_actions.png)
 

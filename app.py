@@ -1,4 +1,4 @@
-"""ProfMonkey Desktop: offline desktop companion, v0.8 candidate."""
+"""ProfMonkey Desktop: offline desktop companion, v0.22 candidate."""
 from pathlib import Path
 import sys
 from PySide6.QtGui import QIcon
@@ -21,7 +21,7 @@ def main() -> int:
     app.setApplicationName('ProfMonkey Desktop')
     app.setOrganizationName('ProfMonkey')
     app.setQuitOnLastWindowClosed(False)
-    # Self-contained v0.20 mascot renders without the missing legacy PNG ZIP.
+    # Self-contained v0.22 mascot renders without the missing legacy PNG ZIP.
     from ui.character_render import render_mascot
     artwork_root = resource_path('assets/monkey')
     icon = QIcon(render_mascot(artwork_root, 'scholar'))

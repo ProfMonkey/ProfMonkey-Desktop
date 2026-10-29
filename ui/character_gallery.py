@@ -1,4 +1,4 @@
-"""v0.20 original six-character studio: real live SVG rigs, 13 actions.
+"""v0.22 original six-character studio: real live SVG rigs, 13 actions.
 
 All six rendered with the same runtime QtSvg pipeline as the desktop pets.
 The art gallery runs ONLY when opened; the timer stops on close.
@@ -17,7 +17,7 @@ class CharacterGallery(QDialog):
         self.colony = colony
         self._cache: dict[tuple[str,str,int],object] = {}
         self._frame = 0
-        self.setWindowTitle('🎨 ProfMonkey 六猴角色设计中心 · v0.20')
+        self.setWindowTitle('🎨 ProfMonkey 六猴角色设计中心 · v0.22')
         self.resize(910, 780)
         self.setStyleSheet('''
             QDialog{background:#101A29;color:#FFF2D9}
