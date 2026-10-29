@@ -70,14 +70,14 @@ footer{border-top:1px solid var(--line);padding:28px 0 42px;color:var(--muted);f
 <script>
 "use strict";
 const people=[
-["scholar","🎓 学究猴","#e9ce87","审稿员"],["trickster","🧢 皮猴","#f6a474","整活专家"],
-["sleepy","💤 困猴","#bd95ef","打盹专家"],["inventor","🔧 发明猴","#60babc","技术鬼才"],
-["captain","⭐ 队长猴","#89a9f6","纪律委员"],["shy","🌿 社恐猴","#9acb95","低调观察"]];
+["scholar","🎓 教授猴","#e9ce87","审稿员"],["trickster","🧢 干饭猴","#f6a474","整活专家"],
+["sleepy","💤 摸鱼猴","#bd95ef","打盹专家"],["inventor","🔧 编程猴","#60babc","技术鬼才"],
+["captain","⭐ 探险猴","#89a9f6","纪律委员"],["shy","🌿 酷帅猴","#9acb95","低调观察"]];
 const views={
 scholar:[1,3,-1],trickster:[-3,-3,2],sleepy:[0,3,-2],
 inventor:[-1,-1,3],captain:[3,1,-2],shy:[1,3,-1]};
 const issueKeys=["banana_rules","quiet_hours","rocket_license"];
-const questions=["要不要统一分配香蕉？","晚上能否大声敲实验设备？","允许发明猴试飞火箭吗？"];
+const questions=["要不要统一分配香蕉？","晚上能否大声敲实验设备？","允许编程猴试飞火箭吗？"];
 const $=id=>document.getElementById(id);
 let chosen=new Set([0,1,2]),edges=new Map(),meeting=null,phase=0;
 const pair=(a,b)=>[a,b].sort((x,y)=>x-y).join(":");

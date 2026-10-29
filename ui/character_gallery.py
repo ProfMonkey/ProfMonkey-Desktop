@@ -1,4 +1,4 @@
-"""v0.22 original six-character studio: real live SVG rigs, 13 actions.
+"""v0.22 six-monkey studio: shared professor prototype, real SVG rigs, 13 actions.
 
 All six rendered with the same runtime QtSvg pipeline as the desktop pets.
 The art gallery runs ONLY when opened; the timer stops on close.
@@ -27,7 +27,7 @@ class CharacterGallery(QDialog):
             QPushButton:hover{border-color:#F4CD7B}
         ''')
         main = QVBoxLayout(self)
-        title = QLabel('六种身形 · 六套服装 · 六种性格')
+        title = QLabel('同一原型 · 六种配件 · 六种性格')
         title.setStyleSheet('font-size:26px;font-weight:900')
         main.addWidget(title)
         sub = QLabel('全新原创角色：缩小头部、补足躯干与四肢，统一轮廓与落地锚点。\n'

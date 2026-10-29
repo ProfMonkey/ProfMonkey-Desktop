@@ -9,7 +9,7 @@ from dataclasses import dataclass
 ISSUES = {
     'banana_rules': ('🍌 香蕉配给条例', '猴山是否实行统一分配香蕉？'),
     'quiet_hours': ('🌙 猴山静音公约', '晚上是否禁止大声敲实验设备？'),
-    'rocket_license': ('🚀 火箭试飞许可', '发明猴的火箭是否获得试飞资格？'),
+    'rocket_license': ('🚀 火箭试飞许可', '编程猴的火箭是否获得试飞资格？'),
 }
 PERSONALITY_VIEWS: dict[str, dict[str, int]] = {
     'scholar':   {'banana_rules': 1,  'quiet_hours': 3,  'rocket_license': -1},
