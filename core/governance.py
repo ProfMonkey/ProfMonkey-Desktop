@@ -17,7 +17,7 @@ POLICIES = {
     'quiet_hours': ('🌙 猴山安静公约',
                     '暂停自动开始的猴山群演和随机双猴偶遇；手动互动仍可正常开启。'),
     'rocket_license': ('🚀 火箭试飞许可',
-                       '允许用户手动启动发明猴的虚构三幕试飞剧情，不影响真实电脑。'),
+                       '允许用户手动启动编程猴的虚构三幕试飞剧情，不影响真实电脑。'),
 }
 OUTCOMES = ('adopted', 'rejected', 'stalemate')
 MAX_HISTORY = 24
