@@ -43,7 +43,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 45px;color:var(--muted);f
 <div class="wrap">
 <nav><div class="brand">🐒 ProfMonkey <span class="pill">v0.11 DEMO</span></div><span><a href="./chronicle.html">📖 连续剧情</a> · <a href="./index.html">← 返回介绍页</a></span></nav>
 <header><div class="tag">OFFLINE PIXEL PREVIEW / 六只猴子 × 七类专属相遇</div><h1>同一座猴山，<br>不同的<em style="color:var(--gold);font-style:normal">猴际关系。</em></h1>
-<p class="lead">队长猴查寝，困猴在梦里打卡；发明猴申请火箭试飞，队长猴开始写事故预案。选择两只猴子，看一场完整的两幕小事故。</p></header>
+<p class="lead">探险猴查寝，摸鱼猴在梦里打卡；编程猴申请火箭试飞，探险猴开始写事故预案。选择两只猴子，看一场完整的两幕小事故。</p></header>
 <div class="gallery" id="gallery" aria-label="六只角色的示意像素头像"></div>
 <section class="playground">
 <div class="controls"><h2>🎭 组合实验室</h2>
@@ -55,7 +55,7 @@ footer{border-top:1px solid var(--line);padding:23px 0 45px;color:var(--muted);f
 </div>
 <div class="stage" aria-live="polite"><div class="tag" id="sceneTitle">MONKEY SOCIAL LAB</div>
 <div class="bubbles"><div class="bubble" id="line1">选好角色，点击开始相遇。</div><div class="bubble" id="line2">猴山的秘密不止一根香蕉。</div></div>
-<div class="stage-figures"><div class="figure"><div id="fig1"></div><strong id="name1">学究猴</strong></div><div class="figure"><div id="fig2"></div><strong id="name2">发明猴</strong></div></div>
+<div class="stage-figures"><div class="figure"><div id="fig1"></div><strong id="name1">教授猴</strong></div><div class="figure"><div id="fig2"></div><strong id="name2">编程猴</strong></div></div>
 <div class="beat" id="beatInfo">角色会影响台词、剧情与行为倾向。</div></div>
 </section>
 <footer>ProfMonkey Desktop · 源码候选预览。Windows 真机透明穿透、六猴像素资源与打包仍需独立验收。<br>Made for monkeys, not for spying.</footer>
@@ -63,12 +63,12 @@ footer{border-top:1px solid var(--line);padding:23px 0 45px;color:var(--muted);f
 <script>
 "use strict";
 const cast=[
-  {id:"scholar",name:"🎓 学究猴",trait:"严格审稿",coat:"#f5e8cb",hat:"#f5e8cb"},
-  {id:"trickster",name:"🧢 皮猴",trait:"专攻捣蛋",coat:"#e98d4b",hat:"#ee9d55"},
-  {id:"sleepy",name:"💤 困猴",trait:"睡眠专家",coat:"#a28cd7",hat:"#8d74cf"},
-  {id:"inventor",name:"🔧 发明猴",trait:"事故制造",coat:"#51b7b2",hat:"#46bfb6"},
-  {id:"captain",name:"⭐ 队长猴",trait:"秩序守护",coat:"#719ae7",hat:"#6391e2"},
-  {id:"shy",name:"🌿 社恐猴",trait:"安静观察",coat:"#83ba75",hat:"#7dac73"}
+  {id:"scholar",name:"🎓 教授猴",trait:"研究证据",coat:"#f5e8cb",hat:"#f5e8cb"},
+  {id:"captain",name:"🧭 探险猴",trait:"探索行动",coat:"#719ae7",hat:"#6391e2"},
+  {id:"inventor",name:"💻 编程猴",trait:"编程创造",coat:"#51b7b2",hat:"#46bfb6"},
+  {id:"sleepy",name:"💤 摸鱼猴",trait:"睡眠专家",coat:"#a28cd7",hat:"#8d74cf"},
+  {id:"trickster",name:"🍌 干饭猴",trait:"美食补给",coat:"#e98d4b",hat:"#ee9d55"},
+  {id:"shy",name:"😎 酷帅猴",trait:"冷静观察",coat:"#83ba75",hat:"#7dac73"}
 ];
 const dialogue={
  invention:{scholar:["你这发明经过学术审查了吗？","风险评估呢？这份报告还得重写。"],inventor:["当然！我自己签的字。","看来安全按钮也需要安全按钮。"]},

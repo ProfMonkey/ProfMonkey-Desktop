@@ -29,7 +29,7 @@ footer{border-top:1px solid #4a5870;padding:25px 0 45px;color:var(--muted);font-
 <nav><strong>🐒 ProfMonkey Desktop · 猴山自治</strong><div><a href="./society.html">🗳 猴山议会</a> · <a href="./expeditions.html">🧭 探险局</a> · <a href="./index.html">首页</a></div></nav>
 <header><div class="kicker">PIXEL COLONY GOVERNANCE · OFFLINE PLAYGROUND</div>
 <h1>一场投票，<br><span style="color:var(--gold)">改变猴山的明天。</span></h1>
-<p>从现在起，猴山议会不只是嘴上投票。通过香蕉共享条例，抢香蕉也会分享；通过安静公约，自动短剧会暂时消失；批准火箭试飞，发明猴就可以开始虚构实验。</p></header>
+<p>从现在起，猴山议会不只是嘴上投票。通过香蕉共享条例，抢香蕉也会分享；通过安静公约，自动短剧会暂时消失；批准火箭试飞，编程猴就可以开始虚构实验。</p></header>
 <div class="layout">
 <section class="panel full"><h2>📜 猴山法令牌</h2><div class="rules" id="ruleCards"></div>
 <p class="note">这里是独立浏览器演示，初始全部未生效。你可以手动模拟投票结果，不会修改真实桌宠的存档，更不会控制电脑操作。</p></section>
@@ -60,7 +60,7 @@ footer{border-top:1px solid #4a5870;padding:25px 0 45px;color:var(--muted);font-
 const rules={
  banana_rules:["🍌 香蕉共享条例","公共香蕉仍然抢，但赢家会主动分享；竞争转为友好互动。"],
  quiet_hours:["🌙 猴山安静公约","关闭猴子自行开始的群演与随机碰面；手动互动仍可启动。"],
- rocket_license:["🚀 火箭试飞许可","解锁发明猴参加的虚构三幕试飞；不会运行真实系统程序。"]
+ rocket_license:["🚀 火箭试飞许可","解锁编程猴参加的虚构三幕试飞；不会运行真实系统程序。"]
 };
 const states={banana_rules:false,quiet_hours:false,rocket_license:false};
 const actions=[];const $=id=>document.getElementById(id);
@@ -89,8 +89,8 @@ $("no").addEventListener("click",()=>vote("rejected"));
 $("tie").addEventListener("click",()=>vote("stalemate"));
 $("banana").addEventListener("click",()=>{
  $("scene").textContent=states.banana_rules?
- "🍌 皮猴抢到香蕉后分给其他猴子一小块。\n🎓 学究猴：这才叫共同富裕，猴山好感+！":
- "🍌 皮猴抢到最后一根香蕉，自己吃掉。\n⭐ 队长猴：我宣布，下次必须遵守规则！";
+ "🍌 干饭猴抢到香蕉后分给其他猴子一小块。\n🎓 教授猴：这才叫共同富裕，猴山好感+！":
+ "🍌 干饭猴抢到最后一根香蕉，自己吃掉。\n⭐ 探险猴：我宣布，下次必须遵守规则！";
 });
 $("auto").addEventListener("click",()=>{
  $("scene").textContent=states.quiet_hours?
@@ -99,8 +99,8 @@ $("auto").addEventListener("click",()=>{
 });
 $("rocket").addEventListener("click",()=>{
  $("scene").textContent=states.rocket_license?
- "🚀 发明猴：许可证拿到啦！\n⭐ 队长猴：带好安全帽。\n🐒 全员：三、二、一，起飞……然后原地躺平！":
- "🔒 试飞尚未获批。需要议会通过火箭许可证，而且真实桌宠还需要三只在场且有发明猴。";
+ "🚀 编程猴：许可证拿到啦！\n⭐ 探险猴：带好安全帽。\n🐒 全员：三、二、一，起飞……然后原地躺平！":
+ "🔒 试飞尚未获批。需要议会通过火箭许可证，而且真实桌宠还需要三只在场且有编程猴。";
 });
 $("clear").addEventListener("click",()=>{
  for(const k of Object.keys(states))states[k]=false;
