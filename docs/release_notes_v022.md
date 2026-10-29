@@ -29,6 +29,7 @@ run_windows.bat
 
 无窗口核心测试：
 ```bat
+.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
 .venv\Scripts\python.exe -m pytest -q tests/test_v020_six_mascots.py tests/test_v021_secrets.py tests/test_v022_character_prototype.py
 ```
 
